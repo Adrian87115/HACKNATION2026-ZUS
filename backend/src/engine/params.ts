@@ -1,5 +1,5 @@
-import { BENEFIT_ENGINE_CONSTANTS_2026 } from '../benefits2026.js';
-import { MATERNITY_BENEFIT_CONSTANTS } from '../maternityConstants.js';
+import { BENEFIT_ENGINE_CONSTANTS_2026 } from './benefits2026.js';
+import { MATERNITY_BENEFIT_CONSTANTS } from './maternityConstants.js';
 
 /**
  * Parametry silnika, których nie ma w benefits2026.ts.
@@ -19,8 +19,10 @@ const EXTRA_PARAMS_2026 = {
   CHILD_LOSS_MIN_DAYS_AFTER_DEATH: 7,
 
   // Granice wieku dziecka przy przyjęciu na wychowanie (Art. 29 ust. 1 pkt 2-3 ustawy, Art. 183 KP)
-  ADOPTION_MAX_CHILD_AGE_YEARS: MATERNITY_BENEFIT_CONSTANTS.ADOPTION_MAX_CHILD_AGE_YEARS, // 14
-  FOSTER_MAX_CHILD_AGE_YEARS: MATERNITY_BENEFIT_CONSTANTS.FOSTER_MAX_CHILD_AGE_YEARS, // 7
+  ADOPTION_MAX_CHILD_AGE_YEARS:
+    MATERNITY_BENEFIT_CONSTANTS.ADOPTION_MAX_CHILD_AGE_YEARS, // 14
+  FOSTER_MAX_CHILD_AGE_YEARS:
+    MATERNITY_BENEFIT_CONSTANTS.FOSTER_MAX_CHILD_AGE_YEARS, // 7
   FOSTER_DEFERRED_SCHOOL_MAX_CHILD_AGE_YEARS:
     MATERNITY_BENEFIT_CONSTANTS.FOSTER_DEFERRED_SCHOOL_MAX_CHILD_AGE_YEARS, // 10
 
@@ -33,7 +35,10 @@ const EXTRA_PARAMS_2026 = {
   PARENTAL_BENEFIT_FLOOR_MONTHLY: 1000,
 } as const;
 
-const ALL_DEFAULTS_2026 = { ...BENEFIT_ENGINE_CONSTANTS_2026, ...EXTRA_PARAMS_2026 };
+const ALL_DEFAULTS_2026 = {
+  ...BENEFIT_ENGINE_CONSTANTS_2026,
+  ...EXTRA_PARAMS_2026,
+};
 
 type Widen<T> = T extends number ? number : T;
 
@@ -44,7 +49,9 @@ export type BenefitParams = {
 
 export const DEFAULT_PARAMS_2026: Readonly<BenefitParams> = Object.freeze({
   ...ALL_DEFAULTS_2026,
-  MATERNITY_WEEKS_BY_CHILDREN: { ...BENEFIT_ENGINE_CONSTANTS_2026.MATERNITY_WEEKS_BY_CHILDREN },
+  MATERNITY_WEEKS_BY_CHILDREN: {
+    ...BENEFIT_ENGINE_CONSTANTS_2026.MATERNITY_WEEKS_BY_CHILDREN,
+  },
 });
 
 /** Zwraca nowy zestaw parametrów z nadpisanymi wartościami (np. z panelu administracyjnego). */

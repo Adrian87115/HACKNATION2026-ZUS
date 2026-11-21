@@ -1,3 +1,4 @@
 export const AppRoutePaths = {
-	HOME: '/'
-};
+  HOME: "/",
+  PARENTING_GUIDE: "/przewodnik-rodzica",
+} as const;
