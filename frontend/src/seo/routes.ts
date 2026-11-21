@@ -71,6 +71,12 @@ export const SEO_ROUTES: SeoMeta[] = [
 			'Sprawdź, co może odebrać lub obniżyć zasiłek: brak ubezpieczenia w dniu porodu, umowa dla pozoru, podwyższenie podstawy w ciąży, zaległości w składkach – i jak chroni Cię Kodeks pracy.',
 		name: 'Ryzyka i ochrona',
 		sitemap: { changefreq: 'monthly', priority: 0.8 }
+	},
+	{
+		path: AppRoutePaths.ADMIN,
+		title: 'Panel administracyjny | ZUSia',
+		description: 'Zarządzanie parametrami kalkulatorów ZUSi.',
+		noindex: true
 	}
 ];
 

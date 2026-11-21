@@ -86,7 +86,7 @@ function redirectHtml(siteUrl: string, to: string): string {
 
 function robotsTxt(siteUrl: string, noindexAll: boolean): string {
 	if (noindexAll) return 'User-agent: *\nDisallow: /\n';
-	return ['User-agent: *', 'Allow: /', 'Disallow: /api/', '', `Sitemap: ${absoluteUrl(siteUrl, '/sitemap.xml')}`, ''].join(
+	return ['User-agent: *', 'Allow: /', 'Disallow: /api/', 'Disallow: /admin', '', `Sitemap: ${absoluteUrl(siteUrl, '/sitemap.xml')}`, ''].join(
 		'\n'
 	);
 }

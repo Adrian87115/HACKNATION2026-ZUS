@@ -3,6 +3,7 @@ import LegacyRedirect from './components/Global/LegacyRedirect';
 import ScrollToTop from './components/Global/ScrollToTop';
 import { ChatProvider } from './features/chat/ChatContext';
 import ChatSidebar from './features/chat/ChatSidebar';
+import Admin from './pages/Admin/Admin';
 import Applications from './pages/Applications/Applications';
 import Calculators from './pages/Calculators/Calculators';
 import Home from './pages/Home/Home';
@@ -25,6 +26,7 @@ function App() {
 					<Route path={AppRoutePaths.PARENTING_GUIDE} element={<ParentingGuide />} />
 					<Route path={AppRoutePaths.APPLICATIONS} element={<Applications />} />
 					<Route path={AppRoutePaths.RISKS} element={<Risks />} />
+					<Route path={AppRoutePaths.ADMIN} element={<Admin />} />
 					{LEGACY_REDIRECTS.map(({ from, to }) => (
 						<Route key={from} path={from} element={<LegacyRedirect to={to} />} />
 					))}

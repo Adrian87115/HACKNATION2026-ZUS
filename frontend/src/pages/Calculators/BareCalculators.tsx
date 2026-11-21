@@ -3,7 +3,7 @@
  *  - MaternityCalculator  -> points b, c, d, e, j  (engine.planMaternity)
  *  - PregnancyCalculator  -> point a               (engine.calculatePregnancyBenefits)
  */
-import { useEffect, useId, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
   ArrowRight,
   Calculator,
@@ -20,12 +20,12 @@ import {
 import { Link, useSearchParams } from "react-router-dom";
 import { AppRoutePaths } from "../../types/shared";
 import CaseImport from "../../features/caseImport/CaseImport";
+import { useBenefitEngine } from "../../hooks/useBenefitEngine";
 import type {
   CalculatorTarget,
   CaseAnalysis,
 } from "../../features/caseImport/caseData";
 import {
-  BenefitEngine,
   type MaternityPlanInput,
   type MaternityPlanResult,
   type ParentalPartInput,
@@ -887,7 +887,7 @@ export function MaternityCalculator({
   preset,
   autoRun,
 }: CalculatorProps<MaternityPreset> = {}) {
-  const engine = useMemo(() => new BenefitEngine(), []);
+  const engine = useBenefitEngine();
 
   const [event, setEvent] = useState<MaternityPlanInput["event"]>(
     preset?.event ?? "birth",
@@ -1532,7 +1532,7 @@ export function PregnancyCalculator({
   preset,
   autoRun,
 }: CalculatorProps<PregnancyPreset> = {}) {
-  const engine = useMemo(() => new BenefitEngine(), []);
+  const engine = useBenefitEngine();
 
   const [basis, setBasis] = useState(preset?.basis ?? "6000");
   const [kind, setKind] = useState<"mandatory" | "voluntary">(

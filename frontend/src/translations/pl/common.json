@@ -23,7 +23,8 @@
     "disclaimer": "Wyliczenia są orientacyjne i nie zastępują decyzji ZUS.",
     "tagline": "HackNation 2026",
     "applications": "Dokumenty i wnioski",
-    "risks": "Ryzyka i ochrona"
+    "risks": "Ryzyka i ochrona",
+    "admin": "Panel administracyjny"
   },
   "home": {
     "eyebrow": "Świadczenia rodzicielskie {{year}}",

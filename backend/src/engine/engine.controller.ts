@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Post, Put } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, Put, UseGuards } from '@nestjs/common';
+import { AdminTokenGuard } from './admin-token.guard.js';
 import { EngineService } from './engine.service.js';
-import type { BasisInput, BenefitParams, MaternityPlanInput, PregnancyBenefitInput } from './index.js';
+import type { BasisInput, MaternityPlanInput, PregnancyBenefitInput } from './index.js';
 
 @Controller('engine')
 export class EngineController {
@@ -24,18 +25,43 @@ export class EngineController {
     return this.engineService.planMaternity(input);
   }
 
-  /** Panel administracyjny – odczyt i zmiana parametrów silnika. */
+  /** Aktualne parametry silnika – czytane przez front przy starcie. */
   @Get('params')
   getParams() {
     return this.engineService.getParams();
   }
 
+  /** Wartości domyślne na 2026 r. (porównanie w panelu administracyjnym). */
+  @Get('params/defaults')
+  getDefaults() {
+    return this.engineService.getDefaults();
+  }
+
+  /* ---- Panel administracyjny (wymaga ADMIN_TOKEN) ---- */
+
+  /** Sprawdzenie tokenu przy logowaniu do panelu. */
+  @Post('admin/verify')
+  @HttpCode(200)
+  @UseGuards(AdminTokenGuard)
+  verifyAdmin() {
+    return { ok: true };
+  }
+
+  @Get('params/history')
+  @UseGuards(AdminTokenGuard)
+  getHistory() {
+    return this.engineService.getHistory();
+  }
+
   @Put('params')
-  updateParams(@Body() overrides: Partial<BenefitParams>) {
+  @UseGuards(AdminTokenGuard)
+  updateParams(@Body() overrides: unknown) {
     return this.engineService.updateParams(overrides);
   }
 
   @Post('params/reset')
+  @HttpCode(200)
+  @UseGuards(AdminTokenGuard)
   resetParams() {
     return this.engineService.resetParams();
   }

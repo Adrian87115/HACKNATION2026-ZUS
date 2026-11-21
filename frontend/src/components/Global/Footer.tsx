@@ -80,7 +80,13 @@ export default function Footer() {
 					<p>
 						© {year} {t('appName')}. {t('footer.rights')} {t('footer.disclaimer')}
 					</p>
-					<p>{t('footer.tagline')}</p>
+					<p className="flex items-center gap-3">
+						<Link to={AppRoutePaths.ADMIN} className="transition-colors hover:text-ink">
+							{t('footer.admin')}
+						</Link>
+						<span aria-hidden>·</span>
+						{t('footer.tagline')}
+					</p>
 				</div>
 			</div>
 		</footer>

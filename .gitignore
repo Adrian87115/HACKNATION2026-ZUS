@@ -8,3 +8,5 @@ dist/
 /python/zusia.sqlite3-wal
 /Materiały dla uczestników
 /python/__pycache__
+# Backend (NestJS) admin parameter overrides
+/backend/data/
