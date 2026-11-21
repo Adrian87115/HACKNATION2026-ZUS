@@ -25,6 +25,10 @@
 }
 
 :root {
+	/* Shared entrance animation (used by .enter / .enter-stagger and page-level CSS) */
+	--ease-enter: cubic-bezier(0.16, 1, 0.3, 1);
+	--enter-duration: 0.6s;
+	--enter-stagger: 55ms;
 	color-scheme: light;
 	--brand: #00843d;
 	--brand-strong: #006b32;
@@ -99,6 +103,90 @@
 		outline: 2px solid var(--focus);
 		outline-offset: 2px;
 	}
+
+	/* Tailwind v4 resets buttons to cursor: default — every clickable element gets a pointer. */
+	button:not(:disabled),
+	[role='button']:not([aria-disabled='true']),
+	[role='tab'],
+	[role='switch'],
+	[role='radio'],
+	[role='checkbox'],
+	a[href],
+	summary,
+	select:not(:disabled),
+	label:has(input[type='radio'], input[type='checkbox']),
+	input[type='radio']:not(:disabled),
+	input[type='checkbox']:not(:disabled),
+	input[type='date']::-webkit-calendar-picker-indicator {
+		cursor: pointer;
+	}
+
+	button:disabled,
+	[aria-disabled='true'] {
+		cursor: not-allowed;
+	}
+}
+
+/*
+ * Entrance animation — one style for every page: fade in, rise a few px and come into focus.
+ * .enter          → animate a single element (set animation-delay inline to sequence it)
+ * .enter-stagger  → animate each direct child one after another
+ * `backwards` (not `both`) so hover transforms keep working after the animation ends.
+ */
+@keyframes enter {
+	from {
+		opacity: 0;
+		transform: translateY(6px) scale(0.985);
+		filter: blur(6px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+		filter: none;
+	}
+}
+
+@layer components {
+	.enter,
+	.enter-stagger > * {
+		animation: enter var(--enter-duration) var(--ease-enter) backwards;
+	}
+	.enter-stagger > * {
+		animation-delay: var(--enter-offset, 0ms);
+	}
+	.enter-stagger > :nth-child(2) {
+		animation-delay: calc(var(--enter-offset, 0ms) + var(--enter-stagger) * 1);
+	}
+	.enter-stagger > :nth-child(3) {
+		animation-delay: calc(var(--enter-offset, 0ms) + var(--enter-stagger) * 2);
+	}
+	.enter-stagger > :nth-child(4) {
+		animation-delay: calc(var(--enter-offset, 0ms) + var(--enter-stagger) * 3);
+	}
+	.enter-stagger > :nth-child(5) {
+		animation-delay: calc(var(--enter-offset, 0ms) + var(--enter-stagger) * 4);
+	}
+	.enter-stagger > :nth-child(6) {
+		animation-delay: calc(var(--enter-offset, 0ms) + var(--enter-stagger) * 5);
+	}
+	.enter-stagger > :nth-child(7) {
+		animation-delay: calc(var(--enter-offset, 0ms) + var(--enter-stagger) * 6);
+	}
+	.enter-stagger > :nth-child(8) {
+		animation-delay: calc(var(--enter-offset, 0ms) + var(--enter-stagger) * 7);
+	}
+	.enter-stagger > :nth-child(9) {
+		animation-delay: calc(var(--enter-offset, 0ms) + var(--enter-stagger) * 8);
+	}
+	.enter-stagger > :nth-child(10) {
+		animation-delay: calc(var(--enter-offset, 0ms) + var(--enter-stagger) * 9);
+	}
+	.enter-stagger > :nth-child(11) {
+		animation-delay: calc(var(--enter-offset, 0ms) + var(--enter-stagger) * 10);
+	}
+	.enter-stagger > :nth-child(12) {
+		animation-delay: calc(var(--enter-offset, 0ms) + var(--enter-stagger) * 11);
+	}
 }
 
 /*
@@ -134,6 +222,7 @@
 :root[data-reduce-motion='true'] *::after {
 	animation-duration: 0.01ms !important;
 	animation-iteration-count: 1 !important;
+	animation-delay: 0s !important;
 	transition-duration: 0.01ms !important;
 	scroll-behavior: auto !important;
 }
@@ -144,6 +233,7 @@
 	*::after {
 		animation-duration: 0.01ms !important;
 		animation-iteration-count: 1 !important;
+		animation-delay: 0s !important;
 		transition-duration: 0.01ms !important;
 		scroll-behavior: auto !important;
 	}

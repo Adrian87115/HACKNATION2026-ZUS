@@ -1,6 +1,8 @@
 // src/components/BasisCalculator.tsx
 import React, { useId, useMemo, useState } from "react";
+import { Check, ChevronDown, TriangleExclamationPoint, Undo2 } from "lucide-react";
 import type { BasisInput, BenefitEngine, ParentRole } from "../engine/index.js";
+import { Collapse } from "./Animations/Collapse.js";
 
 /* ------------------------------------------------------------------ */
 /*  Typy i stałe                                                       */
@@ -324,7 +326,7 @@ export function BasisCalculator({
       <style>{CSS}</style>
 
       <header className="bc-header">
-        <div>
+        <div className="bc-header-text">
           <h2 id="bc-title" className="bc-title">
             Nie znasz swojej podstawy zasiłku? Policzymy ją za Ciebie
           </h2>
@@ -340,12 +342,13 @@ export function BasisCalculator({
           aria-expanded={isOpen}
           aria-controls="bc-body"
         >
-          {isOpen ? "Zwiń kalkulator ▲" : "Rozwiń kalkulator ▼"}
+          {isOpen ? "Zwiń kalkulator" : "Rozwiń kalkulator"}
+          <ChevronDown size={16} className="bc-chev" aria-hidden />
         </button>
       </header>
 
-      {isOpen && (
-        <div id="bc-body" className="bc-body">
+      <Collapse open={isOpen} id="bc-body">
+        <div className="bc-body">
           {/* Krok 1 – dla kogo */}
           <StepHeading
             n={1}
@@ -512,14 +515,14 @@ export function BasisCalculator({
                 aria-expanded={showExtras}
                 aria-controls="bc-extras-body"
               >
-                {showExtras ? "▾" : "▸"} Dodatkowe sytuacje: premie, poprzedni
-                zasiłek
+                <ChevronDown size={16} className="bc-chev" aria-hidden />
+                Dodatkowe sytuacje: premie, poprzedni zasiłek
                 {extrasCount > 0 && (
                   <span className="bc-badge">{extrasCount} uzupełnione</span>
                 )}
               </button>
-              {showExtras && (
-                <div id="bc-extras-body" className="bc-extras-body">
+              <Collapse open={showExtras} id="bc-extras-body">
+                <div className="bc-extras-body">
                   {form.kind === "employee" &&
                     !form.continuePreviousBenefit && (
                       <>
@@ -559,7 +562,7 @@ export function BasisCalculator({
                     </span>
                   </label>
                 </div>
-              )}
+              </Collapse>
             </div>
 
             {/* Wynik */}
@@ -579,7 +582,9 @@ export function BasisCalculator({
                   <div className="bc-result-label">
                     Twoja podstawa zasiłku (miesięcznie)
                   </div>
-                  <div className="bc-result-value">{money(calc.monthly)}</div>
+                  <div className="bc-result-value" key={calc.monthly}>
+                    {money(calc.monthly)}
+                  </div>
                   <div className="bc-hint">
                     To kwota, od której ZUS wylicza zasiłek – nie sam zasiłek.
                     Procent podstawy i ostateczne kwoty pokażemy w planie
@@ -588,7 +593,8 @@ export function BasisCalculator({
 
                   {calc.warning && (
                     <div className="bc-warning" role="note">
-                      ⚠ {calc.warning}
+                      <TriangleExclamationPoint size={16} aria-hidden />
+                      <span>{calc.warning}</span>
                     </div>
                   )}
 
@@ -599,10 +605,11 @@ export function BasisCalculator({
                     aria-expanded={showRules}
                     aria-controls="bc-rules"
                   >
-                    {showRules ? "▾" : "▸"} Jak to obliczyliśmy?
+                    <ChevronDown size={16} className="bc-chev" aria-hidden />
+                    Jak to obliczyliśmy?
                   </button>
-                  {showRules && (
-                    <div id="bc-rules" className="bc-rules">
+                  <Collapse open={showRules} id="bc-rules">
+                    <div className="bc-rules">
                       <ul>
                         {calc.rules.map((rule) => (
                           <li key={rule}>{rule}</li>
@@ -612,7 +619,7 @@ export function BasisCalculator({
                         Stawka dzienna (1/30 podstawy): {money(calc.daily)}.
                       </div>
                     </div>
-                  )}
+                  </Collapse>
 
                   <div className="bc-actions">
                     <button
@@ -621,8 +628,9 @@ export function BasisCalculator({
                       onClick={apply}
                       disabled={alreadyApplied}
                     >
+                      {alreadyApplied && <Check size={18} aria-hidden />}
                       {alreadyApplied
-                        ? `✓ Ta kwota jest już w planie (${ROLE_LABEL[activeRole].title})`
+                        ? `Ta kwota jest już w planie (${ROLE_LABEL[activeRole].title})`
                         : `Użyj tej kwoty w planie dla: ${ROLE_LABEL[activeRole].title}`}
                     </button>
                   </div>
@@ -632,19 +640,19 @@ export function BasisCalculator({
               {applied && (
                 <div className="bc-success" role="status">
                   <span>
-                    ✓ Zapisano {money(applied.value)} w planie dla:{" "}
+                    <Check size={16} aria-hidden /> Zapisano {money(applied.value)} w planie dla:{" "}
                     {ROLE_LABEL[applied.role].title}. Oś czasu została
                     zaktualizowana.
                   </span>
                   <button type="button" className="bc-link-btn" onClick={undo}>
-                    Cofnij
+                    <Undo2 size={15} aria-hidden /> Cofnij
                   </button>
                 </div>
               )}
             </div>
           </div>
         </div>
-      )}
+      </Collapse>
     </section>
   );
 }
@@ -654,74 +662,91 @@ export function BasisCalculator({
 /* ------------------------------------------------------------------ */
 
 const CSS = `
-.bc-root{--bc-ink:#0f172a;--bc-muted:#475569;--bc-line:#cbd5e1;--bc-accent:#1d4ed8;--bc-accent-bg:#eff6ff;
-  --bc-ok:#166534;--bc-ok-bg:#f0fdf4;--bc-warn:#92400e;--bc-warn-bg:#fffbeb;--bc-err:#991b1b;--bc-err-bg:#fef2f2;
-  margin-bottom:24px;border:1px solid var(--bc-line);border-radius:14px;background:#fff;overflow:hidden;
-  color:var(--bc-ink);font-size:16px;line-height:1.5}
+.bc-root{--bc-ease:cubic-bezier(.2,.8,.2,1);
+  --bc-ok:#166534;--bc-ok-bg:#f0fdf4;--bc-ok-line:#bbf7d0;--bc-warn:#92400e;--bc-warn-bg:#fffbeb;--bc-warn-line:#fde68a;--bc-err:#991b1b;--bc-err-bg:#fef2f2;--bc-err-line:#fecaca;
+  margin-bottom:4px;border:1px solid var(--line);border-radius:10px;background:var(--paper);overflow:hidden;
+  color:var(--ink);font-size:16px;line-height:1.5;transition:box-shadow .3s,border-color .3s}
+:root[data-theme='dark'] .bc-root{--bc-ok:#bbf7d0;--bc-ok-bg:#0d2418;--bc-ok-line:#166534;--bc-warn:#fde68a;--bc-warn-bg:#2a1d06;--bc-warn-line:#78350f;--bc-err:#fecaca;--bc-err-bg:#2b0d0d;--bc-err-line:#7f1d1d}
+.bc-root:has(.bc-header button[aria-expanded="true"]){border-color:color-mix(in srgb,var(--brand) 40%,var(--line));box-shadow:0 12px 28px -20px color-mix(in srgb,var(--brand) 70%,transparent)}
 .bc-root *{box-sizing:border-box}
-.bc-header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding:16px 20px;background:var(--bc-accent-bg);border-bottom:1px solid #dbeafe}
-.bc-title{margin:0;font-size:18px;color:#1e3a8a}
-.bc-header-sub{margin:4px 0 0}
-.bc-body{padding:20px}
-.bc-hint{font-size:14px;color:var(--bc-muted)}
-.bc-label{display:block;font-weight:600;margin-bottom:2px}
-.bc-optional{font-weight:400;color:var(--bc-muted)}
-.bc-step-heading{display:flex;gap:12px;align-items:flex-start;margin:24px 0 10px}
+.bc-header{display:flex;align-items:center;flex-wrap:wrap;gap:14px;padding:16px 18px;background:linear-gradient(135deg,var(--brand-soft),color-mix(in srgb,var(--brand-soft) 30%,var(--paper)))}
+.bc-header-text{flex:1;min-width:220px}
+.bc-title{margin:0;font-size:17px;font-weight:600;color:var(--ink)}
+.bc-header-sub{margin:2px 0 0}
+.bc-body{padding:20px;border-top:1px solid var(--line)}
+.bc-hint{font-size:14px;color:var(--muted)}
+.bc-label{display:block;font-weight:600;font-size:15px;margin-bottom:2px}
+.bc-optional{font-weight:400;color:var(--muted)}
+.bc-step-heading{display:flex;gap:12px;align-items:center;margin:28px 0 12px}
 .bc-body>.bc-step-heading:first-child{margin-top:0}
-.bc-step-num{flex:none;width:28px;height:28px;border-radius:50%;background:var(--bc-accent);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px}
-.bc-step-title{margin:0;font-size:17px}
+.bc-step-num{flex:none;width:28px;height:28px;border-radius:6px;background:var(--brand-soft);color:var(--brand-ink);font-weight:700;display:flex;align-items:center;justify-content:center;font-size:14px}
+.bc-step-title{margin:0;font-size:16px;font-weight:600}
 .bc-tabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
-.bc-tab{display:flex;flex-direction:column;gap:2px;text-align:left;padding:12px 14px;min-height:44px;border-radius:10px;border:1px solid var(--bc-line);background:#f8fafc;cursor:pointer;font:inherit;color:inherit}
-.bc-tab-active{border:2px solid var(--bc-accent);background:var(--bc-accent-bg);padding:11px 13px}
-.bc-tab-title{font-weight:700}
-.bc-tab-sub{font-size:13px;color:var(--bc-muted)}
-.bc-tab-saved{font-size:13px;margin-top:4px}
+.bc-tab{display:flex;flex-direction:column;gap:2px;text-align:left;padding:14px 16px;min-height:44px;border-radius:8px;border:1px solid var(--line);background:var(--surface);cursor:pointer;font:inherit;color:inherit;transition:background .2s,border-color .2s,box-shadow .2s,transform .2s var(--bc-ease)}
+.bc-tab:hover{border-color:var(--muted);transform:translateY(-1px)}
+.bc-tab-active,.bc-tab-active:hover{border-color:var(--brand);background:color-mix(in srgb,var(--brand-soft) 60%,var(--paper));box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 15%,transparent)}
+.bc-tab-title{font-weight:600}
+.bc-tab-sub{font-size:13px;color:var(--muted)}
+.bc-tab-saved{font-size:13px;margin-top:4px;font-variant-numeric:tabular-nums}
 .bc-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
-.bc-card{position:relative;display:flex;flex-direction:column;gap:2px;padding:12px 14px 12px 44px;border:1px solid var(--bc-line);border-radius:10px;cursor:pointer;min-height:44px}
-.bc-card input{position:absolute;left:14px;top:16px;width:20px;height:20px;margin:0}
-.bc-card-checked{border:2px solid var(--bc-accent);background:var(--bc-accent-bg);padding:11px 13px 11px 43px}
-.bc-card-title{font-weight:700}
-.bc-card-desc{font-size:14px;color:var(--bc-muted)}
+.bc-card{position:relative;display:flex;flex-direction:column;gap:2px;padding:14px 16px 14px 46px;border:1px solid var(--line);border-radius:8px;cursor:pointer;min-height:44px;background:var(--paper);transition:background .2s,border-color .2s,box-shadow .2s}
+.bc-card:hover{border-color:var(--muted)}
+.bc-card input{position:absolute;left:16px;top:17px;width:18px;height:18px;margin:0;accent-color:var(--brand)}
+.bc-card-checked,.bc-card-checked:hover{border-color:var(--brand);background:color-mix(in srgb,var(--brand-soft) 60%,var(--paper));box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 15%,transparent)}
+.bc-card-title{font-weight:600}
+.bc-card-desc{font-size:14px;color:var(--muted)}
 .bc-field{margin-bottom:16px}
-.bc-input-wrap{position:relative;margin-top:6px;max-width:320px}
-.bc-input-wrap input{width:100%;min-height:48px;padding:10px 40px 10px 12px;font:inherit;font-size:18px;border:1px solid #94a3b8;border-radius:8px;background:#fff;color:var(--bc-ink)}
-.bc-suffix{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--bc-muted);pointer-events:none}
-.bc-invalid input{border:2px solid var(--bc-err)}
-.bc-field-error{color:var(--bc-err);font-size:14px;margin-top:4px}
+.bc-input-wrap{position:relative;margin-top:8px;max-width:320px}
+.bc-input-wrap input{width:100%;min-height:48px;padding:10px 44px 10px 14px;font:inherit;font-size:17px;font-variant-numeric:tabular-nums;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);transition:border-color .15s,box-shadow .15s}
+.bc-input-wrap input:hover{border-color:var(--muted)}
+.bc-input-wrap input:focus-visible{outline:none;border-color:var(--brand);box-shadow:0 0 0 4px color-mix(in srgb,var(--brand) 20%,transparent)}
+.bc-suffix{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;pointer-events:none}
+.bc-invalid input{border-color:var(--bc-err);box-shadow:0 0 0 3px color-mix(in srgb,var(--bc-err) 15%,transparent)}
+.bc-field-error{color:var(--bc-err);font-size:14px;margin-top:6px;animation:enter var(--enter-duration) var(--ease-enter) backwards}
 .bc-help{margin-top:6px;font-size:14px}
-.bc-help summary{cursor:pointer;color:var(--bc-accent);width:fit-content;min-height:24px}
-.bc-help p{margin:6px 0 0;padding:8px 12px;background:#f8fafc;border-radius:8px;color:var(--bc-muted)}
+.bc-help summary{cursor:pointer;color:var(--brand-ink);font-weight:600;width:fit-content;min-height:24px}
+.bc-help[open] p{animation:enter var(--enter-duration) var(--ease-enter) backwards}
+.bc-help p{margin:6px 0 0;padding:10px 12px;background:var(--surface);border-radius:6px;color:var(--muted)}
 .bc-fieldset{border:none;margin:0 0 8px;padding:0}
-.bc-segment{display:inline-flex;margin-top:6px;border:1px solid #94a3b8;border-radius:8px;overflow:hidden}
-.bc-seg{display:flex;align-items:center;padding:0 16px;min-height:44px;cursor:pointer;background:#fff}
-.bc-seg+.bc-seg{border-left:1px solid #94a3b8}
+.bc-segment{display:inline-flex;gap:4px;margin-top:8px;padding:4px;border:1px solid var(--line);border-radius:6px;background:var(--surface)}
+.bc-seg{display:flex;align-items:center;padding:0 16px;min-height:40px;border-radius:6px;cursor:pointer;color:var(--muted);font-weight:500;transition:background .2s,color .2s,box-shadow .2s}
+.bc-seg:hover{color:var(--ink)}
 .bc-seg input{position:absolute;opacity:0;pointer-events:none}
-.bc-seg-checked{background:var(--bc-accent);color:#fff;font-weight:600}
-.bc-seg:focus-within{outline:3px solid #f59e0b;outline-offset:-3px}
+.bc-seg-checked{background:var(--paper);color:var(--brand-ink);font-weight:600;box-shadow:0 1px 3px rgb(15 23 42/.12),0 0 0 1px var(--line)}
+.bc-seg:focus-within{outline:3px solid var(--focus);outline-offset:1px}
 .bc-extras{margin:12px 0 4px}
-.bc-extras-body{margin-top:10px;padding:14px;border:1px dashed var(--bc-line);border-radius:10px}
+.bc-extras-body{margin-top:6px;padding:16px;border:1px dashed var(--line);border-radius:8px;background:var(--surface)}
 .bc-check{display:flex;gap:10px;align-items:flex-start;cursor:pointer}
-.bc-check input{width:22px;height:22px;margin:2px 0 0;flex:none}
-.bc-badge{margin-left:8px;padding:1px 8px;border-radius:999px;background:#dbeafe;color:#1e3a8a;font-size:12px}
-.bc-info{padding:10px 12px;margin-bottom:12px;background:var(--bc-accent-bg);border-radius:8px;font-size:14px}
-.bc-result{margin-top:24px;padding:18px;border-radius:12px;background:#f8fafc;border:1px solid #e2e8f0}
-.bc-result-empty{color:var(--bc-muted)}
-.bc-result-label{font-size:14px;color:var(--bc-muted)}
-.bc-result-value{font-size:32px;font-weight:800;line-height:1.2}
+.bc-check input{width:20px;height:20px;margin:2px 0 0;flex:none;accent-color:var(--brand)}
+.bc-badge{margin-left:8px;padding:1px 6px;border-radius:4px;background:var(--brand-soft);color:var(--brand-ink);font-size:12px;animation:bc-pop .3s cubic-bezier(.34,1.56,.64,1) backwards}
+.bc-info{padding:10px 14px;margin-bottom:12px;background:var(--brand-soft);color:var(--brand-ink);border-radius:6px;font-size:14px}
+.bc-result{margin-top:24px;padding:20px;border-radius:8px;background:var(--surface);border:1px solid var(--line)}
+.bc-result-empty{color:var(--muted)}
+.bc-result-label{font-size:14px;color:var(--muted)}
+.bc-result-value{font-size:34px;font-weight:700;line-height:1.2;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:var(--brand-ink);animation:enter var(--enter-duration) var(--ease-enter) backwards}
 .bc-rules ul{margin:0;padding:0;list-style:none}
-.bc-rules{margin:8px 0 0;padding:10px 12px;background:#fff;border-radius:8px;border:1px solid #e2e8f0;font-size:14px;color:var(--bc-muted)}
+.bc-rules{margin:2px 0 0;padding:12px 14px;background:var(--paper);border-radius:6px;border:1px solid var(--line);font-size:14px;color:var(--muted)}
 .bc-rules li{padding:3px 0}
-.bc-warning{margin-top:10px;padding:10px 12px;border-radius:8px;background:var(--bc-warn-bg);color:var(--bc-warn);font-size:14px}
-.bc-error{padding:10px 12px;border-radius:8px;background:var(--bc-err-bg);color:var(--bc-err)}
-.bc-success{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px;padding:10px 12px;border-radius:8px;background:var(--bc-ok-bg);color:var(--bc-ok)}
-.bc-actions{margin-top:14px}
-.bc-btn{min-height:48px;padding:10px 18px;border-radius:10px;font:inherit;font-weight:600;cursor:pointer;border:1px solid transparent}
-.bc-btn-primary{background:var(--bc-accent);color:#fff;width:100%}
-.bc-btn-primary:disabled{background:#e2e8f0;color:#334155;cursor:default}
-.bc-btn-secondary{background:#fff;color:var(--bc-accent);border-color:#93c5fd;min-height:44px}
-.bc-link-btn{background:none;border:none;padding:8px 0;min-height:44px;font:inherit;font-weight:600;color:var(--bc-accent);cursor:pointer;text-align:left}
-.bc-root button:focus-visible,.bc-root input:focus-visible,.bc-root summary:focus-visible{outline:3px solid #f59e0b;outline-offset:2px}
-.bc-card:focus-within,.bc-card-checked:focus-within{outline:3px solid #f59e0b;outline-offset:2px}
-@media (prefers-reduced-motion:no-preference){.bc-btn,.bc-tab,.bc-card{transition:background .15s,border-color .15s}}
-@media (max-width:480px){.bc-body{padding:14px}.bc-result-value{font-size:28px}}
+.bc-warning{display:flex;gap:8px;align-items:flex-start;margin-top:12px;padding:10px 14px;border-radius:6px;background:var(--bc-warn-bg);border:1px solid var(--bc-warn-line);color:var(--bc-warn);font-size:14px;animation:enter var(--enter-duration) var(--ease-enter) backwards}
+.bc-warning svg{flex:none;margin-top:2px}
+.bc-error{padding:10px 14px;border-radius:6px;background:var(--bc-err-bg);border:1px solid var(--bc-err-line);color:var(--bc-err);animation:enter var(--enter-duration) var(--ease-enter) backwards}
+.bc-success{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px;padding:8px 8px 8px 14px;border-radius:6px;background:var(--bc-ok-bg);border:1px solid var(--bc-ok-line);color:var(--bc-ok);animation:enter var(--enter-duration) var(--ease-enter) backwards}
+.bc-success>span{display:inline-flex;align-items:center;gap:6px}
+.bc-success .bc-link-btn{color:var(--bc-ok);padding:8px 12px}
+.bc-actions{margin-top:16px}
+.bc-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:10px 18px;border-radius:6px;font:inherit;font-weight:600;cursor:pointer;border:1px solid transparent;transition:background .2s,border-color .2s,transform .15s,box-shadow .2s}
+.bc-btn:active:not(:disabled){transform:scale(.98)}
+.bc-btn-primary{background:var(--brand);color:#fff;width:100%;box-shadow:0 8px 20px -12px color-mix(in srgb,var(--brand) 80%,transparent)}
+.bc-btn-primary:hover:not(:disabled){background:var(--brand-strong)}
+.bc-btn-primary:disabled{background:var(--brand-soft);color:var(--brand-ink);box-shadow:none;cursor:default}
+.bc-btn-secondary{background:var(--paper);color:var(--brand-ink);border-color:var(--line);min-height:44px}
+.bc-btn-secondary:hover{border-color:var(--brand)}
+.bc-chev{transition:transform .3s var(--bc-ease)}
+[aria-expanded="true"]>.bc-chev{transform:rotate(180deg)}
+.bc-link-btn{display:inline-flex;align-items:center;gap:6px;background:none;border:none;padding:8px 0;min-height:44px;font:inherit;font-weight:600;color:var(--brand-ink);cursor:pointer;text-align:left;border-radius:6px}
+.bc-link-btn:hover{text-decoration:underline;text-underline-offset:3px}
+.bc-root button:focus-visible,.bc-root input:focus-visible:not(.bc-input-wrap input),.bc-root summary:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.bc-card:focus-within,.bc-card-checked:focus-within{outline:3px solid var(--focus);outline-offset:2px}
+@keyframes bc-pop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
+@media (max-width:480px){.bc-body{padding:16px}.bc-result-value{font-size:28px}.bc-header .bc-btn{width:100%}}
 `;

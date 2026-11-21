@@ -1,42 +1,133 @@
 {
-  "appName": "ZUS",
+  "appName": "ZUSia",
   "navigation": {
     "home": "Strona główna",
     "calculators": "Kalkulatory",
     "parentingGuide": "Przewodnik rodzica"
   },
   "footer": {
+    "description": "Asystent, który pomaga rodzicom zaplanować urlopy i sprawdzić wysokość zasiłków z ZUS.",
+    "tools": "Narzędzia",
+    "guide": "Przewodnik rodzica",
+    "leaveCalculator": "Kalkulator urlopów",
+    "pregnancyCalculator": "Świadczenia w ciąży",
+    "help": "Oficjalne źródła",
+    "zus": "Strona ZUS",
+    "phone": "Infolinia ZUS: 22 560 16 00",
+    "law": "Przepisy prawa (ISAP)",
+    "external": "otwiera się w nowej karcie",
     "rights": "Wszelkie prawa zastrzeżone.",
+    "disclaimer": "Wyliczenia są orientacyjne i nie zastępują decyzji ZUS.",
     "tagline": "HackNation 2026"
   },
-  "dashboard": {
-    "welcome": {
-      "title": "Witaj!",
-      "subtitle": "To jest Twój panel. Tutaj znajdziesz podsumowanie najważniejszych informacji i spraw w toku."
+  "home": {
+    "eyebrow": "Świadczenia rodzicielskie {{year}}",
+    "title": "Urlopy i zasiłki dla rodziców – policzone w kilka minut",
+    "subtitle": "ZUSia pomoże Ci zaplanować urlop macierzyński, ojcowski i rodzicielski oraz sprawdzić, ile wyniesie zasiłek w ciąży. Bez logowania i bez papierologii.",
+    "ctaGuide": "Zaplanuj urlop krok po kroku",
+    "ctaCalculators": "Otwórz kalkulatory",
+    "trust": {
+      "rules": "Przepisy i stawki na {{year}} r.",
+      "noLogin": "Bez logowania",
+      "private": "Obliczenia w Twojej przeglądarce"
     },
-    "overview": "Przegląd",
-    "tiles": {
-      "applications": {
-        "title": "Wnioski w toku",
-        "description": "Oczekujące na decyzję"
+    "estimate": {
+      "title": "Szybki szacunek",
+      "subtitle": "Ile może wynieść zasiłek matki za urlop macierzyński i rodzicielski przy jednym dziecku?",
+      "grossLabel": "Wynagrodzenie brutto miesięcznie",
+      "grossHint": "Średnia z ostatnich 12 miesięcy, umowa o pracę na pełny etat",
+      "invalid": "Wpisz kwotę cyframi, np. 7500.",
+      "variantLabel": "Sposób wypłaty",
+      "combined": "{{rate}} przez cały okres",
+      "split": "{{full}}, potem {{parental}}",
+      "basis": "Podstawa zasiłku",
+      "perMonth": "/ mies.",
+      "rowCombined": "Macierzyński i rodzicielski · {{weeks}} tyg.",
+      "rowMaternity": "Urlop macierzyński · {{weeks}} tyg.",
+      "rowParental": "Urlop rodzicielski · {{weeks}} tyg.",
+      "total": "Łącznie za {{weeks}} tygodni",
+      "note": "Matka wykorzystuje cały urlop poza {{weeks}} tygodniami zarezerwowanymi dla drugiego rodzica.",
+      "more": "Dokładny plan dla obojga rodziców"
+    },
+    "tools": {
+      "title": "Co możesz tu zrobić",
+      "open": "Otwórz",
+      "guide": {
+        "label": "Krok po kroku",
+        "title": "Przewodnik rodzica",
+        "description": "Odpowiedz na kilka pytań o swoją sytuację, a pokażemy harmonogram urlopów i kwoty zasiłku dla obojga rodziców.",
+        "point1": "Poród, adopcja i rodzina zastępcza",
+        "point2": "Podział urlopu między rodziców",
+        "point3": "Wsparcie w trudnych sytuacjach"
       },
-      "messages": {
-        "title": "Nowe wiadomości",
-        "description": "Nieprzeczytane w skrzynce"
+      "leave": {
+        "label": "Własny plan",
+        "title": "Kalkulator urlopów",
+        "description": "Ułóż plan po swojemu: części urlopu, praca w trakcie urlopu, przejęcie urlopu przez drugiego rodzica.",
+        "point1": "Do 5 części urlopu rodzicielskiego",
+        "point2": "Łączenie urlopu z pracą do pół etatu",
+        "point3": "Urlop ojcowski i uzupełniający"
       },
-      "documents": {
-        "title": "Dokumenty",
-        "description": "Dostępne do pobrania"
-      },
-      "appointments": {
-        "title": "Wizyty",
-        "description": "Zaplanowane w tym miesiącu"
+      "pregnancy": {
+        "label": "W ciąży",
+        "title": "Świadczenia w ciąży",
+        "description": "Sprawdź, ile dostaniesz na zwolnieniu lekarskim w ciąży i kto wypłaci pieniądze – pracodawca czy ZUS.",
+        "point1": "Zasiłek chorobowy z kodem „B”",
+        "point2": "Okres wyczekiwania i okres zasiłkowy",
+        "point3": "Utrata pracy w czasie ciąży"
       }
-    }
+    },
+    "facts": {
+      "title": "Najważniejsze liczby na {{year}} rok",
+      "subtitle": "Limity i stawki, z których korzystają nasze kalkulatory.",
+      "maternity": {
+        "value": "{{weeks}} tyg.",
+        "label": "Urlop macierzyński",
+        "hint": "przy jednym dziecku"
+      },
+      "parental": {
+        "value": "{{weeks}} tyg.",
+        "label": "Urlop rodzicielski",
+        "hint": "w tym {{exclusive}} tyg. tylko dla drugiego rodzica"
+      },
+      "paternity": {
+        "value": "{{weeks}} tyg.",
+        "label": "Urlop ojcowski",
+        "hint": "do ukończenia przez dziecko {{months}} miesięcy"
+      },
+      "rates": {
+        "value": "{{full}} · {{combined}} · {{parental}}",
+        "label": "Stawki zasiłku",
+        "hint": "zależnie od wariantu wypłaty"
+      },
+      "floor": {
+        "value": "{{amount}}",
+        "label": "Minimalny zasiłek",
+        "hint": "miesięcznie, przy niskiej podstawie"
+      },
+      "minWage": {
+        "value": "{{amount}}",
+        "label": "Płaca minimalna brutto",
+        "hint": "przy pełnym etacie podstawa nie spadnie poniżej {{basis}}"
+      },
+      "sickness": {
+        "value": "{{rate}}",
+        "label": "Zasiłek chorobowy w ciąży",
+        "hint": "z kodem „B” na zwolnieniu lekarskim"
+      },
+      "period": {
+        "value": "{{days}} dni",
+        "label": "Okres zasiłkowy w ciąży",
+        "hint": "maksymalna długość zwolnienia"
+      }
+    },
+    "disclaimer": "Wyliczenia mają charakter orientacyjny i nie zastępują decyzji ZUS. Ostateczną kwotę ustala ZUS na podstawie Twoich dokumentów."
   },
   "accessibility": {
     "title": "Ułatwienia dostępu",
+    "subtitle": "Dostosuj stronę do swoich potrzeb",
     "open": "Otwórz ustawienia ułatwień dostępu",
+    "close": "Zamknij",
     "theme": {
       "label": "Motyw",
       "light": "Jasny",
@@ -49,10 +140,24 @@
       "large": "Duży",
       "xlarge": "Bardzo duży"
     },
-    "highContrast": "Wysoki kontrast",
-    "textSpacing": "Większe odstępy w tekście",
-    "underlineLinks": "Podkreślone linki",
-    "reduceMotion": "Ograniczenie animacji",
+    "options": "Dodatkowe opcje",
+    "highContrast": {
+      "label": "Wysoki kontrast",
+      "description": "Mocniejsze kolory i wyraźne krawędzie"
+    },
+    "textSpacing": {
+      "label": "Większe odstępy",
+      "description": "Więcej miejsca między liniami i literami"
+    },
+    "underlineLinks": {
+      "label": "Podkreślone linki",
+      "description": "Łatwiejsze rozpoznawanie odnośników"
+    },
+    "reduceMotion": {
+      "label": "Mniej animacji",
+      "description": "Wyłącza animacje i przejścia"
+    },
+    "autosave": "Zmiany zapisują się automatycznie",
     "reset": "Przywróć domyślne"
   }
 }

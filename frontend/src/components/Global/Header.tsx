@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, NavLink } from 'react-router-dom';
 import { NavigationItems } from '../../types/constants';
 import { AppRoutePaths } from '../../types/shared';
+import zusiaLogo from '../../assets/zusia-logo.png';
 import AccessibilityMenu from './AccessibilityMenu';
 
 export default function Header() {
@@ -10,9 +11,8 @@ export default function Header() {
 	return (
 		<header className="sticky top-0 z-50 h-16 border-b border-line bg-paper/90 backdrop-blur">
 			<div className="mx-auto flex h-full max-w-7xl items-center gap-6 px-4 sm:px-6">
-				<Link to={AppRoutePaths.HOME} className="flex items-center gap-2 font-bold text-ink">
-					<span className="grid size-8 place-items-center rounded-lg bg-brand text-sm text-white">Z</span>
-					{t('appName')}
+				<Link to={AppRoutePaths.HOME} className="flex shrink-0 items-center">
+					<img src={zusiaLogo} alt={t('appName')} className="h-9 w-auto" width={467} height={160} />
 				</Link>
 
 				<nav className="flex flex-1 items-center gap-1">

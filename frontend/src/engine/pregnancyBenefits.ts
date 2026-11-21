@@ -3,6 +3,7 @@ import {
   addDays,
   EngineInputError,
   formatDate,
+  formatDatePl,
   parseDate,
   requireNonNegative,
   round2,
@@ -124,12 +125,12 @@ export function calculatePregnancyBenefits(
     input.insuranceKind !== "voluntary"
   ) {
     throw new EngineInputError(
-      'Pole "insuranceKind" musi mieć wartość mandatory albo voluntary.',
+      'Wybierz rodzaj ubezpieczenia: obowiązkowe albo dobrowolne.',
     );
   }
   if (!input.incapacity && !input.jobLoss) {
     throw new EngineInputError(
-      "Podaj okres niezdolności do pracy (incapacity) albo utratę pracy (jobLoss).",
+      "Podaj okres zwolnienia lekarskiego albo zaznacz utratę pracy w ciąży.",
     );
   }
 
@@ -226,12 +227,12 @@ export function calculatePregnancyBenefits(
       )
     ) {
       throw new EngineInputError(
-        'Pole "jobLoss.reason" musi mieć wartość employer_insolvency albo unlawful_termination.',
+        'Wybierz przyczynę utraty pracy.',
       );
     }
     if (!birthDate) {
       throw new EngineInputError(
-        "Przy utracie pracy podaj przewidywaną datę porodu (expectedBirthDate).",
+        "Przy utracie pracy podaj przewidywaną datę porodu.",
       );
     }
   }
@@ -243,7 +244,7 @@ export function calculatePregnancyBenefits(
     const end = parseDate(input.incapacity.endDate, "incapacity.endDate");
     if (end < start)
       throw new EngineInputError(
-        "Data końca niezdolności jest wcześniejsza niż data początku.",
+        "Koniec zwolnienia lekarskiego nie może być wcześniejszy niż jego początek.",
       );
     if (start < insuranceStart) {
       errors.push(
@@ -269,7 +270,7 @@ export function calculatePregnancyBenefits(
     if (birthDate && addDays(birthDate, -1) < last) {
       last = addDays(birthDate, -1);
       notes.push(
-        `Od dnia porodu (${formatDate(birthDate)}) zamiast zasiłku chorobowego przysługuje zasiłek macierzyński – zob. kalkulator zasiłku macierzyńskiego.`,
+        `Od dnia porodu (${formatDatePl(birthDate)}) zamiast zasiłku chorobowego przysługuje zasiłek macierzyński – zob. kalkulator zasiłku macierzyńskiego.`,
       );
     }
     if (employmentEnd && employmentEnd < last) {
@@ -319,7 +320,7 @@ export function calculatePregnancyBenefits(
 
     if (segments.some((s) => s.type === "waiting_period")) {
       warnings.push(
-        `Okres wyczekiwania: prawo do zasiłku powstaje po ${waitingDays} dniach ${input.insuranceKind === "voluntary" ? "dobrowolnego" : "nieprzerwanego"} ubezpieczenia, tj. od ${formatDate(entitlementFrom)} (Art. 4).`,
+        `Okres wyczekiwania: prawo do zasiłku powstaje po ${waitingDays} dniach ${input.insuranceKind === "voluntary" ? "dobrowolnego" : "nieprzerwanego"} ubezpieczenia, tj. od ${formatDatePl(entitlementFrom)} (Art. 4).`,
       );
     }
     if (segments.some((s) => s.type === "employer_sick_pay")) {
@@ -332,7 +333,7 @@ export function calculatePregnancyBenefits(
         monthlyBasis * p.RATE_REHABILITATION_PREGNANCY,
       );
       warnings.push(
-        `Okres zasiłkowy (${maxPeriodDays} dni) wyczerpany ${formatDate(exhaustedOn)} – od tego dnia zasiłek chorobowy nie przysługuje.`,
+        `Okres zasiłkowy (${maxPeriodDays} dni) wyczerpany ${formatDatePl(exhaustedOn)} – od tego dnia zasiłek chorobowy nie przysługuje.`,
       );
       notes.push(
         `Po wyczerpaniu okresu zasiłkowego można wystąpić o świadczenie rehabilitacyjne – do ${p.REHABILITATION_MAX_MONTHS} mies., w ciąży ${p.RATE_REHABILITATION_PREGNANCY * 100}% podstawy (ok. ${rehabMonthly} zł/mies.), jeśli dalsze leczenie rokuje odzyskanie zdolności do pracy (Art. 18, 19).`,

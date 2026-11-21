@@ -1,10 +1,26 @@
 // src/components/Timelines/ParentingDecisionTimeline.tsx
 import React, { useEffect, useId, useMemo, useRef, useState } from "react";
 import {
+  ArrowLeft,
+  ArrowRight,
+  CalendarDays,
+  Check,
+  ChevronDown,
+  CircleX,
+  ExternalLink,
+  HeartHandshake,
+  Info,
+  Pencil,
+  RotateCcw,
+  TriangleExclamationPoint,
+  Wallet,
+} from "lucide-react";
+import {
   PARENTING_DECISION_TREE,
   type DecisionNode,
 } from "../../data/parentingDecisionTree.js";
 import { useBenefitEngine } from "../../hooks/useBenefitEngine.js";
+import { useCountUp } from "../../hooks/useCountUp.js";
 import type {
   BenefitParams,
   MaternityPlanInput,
@@ -13,6 +29,7 @@ import type {
   PlanSegment,
 } from "../../engine/index.js";
 import { BasisCalculator } from "../BasisCalculator.js";
+import { Collapse } from "../Animations/Collapse.js";
 
 /* ------------------------------------------------------------------ */
 /*  Słowniki                                                           */
@@ -39,11 +56,11 @@ const SEGMENT_LABELS: Record<string, string> = {
 
 /** Kolor jest tylko dodatkiem – typ okresu zawsze jest też opisany tekstem. */
 const SEGMENT_COLOR: Record<string, string> = {
-  maternity: "#2563eb",
-  maternity_conditions: "#2563eb",
-  supplementary_maternity: "#7c3aed",
-  parental: "#15803d",
-  paternity: "#c2410c",
+  maternity: "#10b981",
+  maternity_conditions: "#14b8a6",
+  supplementary_maternity: "#8b5cf6",
+  parental: "#0ea5e9",
+  paternity: "#f59e0b",
 };
 
 /* ------------------------------------------------------------------ */
@@ -84,6 +101,10 @@ function parseMoney(text: string): number {
 }
 
 const sameRate = (a: number, b: number) => Math.abs(a - b) < 1e-9;
+
+/** CSS custom properties (stagger index, segment color) for inline styles. */
+const vars = (v: Record<string, string | number>) =>
+  v as unknown as React.CSSProperties;
 
 /** Prosty język: dlaczego akurat taka stawka. */
 function rateExplanation(
@@ -144,12 +165,14 @@ function StepHead(props: {
   id: string;
   title: string;
   sub?: string;
+  state?: "idle" | "active" | "done";
   headingRef?: React.Ref<HTMLHeadingElement>;
 }) {
+  const state = props.state ?? "idle";
   return (
     <div className="pt-step-head">
-      <span className="pt-step-num" aria-hidden="true">
-        {props.n}
+      <span className={`pt-step-num pt-step-${state}`} aria-hidden="true">
+        {state === "done" ? <Check size={18} strokeWidth={3} /> : props.n}
       </span>
       <div>
         <h2
@@ -162,6 +185,33 @@ function StepHead(props: {
         </h2>
         {props.sub && <div className="pt-hint">{props.sub}</div>}
       </div>
+    </div>
+  );
+}
+
+/** Rozwijana sekcja z animacją wysokości. */
+function Disclosure(props: {
+  summary: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  const id = useId();
+  return (
+    <div className={props.className}>
+      <button
+        type="button"
+        className="pt-disc-btn"
+        aria-expanded={open}
+        aria-controls={id}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <ChevronDown size={16} className="pt-disc-chev" aria-hidden />
+        {props.summary}
+      </button>
+      <Collapse open={open} id={id}>
+        <div className="pt-disc-body">{props.children}</div>
+      </Collapse>
     </div>
   );
 }
@@ -242,9 +292,11 @@ function Gantt({ segments }: { segments: PlanSegment[] }) {
           ((toMs(seg.endDate) + DAY_MS - toMs(seg.startDate)) / span) * 100,
           1.5,
         );
+        const color = SEGMENT_COLOR[seg.type] ?? "#64748b";
         return (
           <div key={`${seg.type}-${seg.parent}-${i}`} className="pt-gantt-row">
             <div className="pt-gantt-label">
+              <span className="pt-gantt-dot" style={{ background: color }} />
               {SEGMENT_LABELS[seg.type] ?? seg.type} · {ROLE_SHORT[seg.parent]}
             </div>
             <div className="pt-gantt-track">
@@ -253,7 +305,8 @@ function Gantt({ segments }: { segments: PlanSegment[] }) {
                 style={{
                   left: `${left}%`,
                   width: `${width}%`,
-                  background: SEGMENT_COLOR[seg.type] ?? "#475569",
+                  background: color,
+                  ...vars({ "--i": i }),
                 }}
               />
             </div>
@@ -266,6 +319,25 @@ function Gantt({ segments }: { segments: PlanSegment[] }) {
           {fmtDate(new Date(max - DAY_MS).toISOString().slice(0, 10))}
         </span>
       </div>
+    </div>
+  );
+}
+
+function FamilyTotal({ value }: { value: number }) {
+  const animated = useCountUp(value);
+  return (
+    <div className="pt-family-total">
+      <div className="pt-family-total-label">
+        <Wallet size={18} aria-hidden />
+        Szacowany zasiłek dla całej rodziny
+      </div>
+      <div className="pt-family-total-value" aria-hidden="true">
+        {money(animated)}
+      </div>
+      {/* Czytniki ekranu dostają od razu wartość końcową, bez „odliczania”. */}
+      <span className="pt-sr-only" aria-live="polite">
+        Szacowany zasiłek dla całej rodziny: {money(value)}
+      </span>
     </div>
   );
 }
@@ -283,49 +355,59 @@ function ResultBody(props: {
 
   if (plan.kind === "error") {
     return (
-      <div className="pt-error" role="alert">
-        <strong>Nie udało się wyliczyć planu.</strong> {plan.message}
+      <div className="pt-callout pt-callout-err" role="alert">
+        <CircleX size={18} className="pt-callout-icon" aria-hidden />
+        <div>
+          <strong>Nie udało się wyliczyć planu.</strong> {plan.message}
+        </div>
       </div>
     );
   }
 
   const { input, result } = plan;
-  const familyTotal = result.totals.all;
 
   return (
     <>
       {result.errors.length > 0 && (
-        <div className="pt-error" role="alert">
-          <strong>W tym wariancie plan jest niezgodny z przepisami:</strong>
-          <ul>
-            {result.errors.map((e) => (
-              <li key={e}>{e}</li>
-            ))}
-          </ul>
+        <div className="pt-callout pt-callout-err" role="alert">
+          <CircleX size={18} className="pt-callout-icon" aria-hidden />
+          <div>
+            <strong>W tym wariancie plan jest niezgodny z przepisami:</strong>
+            <ul>
+              {result.errors.map((e) => (
+                <li key={e}>{e}</li>
+              ))}
+            </ul>
+          </div>
         </div>
       )}
 
       {node.specialLegalNote && (
         <div className="pt-callout pt-callout-warn" role="note">
-          <strong>Ważne w tej sytuacji</strong>
-          <p>{node.specialLegalNote}</p>
+          <TriangleExclamationPoint
+            size={18}
+            className="pt-callout-icon"
+            aria-hidden
+          />
+          <div>
+            <strong>Ważne w tej sytuacji</strong>
+            <p>{node.specialLegalNote}</p>
+          </div>
         </div>
       )}
 
       {/* Podsumowanie dla rodziny i każdego rodzica */}
-      <div className="pt-family-total" aria-live="polite">
-        Szacowany zasiłek dla całej rodziny:{" "}
-        <strong>{money(familyTotal)}</strong>
-      </div>
+      <FamilyTotal value={result.totals.all} />
       <div className="pt-parents">
-        {(["primary", "secondary"] as ParentRole[]).map((role) => {
+        {(["primary", "secondary"] as ParentRole[]).map((role, i) => {
           const segs = result.segments.filter((s) => s.parent === role);
           const weeks = Number(
             segs.reduce((sum, s) => sum + s.leaveWeeks, 0).toFixed(1),
           );
           return (
-            <div key={role} className="pt-parent">
-              <div className="pt-parent-title">{ROLE_LABELS[role]}</div>
+            <div key={role} className="pt-parent" style={vars({ "--i": i })}>
+              <div className="pt-parent-title">{ROLE_LABELS[role]}
+              </div>
               {segs.length === 0 ? (
                 <div className="pt-hint">
                   W tym wariancie nie ma okresów dla tego rodzica.
@@ -344,7 +426,9 @@ function ResultBody(props: {
       </div>
 
       {/* Oś czasu */}
-      <h3 className="pt-h3">Kiedy i ile? Harmonogram okresów</h3>
+      <h3 className="pt-h3">
+        <CalendarDays size={18} aria-hidden /> Kiedy i ile? Harmonogram okresów
+      </h3>
       <Gantt segments={result.segments} />
       <ol className="pt-segments">
         {result.segments.map((seg, idx) => {
@@ -353,7 +437,10 @@ function ResultBody(props: {
             <li
               key={`${seg.type}-${seg.parent}-${idx}`}
               className="pt-segment"
-              style={{ borderLeftColor: SEGMENT_COLOR[seg.type] ?? "#475569" }}
+              style={vars({
+                "--i": idx,
+                "--seg": SEGMENT_COLOR[seg.type] ?? "#64748b",
+              })}
             >
               <div className="pt-segment-main">
                 <div className="pt-segment-title">
@@ -361,7 +448,9 @@ function ResultBody(props: {
                 </div>
                 <div className="pt-badge">{ROLE_LABELS[seg.parent]}</div>
                 <div className="pt-segment-dates">
-                  {fmtDate(seg.startDate)} → {fmtDate(seg.endDate)}
+                  {fmtDate(seg.startDate)}
+                  <ArrowRight size={14} aria-label="do" />
+                  {fmtDate(seg.endDate)}
                 </div>
                 <div className="pt-hint">
                   {fmtDuration(seg.days)}
@@ -385,10 +474,9 @@ function ResultBody(props: {
                   </div>
                 )}
               </div>
-              <details className="pt-legal">
-                <summary>Podstawa prawna</summary>
+              <Disclosure summary="Podstawa prawna" className="pt-legal">
                 <p>{seg.legalBasis}</p>
-              </details>
+              </Disclosure>
             </li>
           );
         })}
@@ -396,27 +484,39 @@ function ResultBody(props: {
 
       {result.warnings.length > 0 && (
         <div className="pt-callout pt-callout-warn" role="note">
-          <strong>Zwróć uwagę</strong>
-          <ul>
-            {result.warnings.map((w) => (
-              <li key={w}>{w}</li>
-            ))}
-          </ul>
+          <TriangleExclamationPoint
+            size={18}
+            className="pt-callout-icon"
+            aria-hidden
+          />
+          <div>
+            <strong>Zwróć uwagę</strong>
+            <ul>
+              {result.warnings.map((w) => (
+                <li key={w}>{w}</li>
+              ))}
+            </ul>
+          </div>
         </div>
       )}
       {result.notes.length > 0 && (
         <div className="pt-callout pt-callout-info" role="note">
-          <strong>Warto wiedzieć</strong>
-          <ul>
-            {result.notes.map((n) => (
-              <li key={n}>{n}</li>
-            ))}
-          </ul>
+          <Info size={18} className="pt-callout-icon" aria-hidden />
+          <div>
+            <strong>Warto wiedzieć</strong>
+            <ul>
+              {result.notes.map((n) => (
+                <li key={n}>{n}</li>
+              ))}
+            </ul>
+          </div>
         </div>
       )}
 
-      <details className="pt-assumptions">
-        <summary>Na jakich założeniach opiera się ten plan?</summary>
+      <Disclosure
+        summary="Na jakich założeniach opiera się ten plan?"
+        className="pt-assumptions"
+      >
         <ul>
           {describeAssumptions(input).map((a) => (
             <li key={a}>{a}</li>
@@ -426,11 +526,13 @@ function ResultBody(props: {
           To przykładowy podział urlopów dla wybranej sytuacji. Dokładne daty i
           podział ustalicie wspólnie z pracodawcami.
         </p>
-      </details>
+      </Disclosure>
 
       {node.supportOrganizations && (
         <div className="pt-support">
-          <h3 className="pt-h3">Gdzie szukać wsparcia</h3>
+          <h3 className="pt-h3">
+            <HeartHandshake size={18} aria-hidden /> Gdzie szukać wsparcia
+          </h3>
           <p>
             Poza urlopem możecie skorzystać z bezpłatnej pomocy psychologicznej
             i prawnej:
@@ -444,6 +546,7 @@ function ResultBody(props: {
                   {org.contact} •{" "}
                   <a href={org.url} target="_blank" rel="noopener noreferrer">
                     {org.url.replace(/^https?:\/\//, "")}
+                    <ExternalLink size={13} aria-hidden />
                   </a>
                 </div>
               </li>
@@ -535,6 +638,7 @@ export function ParentingDecisionTimeline() {
       <style>{CSS}</style>
 
       <header className="pt-intro">
+        <p className="pt-pill">Przewodnik rodzica</p>
         <h1 className="pt-h1">Planer urlopów i zasiłków dla rodziców</h1>
         <p className="pt-hint pt-intro-sub">
           Trzy proste kroki: podaj dane, wybierz swoją sytuację i zobacz, co Wam
@@ -549,12 +653,16 @@ export function ParentingDecisionTimeline() {
           id="pt-data-h"
           title="Podaj dane do obliczeń"
           sub="Zmiana któregokolwiek pola od razu aktualizuje plan poniżej."
+          state={touched ? "done" : "active"}
         />
-        {!touched && (
+        <Collapse open={!touched}>
           <div className="pt-callout pt-callout-info" role="note">
-            Pokazujemy <strong>przykładowe dane</strong> – zmień je na swoje.
+            <Info size={18} className="pt-callout-icon" aria-hidden />
+            <div>
+              Pokazujemy <strong>przykładowe dane</strong> – zmień je na swoje.
+            </div>
           </div>
-        )}
+        </Collapse>
         <div className="pt-data-grid">
           <div className="pt-field">
             <label htmlFor="pt-date" className="pt-label">
@@ -605,30 +713,27 @@ export function ParentingDecisionTimeline() {
           id="pt-choice-h"
           title="Wybierz swoją sytuację"
           sub="Odpowiadaj krok po kroku. W każdej chwili możesz wrócić i zmienić wybór."
+          state={isLeaf ? "done" : "active"}
         />
 
-        {path.length > 1 && (
+        <Collapse open={path.length > 1}>
           <div className="pt-toolbar">
-            <button
-              type="button"
-              className="pt-btn pt-btn-secondary"
-              onClick={back}
-            >
-              ← Wróć o krok
+            <button type="button" className="pt-btn" onClick={back}>
+              <ArrowLeft size={16} aria-hidden /> Wróć o krok
             </button>
             <button type="button" className="pt-link-btn" onClick={reset}>
-              Zacznij od nowa
+              <RotateCcw size={15} aria-hidden /> Zacznij od nowa
             </button>
           </div>
-        )}
+        </Collapse>
 
         <ol className="pt-timeline">
           {path.slice(1).map((node, i) => {
             const index = i + 1;
             return (
-              <li key={node.id} className="pt-tl-item">
+              <li key={node.id} className="pt-tl-item pt-tl-item-done">
                 <span className="pt-dot pt-dot-done" aria-hidden="true">
-                  ✓
+                  <Check size={15} strokeWidth={3} />
                 </span>
                 <div className="pt-tl-row">
                   <div>
@@ -644,7 +749,7 @@ export function ParentingDecisionTimeline() {
                     onClick={() => jumpTo(index - 1)}
                     aria-label={`Zmień wybór: ${node.label}`}
                   >
-                    Zmień
+                    <Pencil size={14} aria-hidden /> Zmień
                   </button>
                 </div>
               </li>
@@ -652,7 +757,7 @@ export function ParentingDecisionTimeline() {
           })}
 
           {currentNode.children && (
-            <li className="pt-tl-item">
+            <li key={currentNode.id} className="pt-tl-item">
               <span className="pt-dot pt-dot-current" aria-hidden="true" />
               <div>
                 <div className="pt-eyebrow">{currentNode.label}</div>
@@ -667,11 +772,12 @@ export function ParentingDecisionTimeline() {
                   role="group"
                   aria-label="Dostępne opcje"
                 >
-                  {currentNode.children.map((branch) => (
+                  {currentNode.children.map((branch, i) => (
                     <button
                       key={branch.id}
                       type="button"
                       className="pt-option"
+                      style={vars({ "--i": i })}
                       onClick={() => select(branch)}
                     >
                       <span className="pt-option-title">{branch.label}</span>
@@ -681,6 +787,11 @@ export function ParentingDecisionTimeline() {
                       <span className="pt-option-who">
                         Dotyczy: {stripWho(branch.affectedWho)}
                       </span>
+                      <ArrowRight
+                        size={18}
+                        className="pt-option-arrow"
+                        aria-hidden
+                      />
                     </button>
                   ))}
                 </div>
@@ -691,14 +802,18 @@ export function ParentingDecisionTimeline() {
       </section>
 
       {/* Krok 3 – wynik */}
-      <section className="pt-card pt-result" aria-labelledby="pt-result-h">
+      <section
+        className={`pt-card pt-result${isLeaf ? " pt-result-active" : ""}`}
+        aria-labelledby="pt-result-h"
+      >
         {isLeaf && plan ? (
-          <>
+          <div key={currentNode.id} className="pt-result-body">
             <StepHead
               n={3}
               id="pt-result-h"
               title="Co Wam przysługuje?"
               sub={`Podsumowanie • dotyczy: ${stripWho(currentNode.affectedWho)}`}
+              state="active"
               headingRef={resultRef}
             />
             {currentNode.supportOrganizations && (
@@ -709,14 +824,23 @@ export function ParentingDecisionTimeline() {
               </p>
             )}
             <ResultBody plan={plan} node={currentNode} params={params} />
-          </>
+          </div>
         ) : (
-          <StepHead
-            n={3}
-            id="pt-result-h"
-            title="Zobacz, co Wam przysługuje"
-            sub="Wynik pojawi się tutaj, gdy wybierzesz swoją sytuację w kroku 2."
-          />
+          <>
+            <StepHead
+              n={3}
+              id="pt-result-h"
+              title="Zobacz, co Wam przysługuje"
+              sub="Wynik pojawi się tutaj, gdy wybierzesz swoją sytuację w kroku 2."
+            />
+            <div className="pt-placeholder" aria-hidden="true">
+              <div className="pt-skel pt-skel-lg" />
+              <div className="pt-skel-row">
+                <div className="pt-skel" />
+                <div className="pt-skel" />
+              </div>
+            </div>
+          </>
         )}
       </section>
     </div>
@@ -724,96 +848,197 @@ export function ParentingDecisionTimeline() {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Style (kontrast WCAG AA, pola dotykowe ≥ 44 px, widoczny focus)  */
+/*  Style – tokeny motywu z index.css (jasny/ciemny/wysoki kontrast),  */
+/*  pola dotykowe ≥ 44 px, widoczny focus, animacje z poszanowaniem    */
+/*  ustawienia „ogranicz ruch”.                                        */
 /* ------------------------------------------------------------------ */
 
 const CSS = `
-.pt-root{--ink:#0f172a;--muted:#475569;--line:#cbd5e1;--accent:#1d4ed8;--accent-bg:#eff6ff;
-  max-width:880px;margin:0 auto;padding:0 12px 40px;font-family:system-ui,sans-serif;color:var(--ink);font-size:16px;line-height:1.5}
+.pt-root{
+  --pt-ease:cubic-bezier(.2,.8,.2,1);
+  --pt-info-bg:#eff6ff;--pt-info-line:#bfdbfe;--pt-info-ink:#1e3a8a;
+  --pt-warn-bg:#fffbeb;--pt-warn-line:#fde68a;--pt-warn-ink:#78350f;
+  --pt-err-bg:#fef2f2;--pt-err-line:#fecaca;--pt-err-ink:#991b1b;
+  --pt-care-bg:#fdf2f8;--pt-care-line:#fbcfe8;--pt-care-ink:#831843;
+  --pt-shadow:0 1px 2px rgb(15 23 42/.04),0 10px 30px -14px rgb(15 23 42/.12);
+  padding:0 0 40px;color:var(--ink);font-size:16px;line-height:1.5}
+:root[data-theme='dark'] .pt-root{
+  --pt-info-bg:#0c1e3a;--pt-info-line:#1e3a8a;--pt-info-ink:#bfdbfe;
+  --pt-warn-bg:#2a1d06;--pt-warn-line:#78350f;--pt-warn-ink:#fde68a;
+  --pt-err-bg:#2b0d0d;--pt-err-line:#7f1d1d;--pt-err-ink:#fecaca;
+  --pt-care-bg:#2a0f1e;--pt-care-line:#831843;--pt-care-ink:#fbcfe8;
+  --pt-shadow:0 1px 2px rgb(0 0 0/.3),0 10px 30px -14px rgb(0 0 0/.6)}
 .pt-root *{box-sizing:border-box}
-.pt-h1{margin:16px 0 4px;font-size:26px}
-.pt-h2{margin:0;font-size:19px}
-.pt-h3{margin:20px 0 8px;font-size:17px}
-.pt-intro-sub{margin:0 0 16px}
+.pt-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+/* Nagłówek */
+.pt-intro{margin:4px 0 24px;animation:enter var(--enter-duration) var(--ease-enter) backwards}
+.pt-pill{margin:0;color:var(--brand-ink);font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.pt-h1{margin:12px 0 6px;font-size:clamp(26px,4vw,36px);font-weight:700;letter-spacing:-.02em;line-height:1.15}
+.pt-h2{margin:0;font-size:19px;font-weight:600;letter-spacing:-.01em}
+.pt-h3{display:flex;align-items:center;gap:8px;margin:28px 0 12px;font-size:16px;font-weight:600}
+.pt-intro-sub{margin:0;font-size:16px}
 .pt-hint{font-size:14px;color:var(--muted)}
-.pt-card{margin-bottom:20px;padding:20px;border:1px solid var(--line);border-radius:14px;background:#fff}
-.pt-step-head{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px}
-.pt-step-num{flex:none;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:flex;align-items:center;justify-content:center;font-size:15px}
-.pt-data-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-bottom:16px}
-.pt-label{display:block;font-weight:600;margin-bottom:2px}
-.pt-input-wrap{position:relative;margin-top:6px}
-.pt-input-wrap input,.pt-date{width:100%;min-height:48px;padding:10px 40px 10px 12px;font:inherit;font-size:17px;border:1px solid #94a3b8;border-radius:8px;background:#fff;color:var(--ink);margin-top:6px}
-.pt-input-wrap input{margin-top:0}
-.pt-date{padding-right:12px}
-.pt-suffix{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
-.pt-invalid input{border:2px solid #991b1b}
-.pt-field-error{color:#991b1b;font-size:14px;margin-top:4px}
-.pt-callout{padding:12px 14px;border-radius:10px;margin:14px 0;font-size:15px}
+
+/* Karty kroków */
+.pt-card{margin-bottom:20px;padding:24px;border:1px solid var(--line);border-radius:10px;background:var(--paper);box-shadow:var(--pt-shadow);animation:enter var(--enter-duration) var(--ease-enter) backwards}
+.pt-root>section:nth-of-type(2){animation-delay:.08s}
+.pt-root>section:nth-of-type(3){animation-delay:.16s}
+.pt-result{transition:border-color .4s,box-shadow .4s}
+.pt-result-active{border-color:color-mix(in srgb,var(--brand) 45%,var(--line))}
+.pt-step-head{display:flex;gap:14px;align-items:flex-start;margin-bottom:20px}
+.pt-step-num{flex:none;width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;transition:background .3s,color .3s,transform .3s var(--pt-ease)}
+.pt-step-idle{background:var(--hover);color:var(--muted)}
+.pt-step-active{background:var(--brand);color:#fff;box-shadow:0 6px 16px -6px color-mix(in srgb,var(--brand) 70%,transparent)}
+.pt-step-done{background:var(--brand-soft);color:var(--brand-ink);animation:pt-pop .4s cubic-bezier(.34,1.56,.64,1)}
+
+/* Pola */
+.pt-data-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;margin:4px 0 20px}
+.pt-field{display:flex;flex-direction:column}
+.pt-field>.pt-hint{margin-bottom:8px}
+.pt-label{display:block;font-weight:600;font-size:15px;margin-bottom:2px}
+.pt-input-wrap{position:relative;margin-top:auto}
+.pt-input-wrap input,.pt-date{width:100%;min-height:48px;padding:10px 44px 10px 14px;font:inherit;font-size:16px;font-variant-numeric:tabular-nums;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink);transition:border-color .15s,box-shadow .15s}
+.pt-date{margin-top:auto;padding-right:14px}
+.pt-input-wrap input:hover,.pt-date:hover{border-color:var(--muted)}
+.pt-input-wrap input:focus-visible,.pt-date:focus-visible{outline:none;border-color:var(--brand);box-shadow:0 0 0 4px color-mix(in srgb,var(--brand) 20%,transparent)}
+.pt-suffix{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:14px;font-weight:500;pointer-events:none}
+.pt-invalid input{border-color:var(--pt-err-ink);box-shadow:0 0 0 3px color-mix(in srgb,var(--pt-err-ink) 15%,transparent)}
+.pt-field-error{color:var(--pt-err-ink);font-size:14px;margin-top:6px;animation:enter var(--enter-duration) var(--ease-enter) backwards}
+
+/* Komunikaty */
+.pt-callout{display:flex;gap:10px;align-items:flex-start;padding:12px 16px;border-radius:8px;margin:0 0 16px;font-size:15px;border:1px solid;animation:enter var(--enter-duration) var(--ease-enter) backwards}
+.pt-callout-icon{flex:none;margin-top:2px}
 .pt-callout p,.pt-callout ul{margin:6px 0 0}
 .pt-callout ul{padding-left:20px}
-.pt-callout-info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e3a8a}
-.pt-callout-warn{background:#fffbeb;border:1px solid #fde68a;color:#78350f}
-.pt-error{padding:12px 14px;border-radius:10px;background:#fef2f2;border:1px solid #fecaca;color:#991b1b;margin:14px 0}
-.pt-error ul{margin:6px 0 0;padding-left:20px}
-.pt-toolbar{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
-.pt-timeline{list-style:none;margin:0;padding:0 0 0 18px;border-left:3px solid #93c5fd}
-.pt-tl-item{position:relative;padding:0 0 22px 22px}
+.pt-callout-info{background:var(--pt-info-bg);border-color:var(--pt-info-line);color:var(--pt-info-ink)}
+.pt-callout-warn{background:var(--pt-warn-bg);border-color:var(--pt-warn-line);color:var(--pt-warn-ink)}
+.pt-callout-err{background:var(--pt-err-bg);border-color:var(--pt-err-line);color:var(--pt-err-ink)}
+.pt-result-body .pt-callout{margin:16px 0}
+
+/* Przyciski */
+.pt-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding-bottom:16px}
+.pt-btn{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 16px;border-radius:6px;font:inherit;font-size:15px;font-weight:600;cursor:pointer;border:1px solid var(--line);background:var(--paper);color:var(--ink);transition:background .15s,border-color .15s,transform .15s}
+.pt-btn:hover{background:var(--hover);border-color:var(--muted)}
+.pt-btn:hover svg{transform:translateX(-2px)}
+.pt-btn svg{transition:transform .2s var(--pt-ease)}
+.pt-btn:active,.pt-link-btn:active{transform:scale(.97)}
+.pt-link-btn{display:inline-flex;align-items:center;gap:6px;flex:none;background:none;border:none;padding:8px 12px;min-height:44px;border-radius:6px;font:inherit;font-size:15px;font-weight:600;color:var(--brand-ink);cursor:pointer;transition:background .15s,transform .15s}
+.pt-link-btn:hover{background:var(--brand-soft)}
+
+/* Oś wyborów */
+.pt-timeline{list-style:none;margin:0;padding:0}
+.pt-tl-item{position:relative;padding:0 0 16px 44px;animation:enter var(--enter-duration) var(--ease-enter) backwards}
+.pt-tl-item::before{content:"";position:absolute;left:13px;top:36px;bottom:4px;width:2px;border-radius:2px;background:var(--line)}
+.pt-tl-item-done::before{background:var(--brand);animation:pt-grow-y .5s var(--pt-ease) backwards;transform-origin:top}
 .pt-tl-item:last-child{padding-bottom:0}
-.pt-dot{position:absolute;left:-34px;top:2px;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;border:3px solid #fff}
-.pt-dot-done{background:#1d4ed8;color:#fff}
-.pt-dot-current{background:#fff;border:4px solid #1d4ed8}
-.pt-tl-row{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
-.pt-eyebrow{font-size:12px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:#0f766e}
-.pt-chosen{font-weight:700;font-size:17px}
-.pt-question{margin:2px 0 4px}
-.pt-question-sub{margin:0 0 12px}
+.pt-tl-item:last-child::before{display:none}
+.pt-dot{position:absolute;left:0;top:4px;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.pt-dot-done{background:var(--brand);color:#fff;animation:pt-pop .4s cubic-bezier(.34,1.56,.64,1) backwards}
+.pt-dot-current{background:var(--paper);border:3px solid var(--brand);animation:pt-pulse 2.2s ease-out infinite}
+.pt-tl-row{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 8px 12px 16px;border-radius:8px;background:var(--surface);border:1px solid var(--line)}
+.pt-eyebrow{font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--brand-ink)}
+.pt-chosen{font-weight:600;font-size:16px}
+.pt-question{margin:4px 0 4px;font-size:18px}
+.pt-question-sub{margin:0 0 16px}
 .pt-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px}
-.pt-option{display:flex;flex-direction:column;gap:6px;text-align:left;padding:16px;min-height:44px;border:1px solid var(--line);border-radius:12px;background:#fff;color:inherit;font:inherit;cursor:pointer}
-.pt-option:hover{border-color:var(--accent);background:var(--accent-bg)}
-.pt-option-title{font-weight:700;font-size:16px}
+.pt-option{position:relative;display:flex;flex-direction:column;gap:6px;text-align:left;padding:18px 48px 18px 18px;min-height:44px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:inherit;font:inherit;cursor:pointer;
+  transition:transform .25s var(--pt-ease),border-color .2s,box-shadow .25s,background .2s;
+  animation:enter var(--enter-duration) var(--ease-enter) backwards;animation-delay:calc(var(--i,0) * var(--enter-stagger) + 80ms)}
+.pt-option:hover{transform:translateY(-3px);border-color:var(--brand);background:color-mix(in srgb,var(--brand-soft) 45%,var(--paper));box-shadow:0 14px 28px -16px color-mix(in srgb,var(--brand) 60%,transparent)}
+.pt-option:active{transform:translateY(-1px) scale(.99)}
+.pt-option-title{font-weight:600;font-size:16px}
 .pt-option-desc{font-size:14px;color:var(--muted)}
-.pt-option-who{font-size:13px;color:#0f766e;font-weight:600}
-.pt-btn{min-height:44px;padding:8px 16px;border-radius:10px;font:inherit;font-weight:600;cursor:pointer;border:1px solid transparent}
-.pt-btn-secondary{background:#fff;color:var(--accent);border-color:#93c5fd}
-.pt-link-btn{background:none;border:none;padding:8px 4px;min-height:44px;font:inherit;font-weight:600;color:var(--accent);cursor:pointer;text-decoration:underline}
-.pt-family-total{padding:14px 16px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;font-size:18px;color:#14532d;margin:14px 0}
+.pt-option-who{font-size:13px;color:var(--brand-ink);font-weight:600}
+.pt-option-arrow{position:absolute;right:16px;top:18px;color:var(--muted);transition:transform .25s var(--pt-ease),color .2s}
+.pt-option:hover .pt-option-arrow{transform:translateX(4px);color:var(--brand-ink)}
+
+/* Wynik */
+.pt-result-body{animation:enter var(--enter-duration) var(--ease-enter) backwards}
+.pt-placeholder{display:grid;gap:12px}
+.pt-skel-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pt-skel{height:72px;border-radius:8px;background:linear-gradient(90deg,var(--hover) 0%,var(--surface) 50%,var(--hover) 100%);background-size:200% 100%;animation:pt-shimmer 1.8s linear infinite}
+.pt-skel-lg{height:76px}
+.pt-family-total{position:relative;overflow:hidden;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;padding:22px 24px;border-radius:10px;margin:0 0 12px;color:#fff;
+  background:linear-gradient(135deg,var(--brand) 0%,var(--brand-strong) 100%);box-shadow:0 16px 32px -18px color-mix(in srgb,var(--brand) 80%,transparent);animation:enter var(--enter-duration) var(--ease-enter) backwards}
+.pt-family-total::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 30%,rgb(255 255 255/.18) 50%,transparent 70%);transform:translateX(-100%);animation:pt-sheen 1.4s .3s var(--pt-ease) backwards;pointer-events:none}
+.pt-family-total-label{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:500;opacity:.92}
+.pt-family-total-value{font-size:clamp(26px,4.5vw,36px);font-weight:700;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .pt-parents{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
-.pt-parent{padding:14px;border-radius:10px;background:#f1f5f9}
-.pt-parent-title{font-weight:700}
-.pt-dl{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:8px 0 0;font-size:15px}
+.pt-parent{padding:16px 18px;border-radius:8px;background:var(--surface);border:1px solid var(--line);animation:enter var(--enter-duration) var(--ease-enter) backwards;animation-delay:calc(var(--i,0) * var(--enter-stagger) + 120ms)}
+.pt-parent-title{display:flex;align-items:center;gap:10px;font-weight:600}
+.pt-dl{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin:12px 0 0;font-size:15px}
 .pt-dl dt{color:var(--muted)}
-.pt-dl dd{margin:0;font-weight:700;text-align:right}
-.pt-gantt{margin:8px 0 16px;padding:12px;background:#f8fafc;border-radius:10px;border:1px solid #e2e8f0}
-.pt-gantt-row{margin-bottom:8px}
-.pt-gantt-label{font-size:12px;color:var(--muted);margin-bottom:2px}
-.pt-gantt-track{position:relative;height:14px;background:#e2e8f0;border-radius:7px}
-.pt-gantt-bar{position:absolute;top:0;bottom:0;border-radius:7px}
-.pt-gantt-bar-off{opacity:.4}
-.pt-gantt-axis{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:4px}
+.pt-dl dd{margin:0;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+
+/* Gantt */
+.pt-gantt{margin:0 0 16px;padding:16px 18px;background:var(--surface);border-radius:8px;border:1px solid var(--line)}
+.pt-gantt-row+.pt-gantt-row{margin-top:12px}
+.pt-gantt-label{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-bottom:6px}
+.pt-gantt-dot{width:8px;height:8px;border-radius:2px;flex:none}
+.pt-gantt-track{position:relative;height:10px;background:var(--line);border-radius:3px;overflow:hidden}
+.pt-gantt-bar{position:absolute;top:0;bottom:0;border-radius:3px;transform-origin:left center;transition:left .45s var(--pt-ease),width .45s var(--pt-ease);animation:pt-grow-x .8s var(--pt-ease) backwards;animation-delay:calc(var(--i,0) * 90ms + 200ms)}
+.pt-gantt-bar-off{opacity:.35}
+.pt-gantt-axis{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:10px}
+
+/* Okresy */
 .pt-segments{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
-.pt-segment{display:grid;grid-template-columns:1fr auto;gap:8px 16px;padding:14px;border:1px solid var(--line);border-left-width:6px;border-radius:10px}
-.pt-segment-title{font-weight:700}
-.pt-badge{display:inline-block;margin:4px 0;padding:2px 10px;border-radius:999px;background:#dbeafe;color:#1e3a8a;font-size:12px;font-weight:600}
-.pt-segment-dates{font-size:15px}
+.pt-segment{position:relative;display:grid;grid-template-columns:1fr auto;gap:8px 16px;padding:16px 18px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);overflow:hidden;
+  transition:box-shadow .25s,transform .25s var(--pt-ease),border-color .25s;animation:enter var(--enter-duration) var(--ease-enter) backwards;animation-delay:calc(var(--i,0) * var(--enter-stagger) + 250ms)}
+.pt-segment:hover{transform:translateY(-1px);border-color:color-mix(in srgb,var(--seg) 45%,var(--line));box-shadow:0 12px 24px -18px color-mix(in srgb,var(--seg) 80%,transparent)}
+.pt-segment-title{display:flex;align-items:center;gap:8px;font-weight:600}
+.pt-segment-title::before{content:"";flex:none;width:10px;height:10px;border-radius:2px;background:var(--seg)}
+.pt-badge{display:inline-flex;margin:6px 0;padding:2px 8px;border-radius:4px;background:color-mix(in srgb,var(--seg) 16%,var(--paper));color:var(--ink);font-size:12px;font-weight:600}
+.pt-segment-dates{display:flex;align-items:center;flex-wrap:wrap;gap:6px;font-size:15px}
+.pt-segment-dates svg{color:var(--muted)}
 .pt-segment-money{text-align:right;max-width:280px}
-.pt-rate{font-weight:700}
-.pt-amount{font-size:18px;font-weight:800;margin-top:4px}
-.pt-warn-inline{color:#92400e;font-size:14px;margin-top:4px}
-.pt-legal{grid-column:1/-1;font-size:14px}
-.pt-legal summary,.pt-assumptions summary{cursor:pointer;color:var(--accent);min-height:28px;width:fit-content}
-.pt-legal p{margin:4px 0 0;color:var(--muted)}
-.pt-assumptions{margin-top:16px;font-size:15px}
-.pt-assumptions ul{margin:8px 0;padding-left:20px}
-.pt-empathy{padding:12px 14px;border-radius:10px;background:#fdf2f8;border:1px solid #fbcfe8;color:#500724}
-.pt-support{margin-top:20px;padding:16px;border-radius:12px;background:#fdf2f8;border:1px solid #fbcfe8}
-.pt-support .pt-h3{margin-top:0;color:#831843}
+.pt-rate{font-weight:600;font-size:14px;color:var(--muted)}
+.pt-amount{font-size:20px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.pt-warn-inline{color:var(--pt-warn-ink);font-size:14px;margin-top:4px}
+.pt-legal{grid-column:1/-1;font-size:14px;border-top:1px dashed var(--line);margin-top:4px}
+.pt-legal p{margin:0 0 6px;color:var(--muted)}
+
+/* Rozwijane sekcje */
+.pt-disc-btn{display:inline-flex;align-items:center;gap:6px;background:none;border:none;padding:8px 0;min-height:36px;font:inherit;font-size:14px;font-weight:600;color:var(--brand-ink);cursor:pointer}
+.pt-disc-btn:hover{text-decoration:underline;text-underline-offset:3px}
+.pt-disc-chev{transition:transform .3s var(--pt-ease)}
+.pt-disc-btn[aria-expanded="true"] .pt-disc-chev{transform:rotate(180deg)}
+.pt-disc-body{padding:2px 0 4px 22px}
+.pt-assumptions{margin-top:16px;padding:6px 16px;border-radius:8px;background:var(--surface);border:1px solid var(--line);font-size:15px}
+.pt-assumptions ul{margin:0 0 8px;padding-left:20px}
+.pt-assumptions .pt-hint{margin:0 0 8px}
+
+/* Wsparcie */
+.pt-empathy{padding:14px 16px;border-radius:8px;background:var(--pt-care-bg);border:1px solid var(--pt-care-line);color:var(--pt-care-ink);margin:0 0 16px}
+.pt-support{margin-top:20px;padding:18px;border-radius:8px;background:var(--pt-care-bg);border:1px solid var(--pt-care-line)}
+.pt-support .pt-h3{margin-top:0;color:var(--pt-care-ink)}
+.pt-support>p{margin:0 0 12px}
 .pt-support-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}
-.pt-support-item{padding:12px;background:#fff;border-radius:8px}
-.pt-support-name{font-weight:700}
-.pt-support-contact{font-size:14px;font-weight:600;color:#9d174d;margin-top:4px}
-.pt-disclaimer{margin:20px 0 0;font-size:13px;color:var(--muted)}
-.pt-root button:focus-visible,.pt-root input:focus-visible,.pt-root summary:focus-visible,.pt-root a:focus-visible{outline:3px solid #f59e0b;outline-offset:2px}
+.pt-support-item{padding:14px;background:var(--paper);border-radius:6px;border:1px solid var(--pt-care-line);transition:transform .2s var(--pt-ease)}
+.pt-support-item:hover{transform:translateX(2px)}
+.pt-support-name{font-weight:600}
+.pt-support-contact{font-size:14px;font-weight:600;color:var(--pt-care-ink);margin-top:6px}
+.pt-support-contact a{display:inline-flex;align-items:center;gap:4px;color:inherit}
+.pt-disclaimer{margin:24px 0 0;font-size:13px;color:var(--muted)}
+
+/* Fokus */
+.pt-root button:focus-visible,.pt-root summary:focus-visible,.pt-root a:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
 .pt-root h2:focus,.pt-root h3:focus{outline:none}
-@media (prefers-reduced-motion:no-preference){.pt-option,.pt-btn{transition:background .15s,border-color .15s}}
-@media (max-width:560px){.pt-card{padding:16px}.pt-segment{grid-template-columns:1fr}.pt-segment-money{text-align:left;max-width:none}.pt-tl-row{flex-direction:column;gap:0}}
+
+/* Animacje */
+@keyframes pt-pop{0%{transform:scale(.5);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes pt-grow-x{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes pt-grow-y{from{transform:scaleY(0)}to{transform:scaleY(1)}}
+@keyframes pt-sheen{to{transform:translateX(100%)}}
+@keyframes pt-shimmer{from{background-position:200% 0}to{background-position:-200% 0}}
+@keyframes pt-pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--brand) 45%,transparent)}70%{box-shadow:0 0 0 10px transparent}100%{box-shadow:0 0 0 0 transparent}}
+
+
+@media (max-width:560px){
+  .pt-card{padding:18px;border-radius:10px}
+  .pt-segment{grid-template-columns:1fr}
+  .pt-segment-money{text-align:left;max-width:none}
+  .pt-tl-row{flex-direction:column;align-items:flex-start;gap:4px}
+  .pt-family-total{padding:18px}
+}
 `;

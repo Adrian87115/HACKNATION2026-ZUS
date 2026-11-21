@@ -17,6 +17,7 @@ import {
   addYears,
   EngineInputError,
   formatDate,
+  formatDatePl,
   parseDate,
   requireNonNegative,
   requirePositiveInt,
@@ -147,9 +148,9 @@ export function planMaternity(p: BenefitParams, input: MaternityPlanInput): Mate
   const segments: PlanSegment[] = [];
 
   if (!['birth', 'adoption', 'foster'].includes(input.event)) {
-    throw new EngineInputError('Pole "event" musi mieć wartość birth, adoption albo foster.');
+    throw new EngineInputError('Wybierz rodzaj zdarzenia: urodzenie, adopcja albo rodzina zastępcza.');
   }
-  if (!input.parents?.primary) throw new EngineInputError('Brak danych rodzica (parents.primary).');
+  if (!input.parents?.primary) throw new EngineInputError('Uzupełnij dane pierwszego rodzica.');
   requireNonNegative(input.parents.primary.monthlyBasis, 'parents.primary.monthlyBasis');
   if (input.parents.secondary) {
     requireNonNegative(input.parents.secondary.monthlyBasis, 'parents.secondary.monthlyBasis');
@@ -235,7 +236,7 @@ export function planMaternity(p: BenefitParams, input: MaternityPlanInput): Mate
     if (input.childLoss) {
       const surviving = requireNonNegative(input.childLoss.survivingChildren, 'childLoss.survivingChildren');
       if (surviving >= childrenCount) {
-        throw new EngineInputError('childLoss.survivingChildren musi być mniejsze niż childrenCount.');
+        throw new EngineInputError('Liczba żyjących dzieci musi być mniejsza niż łączna liczba dzieci.');
       }
       maternityDays =
         prenatalDays +
@@ -252,7 +253,7 @@ export function planMaternity(p: BenefitParams, input: MaternityPlanInput): Mate
     }
   } else {
     if (!input.childBirthDate) {
-      throw new EngineInputError('Przy adopcji i rodzinie zastępczej wymagane jest pole "childBirthDate".');
+      throw new EngineInputError('Przy adopcji i rodzinie zastępczej podaj datę urodzenia dziecka.');
     }
     childBirthDate = parseDate(input.childBirthDate, 'childBirthDate');
     const leave = maternityConditionsLeave(p, {
@@ -266,7 +267,7 @@ export function planMaternity(p: BenefitParams, input: MaternityPlanInput): Mate
     adoptionMinimumCase = leave.minimumApplied;
     if (leave.days < maternityLeaveWeeks(p, childrenCount) * 7) {
       notes.push(
-        `Urlop na warunkach urlopu macierzyńskiego skrócony ze względu na wiek dziecka (do ${formatDate(leave.ageLimitDate)}), nie krócej niż ${p.ADOPTION_FOSTER_MIN_GUARANTEED_MATERNITY_WEEKS} tyg. (Art. 183 § 3 KP).`,
+        `Urlop na warunkach urlopu macierzyńskiego skrócony ze względu na wiek dziecka (do ${formatDatePl(leave.ageLimitDate)}), nie krócej niż ${p.ADOPTION_FOSTER_MIN_GUARANTEED_MATERNITY_WEEKS} tyg. (Art. 183 § 3 KP).`,
       );
     }
   }
@@ -347,7 +348,7 @@ export function planMaternity(p: BenefitParams, input: MaternityPlanInput): Mate
     const weeks = requirePositiveInt(part.weeks, `parentalParts[${i}].weeks`);
     const workFte = requireNonNegative(part.workFte ?? 0, `parentalParts[${i}].workFte`);
     if (part.parent !== 'primary' && part.parent !== 'secondary') {
-      throw new EngineInputError(`parentalParts[${i}].parent musi mieć wartość primary albo secondary.`);
+      throw new EngineInputError(`Wybierz, który rodzic korzysta z części ${i + 1} urlopu rodzicielskiego.`);
     }
     if (workFte > p.MAX_WORK_FTE_DURING_PARENTAL) {
       errors.push(`Praca w trakcie urlopu rodzicielskiego – maks. ${p.MAX_WORK_FTE_DURING_PARENTAL} etatu (Art. 182^1e § 1 KP).`);
@@ -406,7 +407,7 @@ export function planMaternity(p: BenefitParams, input: MaternityPlanInput): Mate
     used[part.parent] += part.weeks;
     calendarWeeksTotal += part.weeks / (1 - part.workFte);
     if (deadline && addDays(segmentStart, -1) > deadline) {
-      errors.push(`Część ${i + 1} urlopu rodzicielskiego kończy się po ${formatDate(deadline)} – po terminie wykorzystania urlopu.`);
+      errors.push(`Część ${i + 1} urlopu rodzicielskiego kończy się po ${formatDatePl(deadline)} – po terminie wykorzystania urlopu.`);
     }
   });
 
@@ -455,7 +456,7 @@ export function planMaternity(p: BenefitParams, input: MaternityPlanInput): Mate
         : undefined,
     });
     if (input.event === 'adoption' && !input.adoptionDecreeDate) {
-      warnings.push('Przy adopcji urlop ojcowski wykorzystuje się w ciągu 12 mies. od uprawomocnienia przysposobienia – podaj "adoptionDecreeDate".');
+      warnings.push('Przy adopcji urlop ojcowski wykorzystuje się w ciągu 12 mies. od uprawomocnienia przysposobienia – podaj datę uprawomocnienia przysposobienia.');
     }
     let totalPaternityWeeks = 0;
     let paternityCursor = eventDate;
@@ -468,7 +469,7 @@ export function planMaternity(p: BenefitParams, input: MaternityPlanInput): Mate
       const start = part.startDate ? parseDate(part.startDate, `paternity[${i}].startDate`) : paternityCursor;
       paternityCursor = addSegment('paternity', 'secondary', start, weeks * 7, weeks, benefitRate(p, 'paternity', { combinedApplication: combined }));
       if (addDays(paternityCursor, -1) > paternityDeadline) {
-        errors.push(`Urlop ojcowski trzeba wykorzystać do ${formatDate(paternityDeadline)} (Art. 182^3 § 1 KP).`);
+        errors.push(`Urlop ojcowski trzeba wykorzystać do ${formatDatePl(paternityDeadline)} (Art. 182^3 § 1 KP).`);
       }
     });
     if (totalPaternityWeeks > p.PATERNITY_TOTAL_WEEKS) {

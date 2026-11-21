@@ -89,7 +89,7 @@ export function calculateBasis(p: BenefitParams, input: BasisInput): BasisResult
 
   if (!Array.isArray(input.months) || input.months.length > p.BASIS_MONTHS_COUNT) {
     throw new EngineInputError(
-      `Pole "months" musi być listą maksymalnie ${p.BASIS_MONTHS_COUNT} pełnych miesięcy kalendarzowych.`,
+      `Podaj wynagrodzenie z maksymalnie ${p.BASIS_MONTHS_COUNT} pełnych miesięcy.`,
     );
   }
 
@@ -100,7 +100,7 @@ export function calculateBasis(p: BenefitParams, input: BasisInput): BasisResult
     if (input.months.length === 0) {
       if (input.contractMonthlyGross === undefined) {
         throw new EngineInputError(
-          'Brak pełnych miesięcy ubezpieczenia – podaj "contractMonthlyGross" (Art. 37).',
+          'Nie masz jeszcze pełnego miesiąca ubezpieczenia – podaj miesięczne wynagrodzenie brutto z umowy.',
         );
       }
       rules.push('Brak pełnego miesiąca ubezpieczenia – wynagrodzenie z umowy za pełny miesiąc (Art. 37).');
@@ -154,7 +154,7 @@ export function calculateBasis(p: BenefitParams, input: BasisInput): BasisResult
   if (input.months.length === 0) {
     if (input.contractMonthlyBasis === undefined) {
       throw new EngineInputError(
-        'Brak pełnych miesięcy ubezpieczenia – podaj "contractMonthlyBasis" (Art. 49).',
+        'Nie masz jeszcze pełnego miesiąca ubezpieczenia – podaj miesięczną podstawę składek z umowy lub deklaracji.',
       );
     }
     rules.push('Brak pełnego miesiąca ubezpieczenia – kwota z umowy/deklaracji za miesiąc (Art. 49).');
