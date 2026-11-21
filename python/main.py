@@ -1,16 +1,15 @@
 import os
 
-from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from python.cases import router as cases_router
 from python.chat_store import ChatStore
+from python.config import setting
 from python.routers import router
 from python.session_manager import SessionManager
 from python.storage import ObjectStorage
 
-load_dotenv()
 
 def create_app(manager: SessionManager | None = None) -> FastAPI:
     app = FastAPI(title = 'ZUSia API')
@@ -30,7 +29,7 @@ def create_app(manager: SessionManager | None = None) -> FastAPI:
     async def health() -> dict[str, str | bool]:
         # `assistant` tells the frontend whether chat / case import can work (Gemini key configured).
         return {'status': 'ok',
-                'assistant': bool(os.getenv('ZUS_API_KEY')),
+                'assistant': bool(setting('ZUS_API_KEY')),
                 'storage': app.state.storage is not None}
 
     return app

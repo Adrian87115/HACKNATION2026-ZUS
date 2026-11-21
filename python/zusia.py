@@ -1,24 +1,30 @@
-import os
-from pathlib import Path
-from dotenv import load_dotenv
-from google import genai
-from google.genai import types
+import logging
 import mimetypes
+import time
+from pathlib import Path
+
+from google import genai
+from google.genai import errors, types
 
 from python.case_schemas import CaseExtraction
+from python.config import setting
+
+logger = logging.getLogger(__name__)
+
+# Transient Gemini errors worth retrying: rate limit, overload ("high demand"), gateway problems.
+RETRYABLE_STATUS = {429, 500, 503, 504}
+MAX_ATTEMPTS = 3
 
 class ZUSia:
     def __init__(self):
-        load_dotenv()
-        api_key = os.getenv('ZUS_API_KEY')
+        api_key = setting('ZUS_API_KEY')
 
         if not api_key:
             raise RuntimeError('ZUS_API_KEY is not configured')
 
         self.client = genai.Client(api_key = api_key)
 
-        # self.model = 'gemini-4-hydrogen'
-        self.model = 'gemini-3.1-flash-lite'
+        self.model = setting('ZUSIA_MODEL', 'gemini-3.1-flash-lite')
 
         file_path = Path(__file__).resolve().parent / 'zusia_persona.txt'
 
@@ -31,8 +37,22 @@ class ZUSia:
                                         history = history)
         return chat
 
+    @staticmethod
+    def _retry(call):
+        """Run a Gemini call, retrying transient errors with exponential backoff (1 s, 2 s)."""
+        delay = 1.0
+        for attempt in range(1, MAX_ATTEMPTS + 1):
+            try:
+                return call()
+            except errors.APIError as exc:
+                if getattr(exc, 'code', None) not in RETRYABLE_STATUS or attempt == MAX_ATTEMPTS:
+                    raise
+                logger.warning('Gemini returned %s – retrying in %.0f s (attempt %d/%d)', exc.code, delay, attempt, MAX_ATTEMPTS)
+                time.sleep(delay)
+                delay *= 2
+
     def text(self, chat, message):
-        response = chat.send_message(message)
+        response = self._retry(lambda: chat.send_message(message))
         return response.text
 
     def img(self, chat, message = '', img_path = None, image_bytes = None, mime_type = None):
@@ -47,7 +67,7 @@ class ZUSia:
         if image_bytes is not None:
             parts.append(types.Part.from_bytes(data = image_bytes, mime_type = mime_type or 'image/jpeg'))
 
-        response = chat.send_message(parts)
+        response = self._retry(lambda: chat.send_message(parts))
         return response.text
 
     def pdf(self, chat, message = '', pdf_bytes = None):
@@ -60,7 +80,7 @@ class ZUSia:
             raise ValueError('PDF data is required')
 
         parts.append(types.Part.from_bytes(data = pdf_bytes, mime_type = 'application/pdf'))
-        response = chat.send_message(parts)
+        response = self._retry(lambda: chat.send_message(parts))
         return response.text
 
     def extract_case(self, files: list[tuple[bytes, str]]) -> CaseExtraction:
@@ -71,13 +91,13 @@ class ZUSia:
         parts = [types.Part.from_bytes(data = data, mime_type = mime) for data, mime in files]
         parts.append(types.Part.from_text(text = 'Odczytaj dane z powyższych dokumentów jednej sprawy.'))
 
-        response = self.client.models.generate_content(
+        response = self._retry(lambda: self.client.models.generate_content(
             model = self.model,
             contents = parts,
             config = types.GenerateContentConfig(system_instruction = CASE_EXTRACTION_PROMPT,
                                                  response_mime_type = 'application/json',
                                                  response_schema = CaseExtraction,
-                                                 temperature = 0))
+                                                 temperature = 0)))
 
         if isinstance(response.parsed, CaseExtraction):
             return response.parsed
