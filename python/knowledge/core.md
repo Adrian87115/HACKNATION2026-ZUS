@@ -66,4 +66,10 @@ są nadrzędne (ustawia je administrator w panelu). Przy szczegółach zawsze po
 ## Gdzie szukać pomocy
 - Infolinia ZUS (Centrum Obsługi Telefonicznej): 22 560 16 00, e-wizyta lub wizyta w placówce ZUS.
 - Aplikacja: Kalkulatory i Przewodnik rodzica w ZUSia oraz konto PUE/eZUS (dane o ubezpieczeniach i rozliczeniach).
+- Strona „Gdzie szukać pomocy” w ZUSia (/pomoc-i-wsparcie) – sprawdzone kontakty (zweryfikowane 21.11.2026):
+  nieodpłatna pomoc prawna (gov.pl/web/nieodplatna-pomoc), porady prawne PIP (gov.pl/web/pip/porady-prawne),
+  Rzecznik MŚP 22 123 70 70 (przedsiębiorcy w sporach z ZUS), Rzecznik Praw Pacjenta 800 190 590,
+  Fundacja Rodzić po Ludzku (prawa przy porodzie), Fundacja Wcześniak 22 121 80 55, Fundacja Nagle Sami
+  (żałoba, strata dziecka) 800 108 108, Centrum Wsparcia (kryzys psychiczny) 800 70 2222,
+  Centrum Praw Kobiet 800 107 777, Telefon Zaufania RPD 800 12 12 12. W zagrożeniu życia – 112.
 - ZUSia nie jest decyzją ZUS – ostateczne ustalenie prawa i kwoty należy do ZUS (lub płatnika zasiłku).

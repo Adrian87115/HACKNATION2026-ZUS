@@ -6,7 +6,8 @@
     "parentingGuide": "Przewodnik rodzica",
     "label": "Nawigacja główna",
     "applications": "Wnioski",
-    "risks": "Ryzyka"
+    "risks": "Ryzyka",
+    "support": "Pomoc"
   },
   "footer": {
     "description": "Asystent, który pomaga rodzicom zaplanować urlopy i sprawdzić wysokość zasiłków z ZUS.",
@@ -24,6 +25,7 @@
     "tagline": "HackNation 2026",
     "applications": "Dokumenty i wnioski",
     "risks": "Ryzyka i ochrona",
+    "support": "Gdzie szukać pomocy",
     "admin": "Panel administracyjny"
   },
   "home": {

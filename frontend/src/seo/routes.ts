@@ -73,6 +73,14 @@ export const SEO_ROUTES: SeoMeta[] = [
 		sitemap: { changefreq: 'monthly', priority: 0.8 }
 	},
 	{
+		path: AppRoutePaths.SUPPORT,
+		title: 'Gdzie szukać pomocy – organizacje dla rodziców | ZUSia',
+		description:
+			'Sprawdzone instytucje i fundacje dla przyszłych rodziców: pomoc w sprawach z ZUS i pracodawcą, przy porodzie, wcześniactwie, stracie dziecka i w kryzysie.',
+		name: 'Pomoc i wsparcie',
+		sitemap: { changefreq: 'monthly', priority: 0.7 }
+	},
+	{
 		path: AppRoutePaths.ADMIN,
 		title: 'Panel administracyjny | ZUSia',
 		description: 'Zarządzanie parametrami kalkulatorów ZUSi.',

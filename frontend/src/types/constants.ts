@@ -26,5 +26,9 @@ export const NavigationItems: NavigationItem[] = [
 	{
 		label: 'navigation.risks',
 		href: AppRoutePaths.RISKS
+	},
+	{
+		label: 'navigation.support',
+		href: AppRoutePaths.SUPPORT
 	}
 ];

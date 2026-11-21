@@ -190,25 +190,25 @@ export const PARENTING_DECISION_TREE: DecisionNode = {
           }),
           supportOrganizations: [
             {
-              name: "Fundacja Ernesta",
+              name: "Fundacja Nagle Sami – Telefon Wsparcia",
               description:
-                "Bezpłatna pomoc psychologiczna, prawna i grupy wsparcia dla rodziców po stracie dziecka.",
-              contact: "kontakt@fundacjaernesta.pl",
-              url: "https://fundacjaernesta.pl",
-            },
-            {
-              name: "Fundacja Nagle Sami",
-              description:
-                "Telefon wsparcia dla osób w żałobie oraz indywidualne konsultacje terapeutyczne.",
-              contact: "Tel. 800 108 108 (pon.–pt. 14:00–20:00)",
+                "Bezpłatny telefon i konsultacje dla osób w żałobie, także po stracie dziecka.",
+              contact: "Tel. 800 108 108",
               url: "https://naglesami.org.pl",
             },
             {
-              name: "Portal Poronienie.pl / Hospicja Perinatalne",
+              name: "Fundacja Rodzić po Ludzku",
               description:
-                "Praktyczny przewodnik po formalnościach w USC, ZUS (zasiłek pogrzebowy) oraz prawach pacjenta.",
-              contact: "Infolinia Rzecznika Praw Pacjenta: 800 190 590",
-              url: "https://www.poronienie.pl",
+                "Prawa pacjentki przy porodzie i po stracie dziecka – bezpłatne porady prawne i wzory pism.",
+              contact: "Formularz porady prawnej na stronie fundacji",
+              url: "https://rodzicpoludzku.pl/twoje-prawa/uzyskaj-porade-prawna/",
+            },
+            {
+              name: "Rzecznik Praw Pacjenta",
+              description:
+                "Bezpłatna infolinia w sprawach praw pacjentki, także opieki po stracie dziecka.",
+              contact: "Tel. 800 190 590 (w dni robocze)",
+              url: "https://www.gov.pl/web/rpp",
             },
           ],
         },
