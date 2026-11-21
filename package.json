@@ -1,0 +1,12 @@
+{
+  "name": "hacknation2026-zus",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev:frontend": "npm run dev -w frontend",
+    "dev:backend": "npm run start:dev -w backend"
+  }
+}
