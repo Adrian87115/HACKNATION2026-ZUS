@@ -1,14 +1,13 @@
-import type { ParseKeys } from 'i18next'
-import enCommon from './en/common.json'
 import plCommon from './pl/common.json'
 
 export const resources = {
   pl: { common: plCommon },
-  en: { common: enCommon },
 } as const
 
-export const supportedLanguages = ['pl', 'en'] as const
-export type SupportedLanguage = (typeof supportedLanguages)[number]
+/** Dot-paths to every leaf string in a translation object, e.g. 'appName' | 'navigation.home' */
+type KeyPaths<T> = {
+  [K in keyof T & string]: T[K] extends Record<string, unknown> ? `${K}.${KeyPaths<T[K]>}` : K
+}[keyof T & string]
 
-/** Any valid translation key, e.g. 'appName' | 'navigation.home' */
-export type TranslationKey = ParseKeys<'common'>
+/** Any valid translation key — a plain string-literal union, so the editor can autocomplete it */
+export type TranslationKey = KeyPaths<typeof plCommon>

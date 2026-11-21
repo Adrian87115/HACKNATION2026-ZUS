@@ -1,22 +1,14 @@
 import i18n from 'i18next'
-import LanguageDetector from 'i18next-browser-languagedetector'
 import { initReactI18next } from 'react-i18next'
-import { resources, supportedLanguages } from '../translations'
+import { resources } from '../translations'
 
-i18n
-  .use(LanguageDetector)
-  .use(initReactI18next)
-  .init({
-    resources,
-    fallbackLng: 'pl',
-    supportedLngs: supportedLanguages,
-    defaultNS: 'common',
-    ns: ['common'],
-    interpolation: { escapeValue: false },
-    detection: {
-      order: ['localStorage', 'navigator'],
-      caches: ['localStorage'],
-    },
-  })
+i18n.use(initReactI18next).init({
+  resources,
+  lng: 'pl',
+  fallbackLng: 'pl',
+  defaultNS: 'common',
+  ns: ['common'],
+  interpolation: { escapeValue: false },
+})
 
 export default i18n

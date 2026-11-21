@@ -1,6 +1,36 @@
 {
   "appName": "ZUS",
   "navigation": {
-    "home": "Strona główna"
+    "home": "Strona główna",
+    "calculators": "Kalkulatory"
+  },
+  "footer": {
+    "rights": "Wszelkie prawa zastrzeżone.",
+    "tagline": "HackNation 2026"
+  },
+  "dashboard": {
+    "welcome": {
+      "title": "Witaj!",
+      "subtitle": "To jest Twój panel. Tutaj znajdziesz podsumowanie najważniejszych informacji i spraw w toku."
+    },
+    "overview": "Przegląd",
+    "tiles": {
+      "applications": {
+        "title": "Wnioski w toku",
+        "description": "Oczekujące na decyzję"
+      },
+      "messages": {
+        "title": "Nowe wiadomości",
+        "description": "Nieprzeczytane w skrzynce"
+      },
+      "documents": {
+        "title": "Dokumenty",
+        "description": "Dostępne do pobrania"
+      },
+      "appointments": {
+        "title": "Wizyty",
+        "description": "Zaplanowane w tym miesiącu"
+      }
+    }
   }
 }

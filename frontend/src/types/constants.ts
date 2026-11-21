@@ -9,6 +9,10 @@ export interface NavigationItem {
 export const NavigationItems: NavigationItem[] = [
 	{
 		label: 'navigation.home',
-		href: AppRoutePaths.HOME
+		href: AppRoutePaths.home
+	},
+	{
+		label: 'navigation.calculators',
+		href: AppRoutePaths.calculators
 	}
 ];

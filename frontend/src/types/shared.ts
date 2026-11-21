@@ -1,3 +1,4 @@
 export const AppRoutePaths = {
-	HOME: '/'
+	home: '/',
+	calculators: '/calculators'
 };
