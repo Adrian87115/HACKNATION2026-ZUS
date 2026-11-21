@@ -177,14 +177,17 @@ export default function Applications() {
 						</div>
 
 						<Panel title="Krok po kroku">
-							<ol className="space-y-4">
+							<ol>
 								{guide.steps.map((step, i) => (
-									<li key={step.title} className="flex gap-3">
-										<span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-brand-soft text-sm font-bold text-brand-ink">
-											{i + 1}
-										</span>
+									<li key={step.title} className="relative flex gap-4 pb-6 last:pb-0">
+										{/* connector to the next step */}
+										{i < guide.steps.length - 1 && (
+											<span aria-hidden className="absolute top-[22px] bottom-1 left-[5px] w-0.5 rounded-full bg-line" />
+										)}
+										<span aria-hidden className="relative mt-[3px] h-3 w-3 shrink-0 rounded-full bg-brand ring-4 ring-brand-soft" />
 										<div className="min-w-0">
-											<h3 className="font-semibold text-ink">{step.title}</h3>
+											<p className="text-xs font-semibold uppercase tracking-wider text-brand-ink">Krok {i + 1}</p>
+											<h3 className="mt-0.5 font-semibold text-ink">{step.title}</h3>
 											<p className="mt-0.5 text-sm text-muted">{step.body}</p>
 											{step.docs && step.docs.length > 0 && (
 												<div className="mt-2 flex flex-wrap gap-1.5">
