@@ -3,9 +3,9 @@
   "private": true,
   "packageManager": "pnpm@10.30.3",
   "scripts": {
-    "dev": "pnpm --filter @zus/shared build && pnpm -r --parallel dev",
-    "dev:frontend": "pnpm --filter frontend dev",
-    "dev:backend": "pnpm --filter backend dev",
+    "dev": "pnpm --filter \"./packages/*\" build && pnpm -r --parallel dev",
+    "dev:frontend": "pnpm --filter @zus/engine build && pnpm --filter frontend dev",
+    "dev:backend": "pnpm --filter @zus/engine build && pnpm --filter backend dev",
     "build": "pnpm -r build",
     "infra": "docker compose up -d",
     "setup:zusia": "python3 -m venv .venv && .venv/bin/pip install -r requirements.txt",

@@ -31,7 +31,7 @@ import {
   type ParentalPartInput,
   type PregnancyBenefitInput,
   type PregnancyBenefitResult,
-} from "../../engine/index";
+} from "@zus/engine";
 
 /* ================================================================== */
 /*  Helpers                                                            */

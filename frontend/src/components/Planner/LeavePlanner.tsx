@@ -25,7 +25,7 @@ import {
   type MaternityPlanResult,
   type ParentRole,
   type PlanSegment,
-} from "../../engine/index.js";
+} from "@zus/engine";
 import {
   DAY_MS,
   ROLE_SHORT,

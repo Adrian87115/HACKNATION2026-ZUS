@@ -1,6 +1,6 @@
 /** Admin API (backend/ – EngineController). Errors are mapped to user-facing Polish messages. */
 import { BACKEND_API } from '../../config/api';
-import type { BenefitParams } from '../../engine/index';
+import type { BenefitParams } from '@zus/engine';
 
 export type ParamChange = { key: string; from: unknown; to: unknown };
 export type HistoryEntry = { at: string; action: 'update' | 'reset'; changes: ParamChange[] };

@@ -15,6 +15,7 @@
     "@mui/material": "^9.5.0",
     "@tailwindcss/vite": "^4.3.5",
     "@zus/shared": "workspace:*",
+    "@zus/engine": "workspace:*",
     "i18next": "^27.2.2",
     "lucide-react": "^1.77.0",
     "react": "^19.3.1",

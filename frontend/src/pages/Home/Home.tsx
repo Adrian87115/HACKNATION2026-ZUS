@@ -3,7 +3,7 @@ import { useId, useMemo, useState, type CSSProperties, type ReactNode } from 're
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import BaseLayout from '../../components/Layouts/BaseLayout';
-import { benefitAmount, type BenefitParams } from '../../engine/index';
+import { benefitAmount, type BenefitParams } from '@zus/engine';
 import { useBenefitEngine } from '../../hooks/useBenefitEngine';
 import { useCountUp } from '../../hooks/useCountUp';
 import type { TranslationKey } from '../../translations';

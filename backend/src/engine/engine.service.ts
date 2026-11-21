@@ -3,13 +3,15 @@ import {
   BenefitEngine,
   DEFAULT_PARAMS_2026,
   EngineInputError,
+  ParamsValidationError,
+  diffParams,
+  validateOverrides,
   type BasisInput,
   type BenefitParams,
   type MaternityPlanInput,
   type PregnancyBenefitInput,
-} from './index.js';
+} from '@zus/engine';
 import { ParamsStore, type ParamsHistoryEntry } from './params.store.js';
-import { ParamsValidationError, diffParams, validateOverrides } from './params.validation.js';
 
 @Injectable()
 export class EngineService {

@@ -1,5 +1,5 @@
 // src/data/parentingDecisionTree.ts
-import type { MaternityPlanInput } from "../engine/index.js";
+import type { MaternityPlanInput } from "@zus/engine";
 
 export interface SupportOrganization {
   name: string;

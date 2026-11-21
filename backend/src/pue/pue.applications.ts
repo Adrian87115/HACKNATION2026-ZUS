@@ -5,7 +5,7 @@
  */
 import { createHash, randomInt } from 'node:crypto';
 import { BadRequestException } from '@nestjs/common';
-import type { BenefitParams } from '../engine/params.js';
+import type { BenefitParams } from '@zus/engine';
 import type { Account, InsuranceTitle } from './pue.data.js';
 
 export type ApplicationKind = 'urlop_macierzynski' | 'urlop_rodzicielski' | 'urlop_ojcowski' | 'zam';

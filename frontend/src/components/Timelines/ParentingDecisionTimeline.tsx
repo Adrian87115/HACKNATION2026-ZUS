@@ -38,7 +38,7 @@ import type {
   MaternityPlanResult,
   ParentRole,
   PlanSegment,
-} from "../../engine/index.js";
+} from "@zus/engine";
 import { BasisCalculator } from "../BasisCalculator.js";
 import { Collapse } from "../Animations/Collapse.js";
 import { LeavePlanner } from "../Planner/LeavePlanner.js";

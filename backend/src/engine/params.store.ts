@@ -1,7 +1,6 @@
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import type { BenefitParams } from './params.js';
-import type { ParamChange } from './params.validation.js';
+import type { BenefitParams, ParamChange } from '@zus/engine';
 
 /** One entry of the admin change log. */
 export type ParamsHistoryEntry = {

@@ -1,7 +1,7 @@
 // src/hooks/useBenefitEngine.ts
 import { useEffect, useState } from 'react';
 import { BACKEND_API } from '../config/api';
-import { BenefitEngine, DEFAULT_PARAMS_2026, type BenefitParams } from '../engine/index.js';
+import { BenefitEngine, DEFAULT_PARAMS_2026, type BenefitParams } from '@zus/engine';
 
 /*
  * One shared engine for the whole app. It starts on the 2026 defaults (no waiting for the network),

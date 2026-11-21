@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpCode, Post, Put, UseGuards } from '@nestjs/common';
 import { AdminTokenGuard } from './admin-token.guard.js';
 import { EngineService } from './engine.service.js';
-import type { BasisInput, MaternityPlanInput, PregnancyBenefitInput } from './index.js';
+import type { BasisInput, MaternityPlanInput, PregnancyBenefitInput } from '@zus/engine';
 
 @Controller('engine')
 export class EngineController {

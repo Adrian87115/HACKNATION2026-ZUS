@@ -4,7 +4,7 @@
  * Mirrors python/case_schemas.py.
  */
 import { ZUSIA_API } from '../../config/api';
-import type { BenefitEngine, BasisInput } from '../../engine/index';
+import type { BenefitEngine, BasisInput } from '@zus/engine';
 import type {
 	MaternityPreset,
 	ParentForm,

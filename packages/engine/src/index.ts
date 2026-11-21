@@ -56,5 +56,6 @@ export * from './basis.js';
 export * from './leaveDurations.js';
 export * from './maternityPlanner.js';
 export * from './params.js';
+export * from './params.validation.js';
 export * from './pregnancyBenefits.js';
 export { EngineInputError } from './utils.js';

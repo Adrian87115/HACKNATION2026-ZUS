@@ -4,9 +4,8 @@ import path from 'node:path';
 import { BadRequestException, ForbiddenException, UnauthorizedException, type ExecutionContext } from '@nestjs/common';
 import { AdminTokenGuard } from './admin-token.guard.js';
 import { EngineService } from './engine.service.js';
-import { DEFAULT_PARAMS_2026 } from './params.js';
 import { ParamsStore } from './params.store.js';
-import { ParamsValidationError, validateOverrides } from './params.validation.js';
+import { DEFAULT_PARAMS_2026, ParamsValidationError, validateOverrides } from '@zus/engine';
 
 describe('validateOverrides', () => {
   it('accepts known parameters with valid values', () => {

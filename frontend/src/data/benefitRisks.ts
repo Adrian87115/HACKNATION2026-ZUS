@@ -4,7 +4,7 @@
  *
  * Sources: task brief (ZUS) – sections H and I; ustawa zasiłkowa Art. 2a, Art. 4; engine parameters.
  */
-import type { BenefitParams } from '../engine/index';
+import type { BenefitParams } from '@zus/engine';
 
 export type Employment = 'umowa-o-prace' | 'zlecenie' | 'dzialalnosc';
 export type ContractType = 'nieokreslony' | 'okreslony' | 'probny';

@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import { DEFAULT_PARAMS_2026 } from '../engine/params.js';
+import { DEFAULT_PARAMS_2026 } from '@zus/engine';
 import { buildApplication, normalizeBankAccount } from './pue.applications.js';
 import { ACCOUNTS } from './pue.data.js';
 

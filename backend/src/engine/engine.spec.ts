@@ -1,4 +1,4 @@
-import { BenefitEngine, EngineInputError, type MaternityPlanInput } from './index.js';
+import { BenefitEngine, EngineInputError, type MaternityPlanInput } from '@zus/engine';
 
 const engine = new BenefitEngine();
 const sum = (values: number[]) => values.reduce((a, b) => a + b, 0);

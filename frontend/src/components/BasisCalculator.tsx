@@ -1,7 +1,7 @@
 // src/components/BasisCalculator.tsx
 import React, { useId, useMemo, useState } from "react";
 import { Check, ChevronDown, TriangleExclamationPoint, Undo2 } from "lucide-react";
-import type { BasisInput, BenefitEngine, ParentRole } from "../engine/index.js";
+import type { BasisInput, BenefitEngine, ParentRole } from "@zus/engine";
 import { Collapse } from "./Animations/Collapse.js";
 
 /* ------------------------------------------------------------------ */

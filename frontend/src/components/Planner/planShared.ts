@@ -1,7 +1,7 @@
 // src/components/Planner/planShared.ts
 // Słowniki i formatowanie wspólne dla przewodnika rodzica i planera urlopów.
 import type React from "react";
-import type { ParentRole } from "../../engine/index.js";
+import type { ParentRole } from "@zus/engine";
 
 export const ROLE_LABELS: Record<ParentRole, string> = {
   primary: "Matka / Rodzic 1",

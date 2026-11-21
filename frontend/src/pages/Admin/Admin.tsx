@@ -1,7 +1,7 @@
 import { Clock as History, KeyRound, LoaderCircle, LogOut, RotateCcw, Save, Search, ShieldCheck, Undo2 } from 'lucide-react';
 import { useCallback, useEffect, useId, useMemo, useState, type ReactNode } from 'react';
 import BaseLayout from '../../components/Layouts/BaseLayout';
-import { benefitAmount, type BenefitParams } from '../../engine/index';
+import { benefitAmount, type BenefitParams } from '@zus/engine';
 import { AdminApiError, adminApi, type HistoryEntry, type ParamChange } from '../../features/admin/adminApi';
 import { PARAM_GROUPS, UNIT, formatValue, fromInput, kindOf, labelOf, toInput, type ParamGroup } from '../../features/admin/paramMeta';
 import { setEngineParams } from '../../hooks/useBenefitEngine';
