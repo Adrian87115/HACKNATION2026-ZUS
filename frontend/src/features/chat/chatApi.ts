@@ -3,12 +3,17 @@ import { ZUSIA_API } from '../../config/api';
 
 export class ChatApiError extends Error {
 	readonly status: number;
+	/** The ZUSia service could not be reached at all (not running, network down, proxy error). */
+	readonly offline: boolean;
 
-	constructor(message: string, status: number) {
+	constructor(message: string, status: number, offline = false) {
 		super(message);
 		this.status = status;
+		this.offline = offline;
 	}
 }
+
+const OFFLINE_MESSAGE = 'ZUSia jest teraz niedostępna – serwer asystenta nie odpowiada. Spróbuj za chwilę.';
 
 export const CHAT_FILE_TYPES = 'application/pdf,image/png,image/jpeg,image/webp,image/heic,image/heif';
 export const CHAT_MAX_FILE_BYTES = 10 * 1024 * 1024;
@@ -38,11 +43,34 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 		res = await fetch(`${ZUSIA_API}${path}`, init);
 	} catch (err) {
 		if ((err as Error).name === 'AbortError') throw err;
-		throw new ChatApiError('Brak połączenia z asystentem. Sprawdź internet i spróbuj ponownie.', 0);
+		throw new ChatApiError(OFFLINE_MESSAGE, 0, true);
 	}
-	if (!res.ok) throw new ChatApiError(friendly(res.status), res.status);
+	if (!res.ok) {
+		// Errors from the ZUSia service carry a JSON `detail`; a bare 502/503/504 comes from a proxy or
+		// gateway in front of it, which means the service itself is not reachable.
+		const fromService = await res
+			.clone()
+			.json()
+			.then((body: { detail?: unknown }) => body?.detail !== undefined)
+			.catch(() => false);
+		if (!fromService && res.status >= 502 && res.status <= 504) throw new ChatApiError(OFFLINE_MESSAGE, res.status, true);
+		throw new ChatApiError(friendly(res.status), res.status);
+	}
 	if (res.status === 204) return undefined as T;
 	return (await res.json()) as T;
+}
+
+/** Is the ZUSia service up? (GET /health, short timeout) */
+export async function checkHealth(): Promise<boolean> {
+	try {
+		const res = await fetch(`${ZUSIA_API}/health`, { signal: AbortSignal.timeout(4000) });
+		if (!res.ok) return false;
+		const body = (await res.json()) as { status?: string; assistant?: boolean };
+		// `assistant: false` → the service runs but has no Gemini key configured
+		return body.status === 'ok' && body.assistant !== false;
+	} catch {
+		return false;
+	}
 }
 
 export const createChat = () => request<{ session_id: string }>('/chats', { method: 'POST' }).then((r) => r.session_id);

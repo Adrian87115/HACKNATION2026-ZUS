@@ -3,6 +3,7 @@ dist/
 .env
 .DS_Store
 /venv
+/.venv
 /python/zusia.sqlite3
 /python/zusia.sqlite3-shm
 /python/zusia.sqlite3-wal

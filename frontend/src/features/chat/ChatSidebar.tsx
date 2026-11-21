@@ -17,7 +17,8 @@ const SUGGESTIONS = [
 export const CHAT_PANEL_WIDTH_CLASS = 'sm:w-[26rem]';
 
 export default function ChatSidebar() {
-	const { open, setOpen, messages, sending, loadingHistory, send, retry, newChat } = useChat();
+	const { open, setOpen, messages, sending, loadingHistory, available, recheck, send, retry, newChat } = useChat();
+	const offline = available === false;
 	const titleId = useId();
 	const [text, setText] = useState('');
 	const [file, setFile] = useState<File | null>(null);
@@ -53,7 +54,7 @@ export default function ChatSidebar() {
 	}, [text]);
 
 	async function submit() {
-		if (sending || (!text.trim() && !file)) return;
+		if (sending || offline || (!text.trim() && !file)) return;
 		const t = text;
 		const f = file ?? undefined;
 		setText('');
@@ -129,6 +130,21 @@ export default function ChatSidebar() {
 
 				{/* Messages */}
 				<div className="flex-1 overflow-y-auto px-4 py-4" aria-live="polite" aria-busy={sending || loadingHistory}>
+					{offline && (
+						<div
+							role="status"
+							className="mb-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-3 text-sm text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-100">
+							<p className="font-semibold">ZUSia jest teraz niedostępna</p>
+							<p className="mt-0.5">Serwer asystenta nie odpowiada. Kalkulatory i przewodnik działają normalnie.</p>
+							<button
+								type="button"
+								onClick={() => void recheck()}
+								className="mt-2 inline-flex items-center gap-1.5 font-semibold underline underline-offset-2">
+								<RotateCcw className="h-3.5 w-3.5" aria-hidden />
+								Sprawdź ponownie
+							</button>
+						</div>
+					)}
 					{loadingHistory ? (
 						<div className="flex justify-center py-10 text-muted">
 							<LoaderCircle className="h-5 w-5 animate-spin" aria-label="Wczytuję rozmowę" />
@@ -149,8 +165,9 @@ export default function ChatSidebar() {
 										<li key={s}>
 											<button
 												type="button"
+												disabled={offline}
 												onClick={() => void send(s)}
-												className="w-full rounded-md border border-line bg-paper px-3 py-2 text-left text-sm text-ink transition hover:border-brand hover:bg-brand-soft/40">
+												className="w-full disabled:pointer-events-none disabled:opacity-50 rounded-md border border-line bg-paper px-3 py-2 text-left text-sm text-ink transition hover:border-brand hover:bg-brand-soft/40">
 												{s}
 											</button>
 										</li>
@@ -238,12 +255,12 @@ export default function ChatSidebar() {
 							maxLength={20000}
 							onChange={(e) => setText(e.target.value)}
 							onKeyDown={onKeyDown}
-							placeholder="Zadaj pytanie…"
+							placeholder={offline ? 'ZUSia jest teraz niedostępna' : 'Zadaj pytanie…'}
 							className="max-h-40 min-h-[2rem] flex-1 resize-none bg-transparent py-1.5 text-sm text-ink placeholder:text-muted focus:outline-none"
 						/>
 						<button
 							type="submit"
-							disabled={sending || (!text.trim() && !file)}
+							disabled={sending || offline || (!text.trim() && !file)}
 							aria-label="Wyślij"
 							className="rounded-md bg-brand p-2 text-white transition hover:bg-brand-strong disabled:bg-hover disabled:text-muted">
 							{sending ? <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden /> : <Send className="h-4 w-4" aria-hidden />}

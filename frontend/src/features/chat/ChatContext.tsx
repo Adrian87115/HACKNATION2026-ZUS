@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { ChatApiError, createChat, deleteChat, getHistory, sendMessage } from './chatApi';
+import { ChatApiError, checkHealth, createChat, deleteChat, getHistory, sendMessage } from './chatApi';
 
 export type ChatMessage = {
 	id: string;
@@ -17,6 +17,9 @@ type ChatContextValue = {
 	messages: ChatMessage[];
 	sending: boolean;
 	loadingHistory: boolean;
+	/** null = not checked yet, false = the ZUSia service is not reachable */
+	available: boolean | null;
+	recheck: () => Promise<void>;
 	send: (text: string, file?: File) => Promise<void>;
 	retry: (messageId: string) => Promise<void>;
 	newChat: () => void;
@@ -49,6 +52,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 	const [messages, setMessages] = useState<ChatMessage[]>([]);
 	const [sending, setSending] = useState(false);
 	const [loadingHistory, setLoadingHistory] = useState(false);
+	const [available, setAvailable] = useState<boolean | null>(null);
 	const sessionRef = useRef<string | null>(read(SESSION_KEY));
 	const historyLoaded = useRef(false);
 	// Files can't be persisted; keep them in memory so a failed upload can be retried.
@@ -59,6 +63,16 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 		write(OPEN_KEY, value ? '1' : '0');
 	}, []);
 	const toggle = useCallback(() => setOpen(!open), [open, setOpen]);
+
+	const recheck = useCallback(async () => {
+		setAvailable(null);
+		setAvailable(await checkHealth());
+	}, []);
+
+	// Check that the assistant is reachable whenever the panel is opened.
+	useEffect(() => {
+		if (open) void recheck();
+	}, [open, recheck]);
 
 	// Restore the previous conversation the first time the panel is opened.
 	useEffect(() => {
@@ -101,6 +115,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 					{ id: uid(), role: 'assistant', content: reply }
 				]);
 			} catch (err) {
+				if (err instanceof ChatApiError && err.offline) setAvailable(false);
 				const message = err instanceof Error ? err.message : 'Coś poszło nie tak. Spróbuj ponownie.';
 				setMessages((prev) => prev.map((m) => (m.id === userMessage.id ? { ...m, error: message } : m)));
 			} finally {
@@ -146,8 +161,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 	}, []);
 
 	const value = useMemo(
-		() => ({ open, setOpen, toggle, messages, sending, loadingHistory, send, retry, newChat }),
-		[open, setOpen, toggle, messages, sending, loadingHistory, send, retry, newChat]
+		() => ({ open, setOpen, toggle, messages, sending, loadingHistory, available, recheck, send, retry, newChat }),
+		[open, setOpen, toggle, messages, sending, loadingHistory, available, recheck, send, retry, newChat]
 	);
 
 	return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

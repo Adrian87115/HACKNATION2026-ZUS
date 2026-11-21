@@ -6,6 +6,9 @@
     "dev": "pnpm --filter @zus/shared build && pnpm -r --parallel dev",
     "dev:frontend": "pnpm --filter frontend dev",
     "dev:backend": "pnpm --filter backend dev",
-    "build": "pnpm -r build"
+    "build": "pnpm -r build",
+    "infra": "docker compose up -d",
+    "setup:zusia": "python3 -m venv .venv && .venv/bin/pip install -r requirements.txt",
+    "dev:zusia": ".venv/bin/uvicorn python.main:app --port 8001 --reload"
   }
 }

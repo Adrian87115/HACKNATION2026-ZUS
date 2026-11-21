@@ -27,8 +27,11 @@ def create_app(manager: SessionManager | None = None) -> FastAPI:
     app.include_router(cases_router)
 
     @app.get('/health', tags = ['health'])
-    async def health() -> dict[str, str]:
-        return {'status': 'ok'}
+    async def health() -> dict[str, str | bool]:
+        # `assistant` tells the frontend whether chat / case import can work (Gemini key configured).
+        return {'status': 'ok',
+                'assistant': bool(os.getenv('ZUS_API_KEY')),
+                'storage': app.state.storage is not None}
 
     return app
 
