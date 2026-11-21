@@ -1,12 +1,12 @@
-import type { BenefitParams } from "./params.js";
-import { round2 } from "./utils.js";
+import type { BenefitParams } from './params.js';
+import { round2 } from './utils.js';
 
 export type SegmentType =
-  | "maternity" // urlop macierzyński
-  | "maternity_conditions" // urlop na warunkach urlopu macierzyńskiego (adopcja / rodzina zastępcza)
-  | "supplementary_maternity" // uzupełniający urlop macierzyński
-  | "parental" // urlop rodzicielski
-  | "paternity"; // urlop ojcowski
+  | 'maternity' // urlop macierzyński
+  | 'maternity_conditions' // urlop na warunkach urlopu macierzyńskiego (adopcja / rodzina zastępcza)
+  | 'supplementary_maternity' // uzupełniający urlop macierzyński
+  | 'parental' // urlop rodzicielski
+  | 'paternity'; // urlop ojcowski
 
 /**
  * Art. 31 ustawy zasiłkowej – procent podstawy wymiaru dla danego okresu.
@@ -19,15 +19,14 @@ export function benefitRate(
   opts: { combinedApplication: boolean; secondParentExclusivePart?: boolean },
 ): number {
   switch (type) {
-    case "maternity":
-    case "maternity_conditions":
+    case 'maternity':
+    case 'maternity_conditions':
       return opts.combinedApplication ? p.RATE_COMBINED_21_DAYS : p.RATE_FULL; // ust. 1 i 3
-    case "supplementary_maternity":
-    case "paternity":
+    case 'supplementary_maternity':
+    case 'paternity':
       return p.RATE_FULL; // ust. 1
-    case "parental":
-      if (!opts.combinedApplication || opts.secondParentExclusivePart)
-        return p.RATE_PARENTAL_70; // ust. 2, 3f
+    case 'parental':
+      if (!opts.combinedApplication || opts.secondParentExclusivePart) return p.RATE_PARENTAL_70; // ust. 2, 3f
       return p.RATE_COMBINED_21_DAYS; // ust. 3
   }
 }
@@ -53,9 +52,7 @@ export function benefitAmount(
 ): BenefitAmount {
   const base = opts.monthlyBasis * opts.rate;
   const raisedToFloor = base < p.PARENTAL_BENEFIT_FLOOR_MONTHLY;
-  const monthly =
-    Math.max(base, p.PARENTAL_BENEFIT_FLOOR_MONTHLY) *
-    (1 - (opts.workFte ?? 0));
+  const monthly = Math.max(base, p.PARENTAL_BENEFIT_FLOOR_MONTHLY) * (1 - (opts.workFte ?? 0));
   const dailyAmount = round2(monthly / p.STATUTORY_MONTH_DAYS);
   return {
     monthlyAmount: round2(monthly),
