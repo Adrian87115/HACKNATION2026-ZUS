@@ -1,3 +1,5 @@
 export const AppRoutePaths = {
-	HOME: '/'
-};
+	HOME: '/',
+	CALCULATORS: '/calculators',
+	PARENTING_GUIDE: '/przewodnik-rodzica'
+} as const;

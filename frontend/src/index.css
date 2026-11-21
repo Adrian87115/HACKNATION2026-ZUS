@@ -2,22 +2,149 @@
 @layer theme, base, mui, components, utilities;
 @import 'tailwindcss';
 
+/* Tailwind `dark:` follows the app setting (data-theme on <html>), not just the OS */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/*
+ * Color tokens — single source of truth for Tailwind AND MUI (src/theme.ts reads these).
+ * Use semantic classes: bg-surface, bg-paper, text-ink, text-muted, border-line, bg-hover,
+ * bg-brand, bg-brand-strong, bg-brand-soft, text-brand-ink.
+ */
+@theme inline {
+	--color-brand: var(--brand);
+	--color-brand-strong: var(--brand-strong);
+	--color-brand-soft: var(--brand-soft);
+	--color-brand-ink: var(--brand-ink);
+	--color-surface: var(--surface);
+	--color-paper: var(--paper);
+	--color-ink: var(--ink);
+	--color-muted: var(--muted);
+	--color-line: var(--line);
+	--color-hover: var(--hover);
+	--font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
 :root {
-	--sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-	--heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-	--mono: ui-monospace, Consolas, monospace;
+	color-scheme: light;
+	--brand: #00843d;
+	--brand-strong: #006b32;
+	--brand-soft: #e8f5ee;
+	--brand-ink: #006b32;
+	--primary: #00843d;
+	--on-primary: #ffffff;
+	--surface: #f6f8f7;
+	--paper: #ffffff;
+	--ink: #1e293b;
+	--muted: #64748b;
+	--line: #e2e8f0;
+	--hover: #f1f5f9;
+	--focus: #00843d;
+}
 
-	font: 18px/145% var(--sans);
-	letter-spacing: 0.18px;
-	color-scheme: light dark;
-	color: var(--text);
-	background: var(--bg);
-	font-synthesis: none;
-	text-rendering: optimizeLegibility;
-	-webkit-font-smoothing: antialiased;
-	-moz-osx-font-smoothing: grayscale;
+:root[data-theme='dark'] {
+	color-scheme: dark;
+	--brand: #0f7a3d;
+	--brand-strong: #0a5c2d;
+	--brand-soft: #143524;
+	--brand-ink: #6fdc9f;
+	--primary: #5fd394;
+	--on-primary: #06210f;
+	--surface: #0f1412;
+	--paper: #171d1a;
+	--ink: #e5ece8;
+	--muted: #9aa8a0;
+	--line: #2a332e;
+	--hover: #1f2723;
+	--focus: #6fdc9f;
+}
 
-	@media (max-width: 1024px) {
-		font-size: 16px;
+:root[data-contrast='high'] {
+	--brand: #005a29;
+	--brand-strong: #003d1b;
+	--brand-soft: #cdeedb;
+	--brand-ink: #003d1b;
+	--primary: #005a29;
+	--on-primary: #ffffff;
+	--surface: #ffffff;
+	--paper: #ffffff;
+	--ink: #000000;
+	--muted: #1f1f1f;
+	--line: #000000;
+	--hover: #e5e5e5;
+	--focus: #000000;
+}
+
+:root[data-theme='dark'][data-contrast='high'] {
+	--brand: #004d23;
+	--brand-strong: #00331a;
+	--brand-soft: #003319;
+	--brand-ink: #8cffb8;
+	--primary: #8cffb8;
+	--on-primary: #000000;
+	--surface: #000000;
+	--paper: #000000;
+	--ink: #ffffff;
+	--muted: #f2f2f2;
+	--line: #ffffff;
+	--hover: #262626;
+	--focus: #ffff00;
+}
+
+@layer base {
+	body {
+		@apply bg-surface font-sans text-ink antialiased;
+	}
+
+	:focus-visible {
+		outline: 2px solid var(--focus);
+		outline-offset: 2px;
+	}
+}
+
+/*
+ * Accessibility overrides (set from the header menu). Deliberately unlayered + !important
+ * so they win over MUI and Tailwind utilities — the user's choice should always apply.
+ */
+:root[data-font-size='large'] {
+	font-size: 125%;
+}
+
+:root[data-font-size='xlarge'] {
+	font-size: 150%;
+}
+
+:root[data-contrast='high'] :focus-visible {
+	outline-width: 3px !important;
+}
+
+/* WCAG 1.4.12 text spacing */
+:root[data-text-spacing='true'] body * {
+	line-height: 1.6 !important;
+	letter-spacing: 0.05em !important;
+	word-spacing: 0.16em !important;
+}
+
+:root[data-underline-links='true'] a {
+	text-decoration: underline !important;
+	text-underline-offset: 0.2em;
+}
+
+:root[data-reduce-motion='true'] *,
+:root[data-reduce-motion='true'] *::before,
+:root[data-reduce-motion='true'] *::after {
+	animation-duration: 0.01ms !important;
+	animation-iteration-count: 1 !important;
+	transition-duration: 0.01ms !important;
+	scroll-behavior: auto !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
 	}
 }
