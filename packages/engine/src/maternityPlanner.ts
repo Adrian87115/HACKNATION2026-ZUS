@@ -344,7 +344,11 @@ export function planMaternity(p: BenefitParams, input: MaternityPlanInput): Mate
     childrenForParental === 0
       ? 0
       : parentalLeaveWeeks(p, { childrenCount: childrenForParental, zaZyciem, adoptionMinimumCase });
-  const perParentMax = Math.max(0, parentalWeeks - p.SECOND_PARENT_EXCLUSIVE_PARENTAL_WEEKS);
+  // Po zgonie matki ojcu przysługuje cała niewykorzystana część urlopu rodzicielskiego (Art. 182^1g KP),
+  // więc 9 tygodni matki nie przepada; w pozostałych przypadkach jeden rodzic ma pulę minus 9 tygodni drugiego.
+  const perParentMax = motherDeceased
+    ? parentalWeeks
+    : Math.max(0, parentalWeeks - p.SECOND_PARENT_EXCLUSIVE_PARENTAL_WEEKS);
   const maxExtended = maxExtendedParentalWeeks(p, { childrenCount: childrenForParental, zaZyciem });
   const parts = input.parentalParts ?? [];
 
@@ -358,7 +362,7 @@ export function planMaternity(p: BenefitParams, input: MaternityPlanInput): Mate
     errors.push('Po zgonie matki z urlopu rodzicielskiego może korzystać tylko ojciec.');
   }
   if (motherDeceased && transferDays > 0) {
-    notes.push('Zgon matki: ojciec przejmuje pozostałą część urlopu macierzyńskiego od dnia następującego po dniu zgonu.');
+    notes.push('Zgon matki: ojciec przejmuje pozostałą część urlopu macierzyńskiego od dnia następującego po dniu zgonu oraz całą niewykorzystaną część urlopu rodzicielskiego (Art. 182^1g KP).');
   }
 
   // Pierwszy przebieg: daty startu części (potrzebne dla Art. 31 ust. 3g i ust. 4).

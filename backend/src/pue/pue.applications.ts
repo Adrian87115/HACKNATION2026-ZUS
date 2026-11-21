@@ -244,7 +244,7 @@ export function buildApplication(account: Account, input: ApplicationInput, para
     if (title) fields.push({ label: 'Tytuł ubezpieczenia', value: `${title.payer.name}` });
 
     if (!title || title.sickness === 'brak') {
-      warnings.push('Nie masz ubezpieczenia chorobowego – ZUS najpewniej wyda decyzję odmowną. Sprawdź, czy możesz otrzymać świadczenie rodzicielskie (1000 zł/mies.) w gminie.');
+      warnings.push(`Nie masz ubezpieczenia chorobowego – ZUS najpewniej wyda decyzję odmowną. Sprawdź, czy możesz otrzymać świadczenie rodzicielskie (${params.PARENTAL_BENEFIT_FLOOR_MONTHLY} zł/mies.) w gminie.`);
     }
     const threshold = Math.round(params.MIN_WAGE_2026_GROSS * params.DEBT_EXCLUSION_MIN_WAGE_RATIO * 100) / 100;
     if (title?.sickness === 'dobrowolne' && account.debt.amount > threshold) {

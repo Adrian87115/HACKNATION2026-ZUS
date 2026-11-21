@@ -1074,8 +1074,8 @@ export function MaternityCalculator({
                 onChange={setZaZyciem}
               />
               <Switch
-                label="Wniosek złożony do 21 dni po porodzie"
-                description="Jedna stawka 81,5% za urlop macierzyński i rodzicielski."
+                label={`Wniosek złożony do ${engine.getParams().COMBINED_APPLICATION_DEADLINE_DAYS} dni po porodzie`}
+                description={`Jedna stawka ${(engine.getParams().RATE_COMBINED_21_DAYS * 100).toLocaleString("pl-PL")}% za urlop macierzyński i rodzicielski.`}
                 checked={combined}
                 onChange={setCombined}
               />
@@ -1139,7 +1139,7 @@ export function MaternityCalculator({
             {isBirth && (
               <NumberField
                 label="Tygodnie wykorzystane przed porodem"
-                hint="Maksymalnie 6 tygodni"
+                hint={`Maksymalnie ${engine.getParams().MATERNITY_MAX_PRENATAL_WEEKS} tygodni`}
                 value={prenatal}
                 onChange={setPrenatal}
                 min={0}
@@ -1228,8 +1228,8 @@ export function MaternityCalculator({
                 value={transfer.circumstance}
                 onChange={(v) => setTransfer({ ...transfer, circumstance: v })}
                 options={[
-                  { value: "standard", label: "Standardowe (po 14 tyg.)" },
-                  { value: "special", label: "Szczególne (po 8 tyg.)" },
+                  { value: "standard", label: `Standardowe (po ${engine.getParams().MOTHER_MIN_POSTPARTUM_WEEKS_STANDARD} tyg.)` },
+                  { value: "special", label: `Szczególne (po ${engine.getParams().MOTHER_MIN_POSTPARTUM_WEEKS_SPECIAL} tyg.)` },
                 ]}
               />
               <NumberField
@@ -1744,7 +1744,7 @@ export function PregnancyCalculator({
             <SwitchList>
               <Switch
                 label="Kod „B” (ciąża)"
-                description="Zasiłek 100% zamiast 80%."
+                description={`Zasiłek ${(engine.getParams().RATE_SICKNESS_PREGNANCY * 100).toLocaleString("pl-PL")}% zamiast ${(engine.getParams().RATE_SICKNESS_STANDARD * 100).toLocaleString("pl-PL")}%.`}
                 checked={codeB}
                 onChange={setCodeB}
               />

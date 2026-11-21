@@ -317,6 +317,7 @@ function resolvePaternity(
 
 /** Plan „od końca”: urlop rodzicielski ułożony tak, by skończył się przed dniem powrotu do pracy. */
 function planBackward(
+  params: BenefitParams,
   input: MaternityPlanInput,
   result: MaternityPlanResult,
   bars: Bar[],
@@ -341,7 +342,7 @@ function planBackward(
   if (weeksWanted <= 0) {
     return {
       input: { ...input, parentalParts: [] },
-      message: `Urlop macierzyński kończy się ${lastDay(chainEnd)}, więc przed tą datą nie zmieści się urlop rodzicielski – usunęliśmy go z planu. Jeśli matka chce wrócić wcześniej, po 14 tygodniach może przekazać resztę urlopu macierzyńskiego drugiemu rodzicowi.`,
+      message: `Urlop macierzyński kończy się ${lastDay(chainEnd)}, więc przed tą datą nie zmieści się urlop rodzicielski – usunęliśmy go z planu. Jeśli matka chce wrócić wcześniej, po ${params.MOTHER_MIN_POSTPARTUM_WEEKS_STANDARD} tygodniach może przekazać resztę urlopu macierzyńskiego drugiemu rodzicowi.`,
       tone: "warn",
     };
   }
@@ -849,7 +850,7 @@ export function LeavePlanner({
 
   const applyBackward = () => {
     if (returnMs === undefined || !Number.isFinite(returnMs)) return;
-    const r = planBackward(input, result, bars, returnMs);
+    const r = planBackward(params, input, result, bars, returnMs);
     if (r.input) onChange(r.input);
     setSelectedId(null);
     setBackward({ message: r.message, tone: r.tone });
@@ -970,7 +971,7 @@ export function LeavePlanner({
                 checked={combined}
                 onChange={() => onChange({ ...input, combinedApplicationWithin21Days: true })}
               />
-              <span className="lp-pay-title">81,5% przez cały okres</span>
+              <span className="lp-pay-title">{percent(params.RATE_COMBINED_21_DAYS)} przez cały okres</span>
               <span className="lp-pay-total">{totalCombined !== null ? money(totalCombined) : "—"}</span>
             </label>
             <label className={`lp-pay-opt${!combined ? " is-on" : ""}`}>
@@ -980,14 +981,18 @@ export function LeavePlanner({
                 checked={!combined}
                 onChange={() => onChange({ ...input, combinedApplicationWithin21Days: false })}
               />
-              <span className="lp-pay-title">100%, potem 70%</span>
+              <span className="lp-pay-title">
+                {percent(params.RATE_FULL)}, potem {percent(params.RATE_PARENTAL_70)}
+              </span>
               <span className="lp-pay-total">{totalSplit !== null ? money(totalSplit) : "—"}</span>
             </label>
           </div>
           <p className="pt-hint lp-pay-hint">
-            {combined
-              ? `Wymaga wniosku o zasiłek za cały urlop macierzyński i rodzicielski złożonego do 21 dni po ${eventWord}. Kwota jest równa co miesiąc.`
-              : "100% za urlop macierzyński, 70% za rodzicielski – więcej na początku, mniej później."}
+            {combined && motherDeceased
+              ? `Jeśli mama nie zdążyła złożyć wniosku, może go złożyć tata – w ciągu ${params.COMBINED_APPLICATION_DEADLINE_DAYS} dni od dnia zgonu, czyli do ${fmtDate(toIso(toMs(deathIso) + params.COMBINED_APPLICATION_DEADLINE_DAYS * DAY_MS))}. Kwota jest równa co miesiąc.`
+              : combined
+              ? `Wymaga wniosku o zasiłek za cały urlop macierzyński i rodzicielski złożonego do ${params.COMBINED_APPLICATION_DEADLINE_DAYS} dni po ${eventWord}. Kwota jest równa co miesiąc.`
+              : `${percent(params.RATE_FULL)} za urlop macierzyński, ${percent(params.RATE_PARENTAL_70)} za rodzicielski – więcej na początku, mniej później.`}
           </p>
         </fieldset>
       )}
@@ -1268,8 +1273,9 @@ export function LeavePlanner({
                         onChange={(e) => e.target.value && setDeathDate(e.target.value)}
                       />
                       <div className="pt-hint">
-                        Zasiłek za dni do zgonu włącznie należy się mamie, a tata przejmuje pozostałą część urlopu
-                        od następnego dnia.
+                        Zasiłek za dni do zgonu włącznie przysługuje jeszcze mamie – ZUS wypłaca go jako zasiłek
+                        niezrealizowany uprawnionym członkom rodziny (np. małżonkowi, dzieciom). Tata przejmuje
+                        pozostałą część urlopu od następnego dnia.
                       </div>
                       {autoNote && <div className="pt-hint lp-auto-note">{autoNote}</div>}
                     </div>
@@ -1294,8 +1300,9 @@ export function LeavePlanner({
                         onChange={(e) => e.target.value && setDeathDate(e.target.value)}
                       />
                       <div className="pt-hint">
-                        Zasiłek za dni do zgonu włącznie należy się mamie, a tata przejmuje pozostałą część urlopu
-                        od następnego dnia.
+                        Zasiłek za dni do zgonu włącznie przysługuje jeszcze mamie – ZUS wypłaca go jako zasiłek
+                        niezrealizowany uprawnionym członkom rodziny (np. małżonkowi, dzieciom). Tata przejmuje
+                        pozostałą część urlopu od następnego dnia.
                       </div>
                       {autoNote && <div className="pt-hint lp-auto-note">{autoNote}</div>}
                     </div>

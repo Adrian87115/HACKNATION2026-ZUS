@@ -1,4 +1,5 @@
 import React from 'react';
+import EngineSyncNotice from '../Global/EngineSyncNotice';
 import Footer from '../Global/Footer';
 import Header from '../Global/Header';
 import { useChat } from '../../features/chat/ChatContext';
@@ -17,7 +18,10 @@ export default function BaseLayout({ children }: Props) {
 				className={`flex flex-1 flex-col transition-[padding] duration-300 ease-[cubic-bezier(.2,.8,.2,1)] ${
 					open ? 'xl:pr-[26rem]' : ''
 				}`}>
-				<main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6">{children}</main>
+				<main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6">
+					<EngineSyncNotice />
+					{children}
+				</main>
 				<Footer />
 			</div>
 		</div>

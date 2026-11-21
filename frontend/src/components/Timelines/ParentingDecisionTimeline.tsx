@@ -18,7 +18,9 @@ import {
   ExternalLink,
   HeartHandshake,
   Info,
+  Mail,
   Pencil,
+  Phone,
   RotateCcw,
   TriangleExclamationPoint,
   Wallet,
@@ -28,6 +30,7 @@ import {
   type DecisionNode,
   type SupportOrganization,
 } from "../../data/parentingDecisionTree.js";
+import { VERIFIED_AT, type SupportTopic } from "../../data/supportOrganizations.js";
 import { Link } from "react-router-dom";
 import { useBenefitEngine } from "../../hooks/useBenefitEngine.js";
 import { AppRoutePaths } from "../../types/shared.js";
@@ -87,18 +90,18 @@ function rateExplanation(
 ): string {
   if (sameRate(seg.rate, p.RATE_FULL)) return "pełna stawka";
   if (sameRate(seg.rate, p.RATE_COMBINED_21_DAYS)) {
-    return "podwyższona stawka, bo wniosek o zasiłek złożono w ciągu 21 dni od porodu lub przyjęcia dziecka";
+    return `podwyższona stawka, bo wniosek o zasiłek złożono w ciągu ${p.COMBINED_APPLICATION_DEADLINE_DAYS} dni od porodu lub przyjęcia dziecka`;
   }
   if (seg.type === "parental" && sameRate(seg.rate, p.RATE_PARENTAL_70)) {
     return input.combinedApplicationWithin21Days && seg.parent === "secondary"
-      ? "stawka dla 9 tygodni urlopu rodzicielskiego przysługujących wyłącznie drugiemu rodzicowi"
+      ? `stawka dla ${p.SECOND_PARENT_EXCLUSIVE_PARENTAL_WEEKS} tygodni urlopu rodzicielskiego przysługujących wyłącznie drugiemu rodzicowi`
       : "standardowa stawka za urlop rodzicielski";
   }
   return "";
 }
 
 /** Założenia, które drzewko przyjęło za użytkownika – nic nie jest ukryte. */
-function describeAssumptions(input: MaternityPlanInput): string[] {
+function describeAssumptions(input: MaternityPlanInput, p: BenefitParams): string[] {
   const list: string[] = [];
   list.push(
     input.childrenCount === 1
@@ -109,8 +112,8 @@ function describeAssumptions(input: MaternityPlanInput): string[] {
     list.push(`dziecko urodzone ${fmtDate(input.childBirthDate)}`);
   list.push(
     input.combinedApplicationWithin21Days
-      ? "wniosek o zasiłek za urlop macierzyński i rodzicielski złożony w ciągu 21 dni"
-      : "brak wspólnego wniosku w ciągu 21 dni",
+      ? `wniosek o zasiłek za urlop macierzyński i rodzicielski złożony w ciągu ${p.COMBINED_APPLICATION_DEADLINE_DAYS} dni`
+      : `brak wspólnego wniosku w ciągu ${p.COMBINED_APPLICATION_DEADLINE_DAYS} dni`,
   );
   if (input.prenatalWeeks)
     list.push(`${input.prenatalWeeks} tyg. urlopu przed porodem`);
@@ -274,8 +277,10 @@ function FamilyTotal({ value }: { value: number }) {
 
 function SupportSection({
   organizations,
+  topic,
 }: {
   organizations: SupportOrganization[];
+  topic?: SupportTopic;
 }) {
   return (
     <div className="pt-support">
@@ -292,15 +297,33 @@ function SupportSection({
             <div className="pt-support-name">{org.name}</div>
             <div className="pt-hint">{org.description}</div>
             <div className="pt-support-contact">
-              {org.contact} •{" "}
+              {org.phone && (
+                <a href={`tel:${org.phone.number.replace(/\s/g, "")}`}>
+                  <Phone size={13} aria-hidden /> {org.phone.number}
+                  {org.phone.note && ` (${org.phone.note})`}
+                </a>
+              )}
+              {org.email && (
+                <a href={`mailto:${org.email}`}>
+                  <Mail size={13} aria-hidden /> {org.email}
+                </a>
+              )}
               <a href={org.url} target="_blank" rel="noopener noreferrer">
-                {org.url.replace(/^https?:\/\//, "")}
+                {org.url.replace(/^https?:\/\//, "").replace(/\/$/, "")}
                 <ExternalLink size={13} aria-hidden />
               </a>
             </div>
           </li>
         ))}
       </ul>
+      <p className="pt-hint pt-support-more">
+        Kontakty sprawdzone {fmtDate(VERIFIED_AT)}.{" "}
+        <Link
+          to={`${AppRoutePaths.SUPPORT}${topic ? `?temat=${topic}` : ""}`}
+        >
+          Więcej miejsc wsparcia
+        </Link>
+      </p>
     </div>
   );
 }
@@ -485,7 +508,7 @@ function ResultBody(props: {
         className="pt-assumptions"
       >
         <ul>
-          {describeAssumptions(input).map((a, i) => (
+          {describeAssumptions(input, params).map((a, i) => (
             <li key={`${i}-${a}`}>{a}</li>
           ))}
         </ul>
@@ -496,7 +519,7 @@ function ResultBody(props: {
       </Disclosure>
 
       <Link
-        to={`${AppRoutePaths.APPLICATIONS}?swiadczenie=${node.id === "adoption" ? "adopcja" : "macierzynski"}`}
+        to={`${AppRoutePaths.APPLICATIONS}?swiadczenie=${input.event === "birth" ? "macierzynski" : "adopcja"}`}
         className="pt-docs-link"
       >
         Jakie dokumenty złożyć i gdzie?
@@ -782,6 +805,7 @@ export function ParentingDecisionTimeline() {
             {currentNode.supportOrganizations && (
               <SupportSection
                 organizations={currentNode.supportOrganizations}
+                topic={currentNode.supportTopic}
               />
             )}
             <ResultBody
@@ -976,7 +1000,10 @@ const CSS = `
 .pt-support-item:hover{transform:translateX(2px)}
 .pt-support-name{font-weight:600}
 .pt-support-contact{font-size:14px;font-weight:600;color:var(--pt-care-ink);margin-top:6px}
+.pt-support-contact{display:flex;flex-wrap:wrap;gap:4px 14px}
 .pt-support-contact a{display:inline-flex;align-items:center;gap:4px;color:inherit}
+.pt-support-more{margin:12px 0 0}
+.pt-support-more a{color:var(--pt-care-ink);font-weight:600}
 .pt-docs-link{display:inline-flex;align-items:center;gap:6px;margin-top:20px;font-weight:600;color:var(--brand-ink);text-decoration:none}
 .pt-docs-link:hover{text-decoration:underline;text-underline-offset:4px}
 .pt-docs-link svg{transition:transform .2s var(--pt-ease)}

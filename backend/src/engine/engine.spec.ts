@@ -332,3 +332,40 @@ describe('parametry (panel administracyjny)', () => {
     expect(engine.getParams().RATE_PARENTAL_70).toBe(0.7);
   });
 });
+
+describe('zgon matki (Art. 180, 182^1g KP)', () => {
+  const death = (overrides: Partial<MaternityPlanInput> = {}) =>
+    birth({
+      maternityTransfer: { circumstance: 'death', weeks: 16 },
+      parentalParts: [{ parent: 'secondary', weeks: 41 }],
+      ...overrides,
+    });
+
+  it('ojciec przejmuje resztę urlopu macierzyńskiego od dnia po zgonie, bez minimum 14 tyg. matki', () => {
+    const r = engine.planMaternity(death());
+    const maternity = r.segments.filter((s) => s.type === 'maternity');
+    expect(maternity.map((s) => [s.parent, s.days])).toEqual([
+      ['primary', 28],
+      ['secondary', 112],
+    ]);
+    expect(r.errors).toEqual([]);
+  });
+
+  it('ojcu przysługuje cała pula urlopu rodzicielskiego – 9 tyg. matki nie przepada', () => {
+    const r = engine.planMaternity(death());
+    expect(r.entitlements.parentalWeeksPerParentMax).toBe(41);
+    expect(r.parentalUsage.secondaryWeeks).toBe(41);
+    expect(r.errors).toEqual([]);
+  });
+
+  it('nie pozwala zaplanować urlopu rodzicielskiego zmarłej matce', () => {
+    const r = engine.planMaternity(death({ parentalParts: [{ parent: 'primary', weeks: 9 }] }));
+    expect(r.errors.some((e) => e.includes('tylko ojciec'))).toBe(true);
+  });
+
+  it('bez zgonu jeden rodzic nadal ma maks. 32 tyg.', () => {
+    const r = engine.planMaternity(birth({ parentalParts: [{ parent: 'secondary', weeks: 41 }] }));
+    expect(r.entitlements.parentalWeeksPerParentMax).toBe(32);
+    expect(r.errors.some((e) => e.includes('maks. 32 tyg.'))).toBe(true);
+  });
+});
