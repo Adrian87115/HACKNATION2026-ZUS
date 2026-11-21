@@ -17,7 +17,7 @@ import {
   Trash,
   TriangleExclamationPoint,
 } from "lucide-react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { AppRoutePaths } from "../../types/shared";
 import CaseImport from "../../features/caseImport/CaseImport";
 import { useBenefitEngine } from "../../hooks/useBenefitEngine";
@@ -1931,6 +1931,16 @@ export default function BareCalculators() {
   }
 
   const fromCase = applied && applied.target === tab ? applied : null;
+
+  // Data handed over from "Moje konto" (PUE/eZUS) via navigation state – apply once on arrival.
+  const location = useLocation();
+  useEffect(() => {
+    const preset = (location.state as {
+      casePreset?: { name: string; analysis: CaseAnalysis; target: CalculatorTarget };
+    } | null)?.casePreset;
+    if (preset) applyCase(preset.analysis, preset.target, preset.name);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.key]);
 
   return (
     <div className="space-y-6">

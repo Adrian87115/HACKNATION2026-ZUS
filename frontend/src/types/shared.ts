@@ -4,5 +4,7 @@ export const AppRoutePaths = {
 	PARENTING_GUIDE: '/przewodnik-rodzica',
 	APPLICATIONS: '/dokumenty-i-wnioski',
 	RISKS: '/ryzyka-i-ochrona',
-	ADMIN: '/admin'
+	ADMIN: '/admin',
+	LOGIN: '/logowanie',
+	ACCOUNT: '/moje-konto'
 } as const;

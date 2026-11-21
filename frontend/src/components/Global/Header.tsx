@@ -1,4 +1,4 @@
-import { MessageCircle, PanelRightClose } from 'lucide-react';
+import { LogIn, LogOut, MessageCircle, PanelRightClose, UserRound } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link, NavLink } from 'react-router-dom';
 import { NavigationItems } from '../../types/constants';
@@ -6,10 +6,12 @@ import { AppRoutePaths } from '../../types/shared';
 import zusiaLogo from '../../assets/zusia-logo.png';
 import AccessibilityMenu from './AccessibilityMenu';
 import { useChat } from '../../features/chat/ChatContext';
+import { useAuth } from '../../features/account/AuthContext';
 
 export default function Header() {
 	const { t } = useTranslation();
 	const chat = useChat();
+	const auth = useAuth();
 
 	return (
 		<header className="sticky top-0 z-50 h-16 border-b border-line bg-paper/90 backdrop-blur">
@@ -54,6 +56,34 @@ export default function Header() {
 				</button>
 
 				<AccessibilityMenu />
+
+				{auth.status === 'authenticated' && auth.account ? (
+					<div className="flex shrink-0 items-center gap-1">
+						<Link
+							to={AppRoutePaths.ACCOUNT}
+							className="inline-flex h-10 items-center gap-2 rounded-md border border-line px-3 text-sm font-semibold text-ink transition-colors hover:bg-hover">
+							<UserRound className="size-4" aria-hidden />
+							<span className="hidden md:inline">{t('account.myAccount')}</span>
+							<span className="sr-only md:hidden">{t('account.myAccount')}</span>
+						</Link>
+						<button
+							type="button"
+							onClick={() => void auth.logout()}
+							title={t('account.logout')}
+							aria-label={t('account.logout')}
+							className="inline-flex h-10 w-10 items-center justify-center rounded-md text-muted transition-colors hover:bg-hover hover:text-ink">
+							<LogOut className="size-4" aria-hidden />
+						</button>
+					</div>
+				) : (
+					<Link
+						to={AppRoutePaths.LOGIN}
+						className="inline-flex h-10 shrink-0 items-center gap-2 rounded-md bg-brand px-3 text-sm font-semibold text-white transition-colors hover:bg-brand-strong">
+						<LogIn className="size-4" aria-hidden />
+						<span className="hidden md:inline">{t('account.login')}</span>
+						<span className="sr-only md:hidden">{t('account.login')}</span>
+					</Link>
+				)}
 			</div>
 		</header>
 	);

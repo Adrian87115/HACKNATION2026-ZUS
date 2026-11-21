@@ -176,5 +176,10 @@
   "chat": {
     "open": "Zapytaj ZUSię",
     "close": "Zwiń ZUSię"
+  },
+  "account": {
+    "login": "Zaloguj się",
+    "logout": "Wyloguj",
+    "myAccount": "Moje konto"
   }
 }

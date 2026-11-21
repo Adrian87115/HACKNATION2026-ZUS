@@ -77,6 +77,18 @@ export const SEO_ROUTES: SeoMeta[] = [
 		title: 'Panel administracyjny | ZUSia',
 		description: 'Zarządzanie parametrami kalkulatorów ZUSi.',
 		noindex: true
+	},
+	{
+		path: AppRoutePaths.LOGIN,
+		title: 'Zaloguj się | ZUSia',
+		description: 'Zaloguj się przez mObywatel, aby wykorzystać swoje dane z ZUS w kalkulatorach.',
+		noindex: true
+	},
+	{
+		path: AppRoutePaths.ACCOUNT,
+		title: 'Moje konto | ZUSia',
+		description: 'Twoje ubezpieczenia, podstawa zasiłku, zwolnienia lekarskie i stan rozliczeń z ZUS.',
+		noindex: true
 	}
 ];
 
