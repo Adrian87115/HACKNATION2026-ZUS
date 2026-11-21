@@ -1,12 +1,11 @@
 {
   "name": "hacknation2026-zus",
   "private": true,
-  "workspaces": [
-    "frontend",
-    "backend"
-  ],
+  "packageManager": "pnpm@10.30.3",
   "scripts": {
-    "dev:frontend": "npm run dev -w frontend",
-    "dev:backend": "npm run start:dev -w backend"
+    "dev": "pnpm --filter @zus/shared build && pnpm -r --parallel dev",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "dev:backend": "pnpm --filter backend dev",
+    "build": "pnpm -r build"
   }
 }

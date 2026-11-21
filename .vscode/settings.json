@@ -1,0 +1,53 @@
+{
+	// Hide generated/vendor dirs from the workspace. Extensions that scan via workspace.findFiles
+	// (autoimport, tsimporter, html-css-class-completion, ...) respect this. TS module resolution does not need it.
+	"files.exclude": {
+		"**/node_modules": true,
+		"**/dist": true,
+		"**/.venv": true,
+		"**/__pycache__": true,
+		"**/.pytest_cache": true,
+		"**/*.tsbuildinfo": true
+	},
+	"files.watcherExclude": {
+		"**/node_modules/**": true,
+		"**/dist/**": true,
+		"**/.venv/**": true,
+		"**/__pycache__/**": true
+	},
+	"search.exclude": {
+		"**/node_modules": true,
+		"**/dist": true,
+		"**/.venv": true,
+		"pnpm-lock.yaml": true
+	},
+
+	// Use the workspace TypeScript (6.0.x, same in frontend + backend) instead of VS Code's bundled one.
+	"typescript.tsdk": "frontend/node_modules/typescript/lib",
+	"typescript.enablePromptUseWorkspaceTsdk": true,
+	"typescript.tsserver.maxTsServerMemory": 4096,
+
+	// Don't crawl every dependency for auto-import suggestions; suggest `@mui/material`,
+	// not deep-path duplicates like `@mui/material/Button`.
+	"typescript.preferences.includePackageJsonAutoImports": "off",
+	"typescript.preferences.autoImportSpecifierExcludeRegexes": [
+		"^@mui/[^/]+/.+"
+	],
+
+	// Extension-specific scanners
+	"autoimport.filesToScan": "{frontend,backend,packages}/src/**/*.{ts,tsx}",
+	"html-css-class-completion.excludeGlobPattern": "**/node_modules/**",
+	"tailwindCSS.files.exclude": [
+		"**/.git/**",
+		"**/node_modules/**",
+		"**/dist/**",
+		"**/.venv/**"
+	],
+	"python.analysis.exclude": [
+		"**/node_modules",
+		"frontend",
+		"backend",
+		"packages"
+	],
+	"js/ts.tsdk.path": "frontend/node_modules/typescript/lib"
+}

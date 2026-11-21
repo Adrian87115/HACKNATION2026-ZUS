@@ -1,0 +1,10 @@
+{
+  // These duplicate VS Code's built-in TS auto-import and each run their own full-workspace
+  // symbol scanner, which stalls autocomplete. Disable them for this workspace.
+  "unwantedRecommendations": [
+    "pmneo.tsimporter",
+    "steoates.autoimport",
+    "zignd.html-css-class-completion",
+    "wix.vscode-import-cost"
+  ]
+}
