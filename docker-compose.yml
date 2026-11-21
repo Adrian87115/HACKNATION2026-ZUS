@@ -1,0 +1,54 @@
+# Local infrastructure for ZUSia.
+#   docker compose up -d
+# MinIO API:     http://localhost:9000   (S3_ENDPOINT_URL for python/)
+# MinIO console: http://localhost:9001   (login with MINIO_ROOT_USER / MINIO_ROOT_PASSWORD)
+#
+# Credentials come from .env (see .env.example). The defaults below are for local development only.
+name: zusia
+
+services:
+  minio:
+    # MinIO no longer publishes new community images; pin a specific RELEASE.* tag for production use.
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-zusia}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-zusia-dev-password}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  # One-off job: create private buckets and the retention rule for case documents (idempotent).
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-zusia}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-zusia-dev-password}
+      S3_BUCKET_ATTACHMENTS: ${S3_BUCKET_ATTACHMENTS:-zusia-attachments}
+      S3_BUCKET_CASES: ${S3_BUCKET_CASES:-zusia-cases}
+      CASE_RETENTION_DAYS: ${CASE_RETENTION_DAYS:-30}
+    entrypoint: >
+      /bin/sh -c "
+      set -e;
+      mc alias set local http://minio:9000 \"$$MINIO_ROOT_USER\" \"$$MINIO_ROOT_PASSWORD\";
+      mc mb --ignore-existing \"local/$$S3_BUCKET_ATTACHMENTS\" \"local/$$S3_BUCKET_CASES\";
+      mc anonymous set none \"local/$$S3_BUCKET_ATTACHMENTS\";
+      mc anonymous set none \"local/$$S3_BUCKET_CASES\";
+      echo '{\"Rules\":[{\"ID\":\"expire-case-documents\",\"Status\":\"Enabled\",\"Filter\":{\"Prefix\":\"\"},\"Expiration\":{\"Days\":'$$CASE_RETENTION_DAYS'}}]}' | mc ilm import \"local/$$S3_BUCKET_CASES\";
+      echo 'MinIO buckets ready';
+      "
+    restart: "no"
+
+volumes:
+  minio-data:

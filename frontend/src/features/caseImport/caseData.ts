@@ -61,7 +61,12 @@ export type CaseExtraction = {
 	job_loss_reason: 'employer_insolvency' | 'unlawful_termination' | 'other' | null;
 	zus_decision: { granted: boolean | null; benefit: string | null; amount: number | null; reason: string | null } | null;
 	warnings: string[];
+	/** Set when the documents were kept in object storage (MinIO / S3). */
+	case_id?: string | null;
+	files?: StoredFile[];
 };
+
+export type StoredFile = { id: string; name: string; size: number; content_type: string };
 
 /* ------------------------------------------------------------------ */
 /*  API                                                                */
@@ -93,6 +98,19 @@ export async function extractCase(files: File[], signal?: AbortSignal): Promise<
 		throw new Error(detail ?? 'Nie udało się odczytać dokumentów. Spróbuj ponownie za chwilę.');
 	}
 	return (await res.json()) as CaseExtraction;
+}
+
+/** URL of a stored source document (served by the ZUSia API from the private bucket). */
+export const caseFileUrl = (caseId: string, fileId: string) =>
+	`${ZUSIA_API}/cases/${encodeURIComponent(caseId)}/files/${encodeURIComponent(fileId)}`;
+
+/** Delete a case's stored documents. Best effort – the bucket also expires them automatically. */
+export async function deleteCase(caseId: string): Promise<void> {
+	try {
+		await fetch(`${ZUSIA_API}/cases/${encodeURIComponent(caseId)}`, { method: 'DELETE' });
+	} catch {
+		/* offline – documents expire via the bucket lifecycle rule */
+	}
 }
 
 /* ------------------------------------------------------------------ */

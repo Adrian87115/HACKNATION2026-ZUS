@@ -21,7 +21,9 @@ import {
 	MAX_FILE_BYTES,
 	MAX_FILES,
 	analyzeCase,
+	caseFileUrl,
 	caseName,
+	deleteCase,
 	extractCase,
 	loadStoredCases,
 	saveStoredCases,
@@ -184,6 +186,8 @@ export default function CaseImport({ onApply }: Props) {
 	}
 
 	function removeRecent(caseId: string) {
+		const removed = recent.find((c) => c.id === caseId);
+		if (removed?.extraction.case_id) void deleteCase(removed.extraction.case_id);
 		const next = recent.filter((c) => c.id !== caseId);
 		setRecent(next);
 		saveStoredCases(next);
@@ -307,7 +311,9 @@ export default function CaseImport({ onApply }: Props) {
 								<Sparkles className="h-4 w-4" aria-hidden />
 								{state.kind === 'error' ? 'Spróbuj ponownie' : 'Odczytaj dokumenty'}
 							</button>
-							<p className="text-xs text-muted">Pliki są wysyłane tylko do odczytu i nie są zapisywane na serwerze.</p>
+							<p className="text-xs text-muted">
+								Dokumenty przechowujemy w prywatnym magazynie maksymalnie 30 dni – możesz je usunąć w każdej chwili.
+							</p>
 						</div>
 
 						{recent.length > 0 && (
@@ -339,7 +345,9 @@ export default function CaseImport({ onApply }: Props) {
 										</li>
 									))}
 								</ul>
-								<p className="mt-1.5 text-xs text-muted">Zapisane tylko w tej przeglądarce – możesz je w każdej chwili usunąć.</p>
+								<p className="mt-1.5 text-xs text-muted">
+									Lista jest zapisana tylko w tej przeglądarce. Usunięcie sprawy usuwa też jej dokumenty z serwera.
+								</p>
 							</div>
 						)}
 					</>
@@ -480,6 +488,27 @@ function Review({
 					<ul className="mt-1 list-disc space-y-0.5 pl-6">
 						{warnings.map((w) => (
 							<li key={w}>{w}</li>
+						))}
+					</ul>
+				</div>
+			)}
+
+			{x.case_id && x.files && x.files.length > 0 && (
+				<div>
+					<h4 className="text-sm font-semibold text-ink">Pliki źródłowe</h4>
+					<ul className="mt-1.5 flex flex-wrap gap-2">
+						{x.files.map((f) => (
+							<li key={f.id}>
+								<a
+									href={caseFileUrl(x.case_id!, f.id)}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="inline-flex max-w-xs items-center gap-1.5 rounded-md border border-line bg-paper px-2.5 py-1.5 text-sm text-ink transition hover:border-brand hover:text-brand-ink">
+									<FileText className="h-4 w-4 shrink-0 text-muted" aria-hidden />
+									<span className="truncate">{f.name}</span>
+									<span className="sr-only">(otwiera się w nowej karcie)</span>
+								</a>
+							</li>
 						))}
 					</ul>
 				</div>

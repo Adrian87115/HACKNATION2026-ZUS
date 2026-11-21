@@ -1,10 +1,16 @@
 import os
+
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from python.cases import router as cases_router
+from python.chat_store import ChatStore
 from python.routers import router
 from python.session_manager import SessionManager
+from python.storage import ObjectStorage
+
+load_dotenv()
 
 def create_app(manager: SessionManager | None = None) -> FastAPI:
     app = FastAPI(title = 'ZUSia API')
@@ -14,7 +20,9 @@ def create_app(manager: SessionManager | None = None) -> FastAPI:
                        allow_credentials = False,
                        allow_methods = ['GET', 'POST', 'DELETE'],
                        allow_headers = ['Content-Type'])
-    app.state.sessions = manager or SessionManager()
+    # MinIO / S3 for attachments and case documents (None → files stay in SQLite / are not kept)
+    app.state.storage = ObjectStorage.from_env()
+    app.state.sessions = manager or SessionManager(store = ChatStore(storage = app.state.storage))
     app.include_router(router)
     app.include_router(cases_router)
 
