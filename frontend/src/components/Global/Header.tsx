@@ -44,6 +44,8 @@ export default function Header() {
 
 				<div className="flex-1 xl:hidden" />
 
+				{/* actions sit close together; the larger header gap only separates logo, navigation and this group */}
+				<div className="flex shrink-0 items-center gap-1.5">
 				<button
 					type="button"
 					onClick={chat.toggle}
@@ -64,7 +66,7 @@ export default function Header() {
 				<AccessibilityMenu />
 
 				{auth.status === 'authenticated' && auth.account ? (
-					<div className="flex shrink-0 items-center gap-1">
+					<div className="flex shrink-0 items-center gap-1.5">
 						<Link
 							to={AppRoutePaths.ACCOUNT}
 							className="inline-flex h-10 items-center gap-2 rounded-md border border-line px-3 text-sm font-semibold text-ink transition-colors hover:bg-hover">
@@ -100,6 +102,7 @@ export default function Header() {
 					className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-line text-ink transition-colors hover:bg-hover xl:hidden">
 					{menuOpen ? <X className="size-5" aria-hidden /> : <Menu className="size-5" aria-hidden />}
 				</button>
+				</div>
 			</div>
 
 			{/* portal: the header's backdrop-filter would otherwise become the containing block of the fixed panel */}
