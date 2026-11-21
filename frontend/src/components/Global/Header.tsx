@@ -10,7 +10,7 @@ export default function Header() {
 		<header className="sticky top-0 z-50 h-16 border-b border-slate-200 bg-white/90 backdrop-blur">
 			<div className="mx-auto flex h-full max-w-7xl items-center gap-6 px-4 sm:px-6">
 				<Link
-					to={AppRoutePaths.home}
+					to={AppRoutePaths.HOME}
 					className="flex items-center gap-2 font-bold text-slate-900">
 					<span className="grid size-8 place-items-center rounded-lg bg-brand-600 text-sm text-white">
 						Z
