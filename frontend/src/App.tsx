@@ -7,6 +7,7 @@ import ChatSidebar from './features/chat/ChatSidebar';
 import Account from './pages/Account/Account';
 import Admin from './pages/Admin/Admin';
 import Applications from './pages/Applications/Applications';
+import SubmitApplication from './pages/SubmitApplication/SubmitApplication';
 import Calculators from './pages/Calculators/Calculators';
 import Home from './pages/Home/Home';
 import Login from './pages/Login/Login';
@@ -33,6 +34,7 @@ function App() {
 						<Route path={AppRoutePaths.ADMIN} element={<Admin />} />
 						<Route path={AppRoutePaths.LOGIN} element={<Login />} />
 						<Route path={AppRoutePaths.ACCOUNT} element={<Account />} />
+						<Route path={AppRoutePaths.SUBMIT_APPLICATION} element={<SubmitApplication />} />
 						{LEGACY_REDIRECTS.map(({ from, to }) => (
 							<Route key={from} path={from} element={<LegacyRedirect to={to} />} />
 						))}

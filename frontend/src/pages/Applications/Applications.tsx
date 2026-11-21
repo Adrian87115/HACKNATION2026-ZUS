@@ -129,6 +129,12 @@ export default function Applications() {
 						Odpowiedz na trzy pytania, a pokażemy, kto wypłaci zasiłek, jakie wnioski przygotować, w jakich terminach i gdzie je
 						złożyć.
 					</p>
+					<Link
+						to={AppRoutePaths.SUBMIT_APPLICATION}
+						className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-ink hover:underline hover:underline-offset-4">
+						Wypełnij i wyślij wniosek online danymi z ZUS
+						<ArrowUpRight className="h-4 w-4" aria-hidden />
+					</Link>
 				</header>
 
 				<section

@@ -6,5 +6,6 @@ export const AppRoutePaths = {
 	RISKS: '/ryzyka-i-ochrona',
 	ADMIN: '/admin',
 	LOGIN: '/logowanie',
-	ACCOUNT: '/moje-konto'
+	ACCOUNT: '/moje-konto',
+	SUBMIT_APPLICATION: '/moje-konto/wnioski'
 } as const;

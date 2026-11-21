@@ -1,8 +1,8 @@
-import { ArrowRight, Calculator, FileText, LoaderCircle, MessageCircle, Printer, ShieldBan, ShieldCheck, ShieldEllipsis } from 'lucide-react';
-import { useMemo, useState, type ReactNode } from 'react';
+import { ArrowRight, Calculator, FileText, LoaderCircle, MessageCircle, Printer, Send, ShieldBan, ShieldCheck, ShieldEllipsis } from 'lucide-react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import BaseLayout from '../../components/Layouts/BaseLayout';
-import { accountApi, type Account as AccountData, type DebtCertificate } from '../../features/account/accountApi';
+import { accountApi, type Account as AccountData, type DebtCertificate, type SubmittedApplication } from '../../features/account/accountApi';
 import { accountToCase, currentTitle } from '../../features/account/accountToCase';
 import { useAuth } from '../../features/account/AuthContext';
 import { analyzeCase, type CalculatorTarget } from '../../features/caseImport/caseData';
@@ -81,6 +81,19 @@ function AccountView({ account }: { account: AccountData }) {
 	const [certificate, setCertificate] = useState<DebtCertificate | null>(null);
 	const [certError, setCertError] = useState<string | null>(null);
 	const [issuing, setIssuing] = useState(false);
+	const [applications, setApplications] = useState<SubmittedApplication[] | null>(null);
+
+	useEffect(() => {
+		if (!token) return;
+		let active = true;
+		accountApi
+			.applications(token)
+			.then((list) => active && setApplications(list))
+			.catch(() => active && setApplications([]));
+		return () => {
+			active = false;
+		};
+	}, [token]);
 
 	const extraction = useMemo(() => accountToCase(account), [account]);
 	const analysis = useMemo(() => analyzeCase(extraction, engine), [extraction, engine]);
@@ -209,6 +222,43 @@ function AccountView({ account }: { account: AccountData }) {
 					<ul className="mt-3 list-disc space-y-0.5 pl-5 text-sm text-muted">
 						{analysis.insurance.reasons.map((r) => (
 							<li key={r}>{r}</li>
+						))}
+					</ul>
+				)}
+			</Section>
+
+			<Section
+				title="Moje wnioski"
+				action={
+					<Link
+						to={AppRoutePaths.SUBMIT_APPLICATION}
+						className="inline-flex items-center gap-1.5 rounded-md bg-brand px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-brand-strong">
+						<Send className="h-4 w-4" aria-hidden />
+						Złóż wniosek
+					</Link>
+				}>
+				{applications === null ? (
+					<p className="text-sm text-muted">Wczytuję…</p>
+				) : applications.length === 0 ? (
+					<p className="text-sm text-muted">
+						Nie masz jeszcze wysłanych wniosków. Wniosek o urlop lub zasiłek macierzyński wypełnimy danymi z Twojego konta.
+					</p>
+				) : (
+					<ul className="divide-y divide-line">
+						{applications.map((a) => (
+							<li key={a.id} className="flex flex-wrap items-start justify-between gap-2 py-2.5 text-sm first:pt-0 last:pb-0">
+								<div>
+									<p className="font-semibold text-ink">{a.title}</p>
+									<p className="text-muted">
+										Nr {a.number} · {new Date(a.submittedAt).toLocaleString('pl-PL', { dateStyle: 'medium', timeStyle: 'short' })} ·{' '}
+										{a.recipient.name}
+									</p>
+									{a.warnings.length > 0 && <p className="text-amber-800 dark:text-amber-200">{a.warnings[0]}</p>}
+								</div>
+								<span className="rounded bg-brand-soft px-1.5 text-xs font-semibold leading-5 text-brand-ink">
+									{a.status === 'przyjety' ? `przyjęty · ${a.upo?.number ?? ''}` : 'doręczony'}
+								</span>
+							</li>
 						))}
 					</ul>
 				)}

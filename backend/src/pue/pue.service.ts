@@ -1,6 +1,7 @@
 import { randomBytes, randomInt } from 'node:crypto';
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { EngineService } from '../engine/engine.service.js';
+import { buildApplication, type Application, type ApplicationInput } from './pue.applications.js';
 import { ACCOUNTS, PERSONAS, type Account } from './pue.data.js';
 
 const SESSION_TTL_MS = 2 * 60 * 60 * 1000;
@@ -25,6 +26,8 @@ export type DebtCertificate = {
 @Injectable()
 export class PueService {
   private readonly sessions = new Map<string, Session>();
+  /** Submitted applications per account – kept across sign-ins until the server restarts (demo only). */
+  private readonly applications = new Map<string, Application[]>();
 
   constructor(private readonly engine: EngineService) {}
 
@@ -78,6 +81,17 @@ export class PueService {
           ? `Zakład Ubezpieczeń Społecznych zaświadcza, że ${name} na dzień ${account.debt.asOf} posiada zaległość z tytułu składek na ubezpieczenia społeczne w kwocie ${amount.toFixed(2)} zł.`
           : `Zakład Ubezpieczeń Społecznych zaświadcza, że ${name} na dzień ${account.debt.asOf} nie posiada zaległości z tytułu składek na ubezpieczenia społeczne.`,
     };
+  }
+
+  listApplications(account: Account): Application[] {
+    return this.applications.get(account.id) ?? [];
+  }
+
+  /** Simulated e-submission: validates the request, "delivers" it and returns the confirmation (UPO for ZUS). */
+  submitApplication(account: Account, input: ApplicationInput): Application {
+    const application = buildApplication(account, input ?? {}, this.engine.getParams());
+    this.applications.set(account.id, [application, ...this.listApplications(account)].slice(0, 50));
+    return application;
   }
 
   private prune() {

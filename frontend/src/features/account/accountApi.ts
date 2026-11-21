@@ -42,6 +42,33 @@ export type DebtCertificate = {
 	text: string;
 };
 
+export type ApplicationKind = 'urlop_macierzynski' | 'urlop_rodzicielski' | 'urlop_ojcowski' | 'zam';
+export type ZamPeriod = 'macierzynski' | 'rodzicielski' | 'ojcowski';
+
+export type ApplicationInput = {
+	kind: ApplicationKind;
+	startDate: string;
+	weeks: number;
+	combined?: boolean;
+	period?: ZamPeriod;
+	bankAccount?: string;
+	confirmed: boolean;
+};
+
+export type SubmittedApplication = {
+	id: string;
+	number: string;
+	kind: ApplicationKind;
+	title: string;
+	recipient: { type: 'pracodawca' | 'zus'; name: string };
+	channel: string;
+	submittedAt: string;
+	status: 'doreczony' | 'przyjety';
+	fields: { label: string; value: string }[];
+	warnings: string[];
+	upo: { number: string; digest: string } | null;
+};
+
 export class AccountApiError extends Error {
 	readonly status: number;
 
@@ -80,5 +107,8 @@ export const accountApi = {
 		request<{ token: string; expiresAt: string }>('/pue/login', { method: 'POST', body: JSON.stringify({ personaId }) }),
 	logout: (token: string) => request<void>('/pue/logout', { method: 'POST' }, token).catch(() => undefined),
 	me: (token: string) => request<Account>('/pue/me', {}, token),
-	debtCertificate: (token: string) => request<DebtCertificate>('/pue/me/debt-certificate', { method: 'POST' }, token)
+	debtCertificate: (token: string) => request<DebtCertificate>('/pue/me/debt-certificate', { method: 'POST' }, token),
+	applications: (token: string) => request<SubmittedApplication[]>('/pue/me/applications', {}, token),
+	submitApplication: (token: string, input: ApplicationInput) =>
+		request<SubmittedApplication>('/pue/me/applications', { method: 'POST', body: JSON.stringify(input) }, token)
 };

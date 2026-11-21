@@ -1,4 +1,5 @@
 import { Body, Controller, Get, HttpCode, Post, Req, UseGuards } from '@nestjs/common';
+import type { ApplicationInput } from './pue.applications.js';
 import { PueSessionGuard, type PueRequest } from './pue-session.guard.js';
 import { PueService } from './pue.service.js';
 
@@ -39,5 +40,19 @@ export class PueController {
   @UseGuards(PueSessionGuard)
   debtCertificate(@Req() req: PueRequest) {
     return this.pue.debtCertificate(req.pueAccount!);
+  }
+
+  /** Applications sent from the account (leave requests to the employer, ZAM to ZUS). */
+  @Get('me/applications')
+  @UseGuards(PueSessionGuard)
+  applications(@Req() req: PueRequest) {
+    return this.pue.listApplications(req.pueAccount!);
+  }
+
+  /** Simulated e-submission of an application signed with mObywatel. */
+  @Post('me/applications')
+  @UseGuards(PueSessionGuard)
+  submit(@Req() req: PueRequest, @Body() body: ApplicationInput) {
+    return this.pue.submitApplication(req.pueAccount!, body);
   }
 }

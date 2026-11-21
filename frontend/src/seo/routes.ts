@@ -89,6 +89,12 @@ export const SEO_ROUTES: SeoMeta[] = [
 		title: 'Moje konto | ZUSia',
 		description: 'Twoje ubezpieczenia, podstawa zasiłku, zwolnienia lekarskie i stan rozliczeń z ZUS.',
 		noindex: true
+	},
+	{
+		path: AppRoutePaths.SUBMIT_APPLICATION,
+		title: 'Złóż wniosek online | ZUSia',
+		description: 'Wypełnij wniosek o urlop lub zasiłek macierzyński danymi z ZUS, podpisz w mObywatelu i wyślij.',
+		noindex: true
 	}
 ];
 
