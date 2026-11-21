@@ -2,6 +2,9 @@
 
 Polish is heavily inflected, so words are compared by a short prefix without diacritics:
 „zasiłku macierzyńskiego” and „zasilek macierzynski” end up as the same terms.
+
+When a semantic ranking is passed in (OpenAI embeddings, see vectors.py), it is merged with the BM25 ranking by
+Reciprocal Rank Fusion – fragments ranked high by either method come first.
 """
 import json
 import math
@@ -21,6 +24,17 @@ STOPWORDS = {
 # long and mentions „zasiłek”/„składka” everywhere, so it is slightly down-weighted.
 ACT_WEIGHT = {'ustawa zasiłkowa': 1.25, 'Kodeks pracy': 1.25, 'ustawa o systemie ubezpieczeń społecznych': 0.75}
 ARTICLE_REF = re.compile(r'art(?:ykul\w*)?\.?\s*(\d+[a-z]?)(?:\s*\^?\s*(\d+[a-z]?))?', re.IGNORECASE)
+# Reciprocal Rank Fusion: each ranking adds 1 / (RRF_K + position); only the top FUSION_DEPTH of BM25 take part.
+RRF_K = 60
+FUSION_DEPTH = 20
+
+
+def fuse(*rankings: list[int]) -> list[int]:
+    scores: dict[int, float] = {}
+    for ranking in rankings:
+        for position, i in enumerate(ranking, start = 1):
+            scores[i] = scores.get(i, 0.0) + 1 / (RRF_K + position)
+    return sorted(scores, key = lambda i: -scores[i])
 
 
 def fold(text: str) -> str:
@@ -45,7 +59,9 @@ class LegalIndex:
     def __len__(self) -> int:
         return len(self.chunks)
 
-    def search(self, question: str, limit: int = 6, max_chars: int = 16_000) -> list[dict]:
+    def search(self, question: str, limit: int = 6, max_chars: int = 16_000,
+               semantic: list[int] | None = None) -> list[dict]:
+        """`semantic` – fragment indices ranked by embeddings (best first); merged with BM25 when given."""
         if not self.chunks or not question.strip():
             return []
         query = Counter(terms(question))
@@ -60,7 +76,13 @@ class LegalIndex:
         wanted = {(m.group(1) + (f'^{m.group(2)}' if m.group(2) else '')).lower() for m in ARTICLE_REF.finditer(question)}
         pinned = [i for i, c in enumerate(self.chunks) if c['article'].split(' ')[0].lower() in wanted]
 
-        order = pinned + [i for _, i in sorted(scores, reverse=True) if i not in pinned]
+        ranked = [i for _, i in sorted(scores, reverse=True)]
+        if semantic:
+            fused = fuse(ranked[:FUSION_DEPTH], semantic)
+            in_fused = set(fused)
+            ranked = fused + [i for i in ranked if i not in in_fused]
+
+        order = pinned + [i for i in ranked if i not in pinned]
         hits, used = [], 0
         for i in order:
             chunk = self.chunks[i]
