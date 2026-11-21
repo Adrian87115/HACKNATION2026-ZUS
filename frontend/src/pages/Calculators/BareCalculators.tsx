@@ -5,6 +5,7 @@
  */
 import { useEffect, useId, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
+  ArrowRight,
   Calculator,
   CalendarDays,
   ChevronDown,
@@ -16,7 +17,8 @@ import {
   Trash,
   TriangleExclamationPoint,
 } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
+import { AppRoutePaths } from "../../types/shared";
 import CaseImport from "../../features/caseImport/CaseImport";
 import type {
   CalculatorTarget,
@@ -719,9 +721,12 @@ function TechDetails({ input, result }: { input: unknown; result?: unknown }) {
 function ResultsPanel({
   hasResult,
   runId,
+  docsHref,
   children,
 }: {
   hasResult: boolean;
+  /** Link to the documents & deadlines guide for this kind of benefit. */
+  docsHref: string;
   /** Changes on every calculation so the results animate in again. */
   runId: number;
   children?: ReactNode;
@@ -741,6 +746,16 @@ function ResultsPanel({
       {hasResult ? (
         <div key={runId} className="enter-stagger space-y-4">
           {children}
+          <Link
+            to={docsHref}
+            className="group flex items-center justify-between gap-3 rounded-lg border border-line bg-paper px-5 py-4 text-sm font-semibold text-ink shadow-sm transition hover:border-brand"
+          >
+            Jakie dokumenty złożyć i gdzie?
+            <ArrowRight
+              className="h-4 w-4 text-brand-ink transition-transform group-hover:translate-x-0.5"
+              aria-hidden
+            />
+          </Link>
         </div>
       ) : (
         <div className="rounded-lg border border-dashed border-line bg-paper px-6 py-8 text-center">
@@ -1350,7 +1365,11 @@ export function MaternityCalculator({
         </Card>
       </div>
 
-      <ResultsPanel hasResult={!!out} runId={runId}>
+      <ResultsPanel
+        hasResult={!!out}
+        runId={runId}
+        docsHref={`${AppRoutePaths.APPLICATIONS}?swiadczenie=${event === "birth" ? "macierzynski" : "adopcja"}`}
+      >
         {out && <MaternityResults {...out} />}
       </ResultsPanel>
     </form>
@@ -1763,7 +1782,11 @@ export function PregnancyCalculator({
         </Card>
       </div>
 
-      <ResultsPanel hasResult={!!out} runId={runId}>
+      <ResultsPanel
+        hasResult={!!out}
+        runId={runId}
+        docsHref={`${AppRoutePaths.APPLICATIONS}?swiadczenie=ciaza`}
+      >
         {out && <PregnancyResults {...out} />}
       </ResultsPanel>
     </form>

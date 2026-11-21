@@ -18,5 +18,9 @@ export const NavigationItems: NavigationItem[] = [
 	{
 		label: 'navigation.parentingGuide',
 		href: AppRoutePaths.PARENTING_GUIDE
+	},
+	{
+		label: 'navigation.applications',
+		href: AppRoutePaths.APPLICATIONS
 	}
 ];

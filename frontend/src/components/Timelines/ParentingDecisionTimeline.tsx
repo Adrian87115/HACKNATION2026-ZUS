@@ -19,7 +19,9 @@ import {
   PARENTING_DECISION_TREE,
   type DecisionNode,
 } from "../../data/parentingDecisionTree.js";
+import { Link } from "react-router-dom";
 import { useBenefitEngine } from "../../hooks/useBenefitEngine.js";
+import { AppRoutePaths } from "../../types/shared.js";
 import { useCountUp } from "../../hooks/useCountUp.js";
 import type {
   BenefitParams,
@@ -555,6 +557,14 @@ function ResultBody(props: {
         </div>
       )}
 
+      <Link
+        to={`${AppRoutePaths.APPLICATIONS}?swiadczenie=${node.id === "adoption" ? "adopcja" : "macierzynski"}`}
+        className="pt-docs-link"
+      >
+        Jakie dokumenty złożyć i gdzie?
+        <ArrowRight size={16} aria-hidden />
+      </Link>
+
       <p className="pt-disclaimer">
         Wyliczenie ma charakter orientacyjny i nie zastępuje decyzji ZUS.
         Ostateczną kwotę zasiłku ustala ZUS na podstawie Waszych dokumentów.
@@ -1019,6 +1029,10 @@ const CSS = `
 .pt-support-name{font-weight:600}
 .pt-support-contact{font-size:14px;font-weight:600;color:var(--pt-care-ink);margin-top:6px}
 .pt-support-contact a{display:inline-flex;align-items:center;gap:4px;color:inherit}
+.pt-docs-link{display:inline-flex;align-items:center;gap:6px;margin-top:20px;font-weight:600;color:var(--brand-ink);text-decoration:none}
+.pt-docs-link:hover{text-decoration:underline;text-underline-offset:4px}
+.pt-docs-link svg{transition:transform .2s var(--pt-ease)}
+.pt-docs-link:hover svg{transform:translateX(3px)}
 .pt-disclaimer{margin:24px 0 0;font-size:13px;color:var(--muted)}
 
 /* Fokus */

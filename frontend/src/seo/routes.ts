@@ -55,6 +55,14 @@ export const SEO_ROUTES: SeoMeta[] = [
 			'Policz zasiłek macierzyński, rodzicielski i ojcowski oraz zasiłek chorobowy w ciąży według przepisów i stawek ZUS na 2026 rok.',
 		name: 'Kalkulatory',
 		sitemap: { changefreq: 'monthly', priority: 0.9 }
+	},
+	{
+		path: AppRoutePaths.APPLICATIONS,
+		title: 'Jakie dokumenty złożyć do ZUS? Wnioski i terminy | ZUSia',
+		description:
+			'Sprawdź, kto wypłaci zasiłek – pracodawca czy ZUS – jakie wnioski złożyć (ZAM, Z-3, ZAS-53), w jakich terminach i gdzie, przy ciąży, urlopie macierzyńskim, ojcowskim i rodzicielskim.',
+		name: 'Dokumenty i wnioski',
+		sitemap: { changefreq: 'monthly', priority: 0.8 }
 	}
 ];
 
