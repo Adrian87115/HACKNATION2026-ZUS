@@ -3,7 +3,7 @@
  *  - MaternityCalculator  -> points b, c, d, e, j  (engine.planMaternity)
  *  - PregnancyCalculator  -> point a               (engine.calculatePregnancyBenefits)
  */
-import { useId, useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
   Calculator,
   CalendarDays,
@@ -17,6 +17,11 @@ import {
   TriangleExclamationPoint,
 } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
+import CaseImport from "../../features/caseImport/CaseImport";
+import type {
+  CalculatorTarget,
+  CaseAnalysis,
+} from "../../features/caseImport/caseData";
 import {
   BenefitEngine,
   type MaternityPlanInput,
@@ -771,19 +776,74 @@ function ResultCard({
 /*  MATERNITY  (b, c, d, e, j)                                         */
 /* ================================================================== */
 type ParentRoleStr = "primary" | "secondary";
-type ParentForm = {
+export type ParentForm = {
   basis: string;
   insured: boolean;
   isEmployee: boolean;
   debt: string;
 };
-type ParentalRow = {
+export type ParentalRow = {
   parent: ParentRoleStr;
   weeks: string;
   fte: string;
   start: string;
 };
-type PaternityRow = { weeks: string; start: string };
+export type PaternityRow = { weeks: string; start: string };
+
+/** Initial values for the calculators (e.g. read from an imported case). All fields optional. */
+export type MaternityPreset = {
+  event: MaternityPlanInput["event"];
+  eventDate: string;
+  children: string;
+  zaZyciem: boolean;
+  combined: boolean;
+  childBirthDate: string;
+  decreeDate: string;
+  p1: ParentForm;
+  hasP2: boolean;
+  p2: ParentForm;
+  prenatal: string;
+  hasTransfer: boolean;
+  transfer: { weeks: string; circumstance: "standard" | "special" };
+  paternity: PaternityRow[];
+  parental: ParentalRow[];
+};
+
+export type PregnancyPreset = {
+  basis: string;
+  kind: "mandatory" | "voluntary";
+  isEmployee: boolean;
+  insured: boolean;
+  debt: string;
+  over20: boolean;
+  insStart: string;
+  birth: string;
+  hasInc: boolean;
+  incStart: string;
+  incEnd: string;
+  codeB: boolean;
+  hasJob: boolean;
+  jobEnd: string;
+  jobReason: "employer_insolvency" | "unlawful_termination";
+};
+
+type CalculatorProps<P> = {
+  preset?: Partial<P>;
+  /** Calculate immediately on mount (used after importing a case). */
+  autoRun?: boolean;
+};
+
+/** Run the calculation once on mount when requested. */
+function useAutoRun(autoRun: boolean | undefined, runNow: () => void) {
+  const ran = useRef(false);
+  useEffect(() => {
+    if (!autoRun || ran.current) return;
+    ran.current = true;
+    runNow();
+    // runNow reads the initial (preset) state – only on mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoRun]);
+}
 
 const PARENT_LABEL: Record<ParentRoleStr, string> = {
   primary: "Rodzic 1",
@@ -808,34 +868,35 @@ const MATERNITY_SEGMENT: Record<string, { label: string; color: string }> = {
   paternity: { label: "Urlop ojcowski", color: "bg-violet-500" },
 };
 
-export function MaternityCalculator() {
+export function MaternityCalculator({
+  preset,
+  autoRun,
+}: CalculatorProps<MaternityPreset> = {}) {
   const engine = useMemo(() => new BenefitEngine(), []);
 
-  const [event, setEvent] = useState<MaternityPlanInput["event"]>("birth");
-  const [eventDate, setEventDate] = useState("2026-03-01");
-  const [children, setChildren] = useState("1");
-  const [zaZyciem, setZaZyciem] = useState(false);
-  const [combined, setCombined] = useState(false);
+  const [event, setEvent] = useState<MaternityPlanInput["event"]>(
+    preset?.event ?? "birth",
+  );
+  const [eventDate, setEventDate] = useState(preset?.eventDate ?? "2026-03-01");
+  const [children, setChildren] = useState(preset?.children ?? "1");
+  const [zaZyciem, setZaZyciem] = useState(preset?.zaZyciem ?? false);
+  const [combined, setCombined] = useState(preset?.combined ?? false);
 
-  const [childBirthDate, setChildBirthDate] = useState("");
+  const [childBirthDate, setChildBirthDate] = useState(
+    preset?.childBirthDate ?? "",
+  );
   const [deferredSchool, setDeferredSchool] = useState(false);
-  const [decreeDate, setDecreeDate] = useState("");
+  const [decreeDate, setDecreeDate] = useState(preset?.decreeDate ?? "");
 
-  const [p1, setP1] = useState<ParentForm>({
-    basis: "6000",
-    insured: true,
-    isEmployee: true,
-    debt: "0",
-  });
-  const [hasP2, setHasP2] = useState(true);
-  const [p2, setP2] = useState<ParentForm>({
-    basis: "9000",
-    insured: true,
-    isEmployee: true,
-    debt: "0",
-  });
+  const [p1, setP1] = useState<ParentForm>(
+    preset?.p1 ?? { basis: "6000", insured: true, isEmployee: true, debt: "0" },
+  );
+  const [hasP2, setHasP2] = useState(preset?.hasP2 ?? true);
+  const [p2, setP2] = useState<ParentForm>(
+    preset?.p2 ?? { basis: "9000", insured: true, isEmployee: true, debt: "0" },
+  );
 
-  const [prenatal, setPrenatal] = useState("0");
+  const [prenatal, setPrenatal] = useState(preset?.prenatal ?? "0");
   const [hasLoss, setHasLoss] = useState(false);
   const [lossDate, setLossDate] = useState("");
   const [lossSurv, setLossSurv] = useState("0");
@@ -847,22 +908,31 @@ export function MaternityCalculator() {
     startDay: "",
     parent: "",
   });
-  const [hasTransfer, setHasTransfer] = useState(false);
+  const [hasTransfer, setHasTransfer] = useState(preset?.hasTransfer ?? false);
   const [transfer, setTransfer] = useState<{
     weeks: string;
     circumstance: "standard" | "special";
-  }>({ weeks: "6", circumstance: "standard" });
+  }>(preset?.transfer ?? { weeks: "6", circumstance: "standard" });
 
-  const [paternity, setPaternity] = useState<PaternityRow[]>([]);
-  const [parental, setParental] = useState<ParentalRow[]>([
-    { parent: "primary", weeks: "32", fte: "0", start: "" },
-    { parent: "secondary", weeks: "9", fte: "0", start: "" },
-  ]);
+  const [paternity, setPaternity] = useState<PaternityRow[]>(
+    preset?.paternity ?? [],
+  );
+  const [parental, setParental] = useState<ParentalRow[]>(
+    preset?.parental ?? [
+      { parent: "primary", weeks: "32", fte: "0", start: "" },
+      { parent: "secondary", weeks: "9", fte: "0", start: "" },
+    ],
+  );
 
   const [out, setOut] = useState<ReturnType<typeof compute> | null>(null);
   const [runId, setRunId] = useState(0);
 
   const isBirth = event === "birth";
+
+  useAutoRun(autoRun, () => {
+    setOut(compute());
+    setRunId((n) => n + 1);
+  });
 
   function compute() {
     const parentOf = (f: ParentForm) => ({
@@ -1439,38 +1509,48 @@ const PAID_BY: Record<string, string> = {
   zus: "ZUS",
 };
 
-export function PregnancyCalculator() {
+export function PregnancyCalculator({
+  preset,
+  autoRun,
+}: CalculatorProps<PregnancyPreset> = {}) {
   const engine = useMemo(() => new BenefitEngine(), []);
 
-  const [basis, setBasis] = useState("6000");
-  const [kind, setKind] = useState<"mandatory" | "voluntary">("mandatory");
-  const [isEmployee, setIsEmployee] = useState(true);
-  const [insured, setInsured] = useState(true);
-  const [debt, setDebt] = useState("0");
+  const [basis, setBasis] = useState(preset?.basis ?? "6000");
+  const [kind, setKind] = useState<"mandatory" | "voluntary">(
+    preset?.kind ?? "mandatory",
+  );
+  const [isEmployee, setIsEmployee] = useState(preset?.isEmployee ?? true);
+  const [insured, setInsured] = useState(preset?.insured ?? true);
+  const [debt, setDebt] = useState(preset?.debt ?? "0");
   const [age50, setAge50] = useState(false);
-  const [over20, setOver20] = useState(false);
+  const [over20, setOver20] = useState(preset?.over20 ?? false);
 
-  const [insStart, setInsStart] = useState("2025-01-01");
+  const [insStart, setInsStart] = useState(preset?.insStart ?? "2025-01-01");
   const [prevIns, setPrevIns] = useState("0");
   const [waitExempt, setWaitExempt] = useState(false);
   const [empUsed, setEmpUsed] = useState("0");
   const [prevInc, setPrevInc] = useState("0");
 
-  const [birth, setBirth] = useState("");
+  const [birth, setBirth] = useState(preset?.birth ?? "");
 
-  const [hasInc, setHasInc] = useState(true);
-  const [incStart, setIncStart] = useState("2026-03-01");
-  const [incEnd, setIncEnd] = useState("2026-04-30");
-  const [codeB, setCodeB] = useState(true);
+  const [hasInc, setHasInc] = useState(preset?.hasInc ?? true);
+  const [incStart, setIncStart] = useState(preset?.incStart ?? "2026-03-01");
+  const [incEnd, setIncEnd] = useState(preset?.incEnd ?? "2026-04-30");
+  const [codeB, setCodeB] = useState(preset?.codeB ?? true);
 
-  const [hasJob, setHasJob] = useState(false);
-  const [jobEnd, setJobEnd] = useState("");
+  const [hasJob, setHasJob] = useState(preset?.hasJob ?? false);
+  const [jobEnd, setJobEnd] = useState(preset?.jobEnd ?? "");
   const [jobReason, setJobReason] = useState<
     "employer_insolvency" | "unlawful_termination"
-  >("employer_insolvency");
+  >(preset?.jobReason ?? "employer_insolvency");
 
   const [out, setOut] = useState<ReturnType<typeof compute> | null>(null);
   const [runId, setRunId] = useState(0);
+
+  useAutoRun(autoRun, () => {
+    setOut(compute());
+    setRunId((n) => n + 1);
+  });
 
   function compute() {
     const input: PregnancyBenefitInput = {
@@ -1802,6 +1882,33 @@ export default function BareCalculators() {
   const setTab = (next: Tab) =>
     setSearchParams({ tab: next }, { replace: true });
   const active = TABS.find((t) => t.id === tab)!;
+
+  // Data from an imported case: the matching calculator is re-mounted with it and calculates immediately.
+  const [applied, setApplied] = useState<{
+    id: number;
+    name: string;
+    target: Tab;
+    maternity: Partial<MaternityPreset>;
+    pregnancy: Partial<PregnancyPreset>;
+  } | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  function applyCase(analysis: CaseAnalysis, target: CalculatorTarget, name: string) {
+    setApplied({
+      id: Date.now(),
+      name,
+      target,
+      maternity: analysis.maternity,
+      pregnancy: analysis.pregnancy,
+    });
+    setTab(target);
+    requestAnimationFrame(() =>
+      panelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
+    );
+  }
+
+  const fromCase = applied && applied.target === tab ? applied : null;
+
   return (
     <div className="space-y-6">
       <header className="enter space-y-2">
@@ -1818,6 +1925,14 @@ export default function BareCalculators() {
       </header>
 
       <div className="enter" style={{ animationDelay: "60ms" }}>
+        <CaseImport onApply={applyCase} />
+      </div>
+
+      <div
+        ref={panelRef}
+        className="enter scroll-mt-24"
+        style={{ animationDelay: "100ms" }}
+      >
         <div
           role="tablist"
           aria-label="Rodzaj kalkulatora"
@@ -1849,8 +1964,41 @@ export default function BareCalculators() {
         <p className="mt-3 text-sm text-muted">{active.sub}</p>
       </div>
 
-      <div id="calc-panel" role="tabpanel" aria-labelledby={`calc-tab-${tab}`}>
-        {tab === "maternity" ? <MaternityCalculator /> : <PregnancyCalculator />}
+      <div
+        id="calc-panel"
+        role="tabpanel"
+        aria-labelledby={`calc-tab-${tab}`}
+        className="space-y-4"
+      >
+        {fromCase && (
+          <div className="enter flex flex-wrap items-center justify-between gap-3 rounded-md border border-brand/40 bg-brand-soft px-4 py-3 text-sm text-brand-ink">
+            <p>
+              Kalkulator uzupełniony danymi ze sprawy{" "}
+              <span className="font-semibold">„{fromCase.name}”</span>. Sprawdź
+              pola i w razie potrzeby je popraw.
+            </p>
+            <button
+              type="button"
+              onClick={() => setApplied(null)}
+              className="rounded-md border border-brand/40 bg-paper px-3 py-1.5 font-semibold transition hover:bg-hover"
+            >
+              Wyczyść dane sprawy
+            </button>
+          </div>
+        )}
+        {tab === "maternity" ? (
+          <MaternityCalculator
+            key={fromCase ? `case-${fromCase.id}` : "default"}
+            preset={fromCase?.maternity}
+            autoRun={Boolean(fromCase)}
+          />
+        ) : (
+          <PregnancyCalculator
+            key={fromCase ? `case-${fromCase.id}` : "default"}
+            preset={fromCase?.pregnancy}
+            autoRun={Boolean(fromCase)}
+          />
+        )}
       </div>
     </div>
   );

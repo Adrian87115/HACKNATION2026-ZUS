@@ -2,6 +2,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from python.cases import router as cases_router
 from python.routers import router
 from python.session_manager import SessionManager
 
@@ -15,6 +16,7 @@ def create_app(manager: SessionManager | None = None) -> FastAPI:
                        allow_headers = ['Content-Type'])
     app.state.sessions = manager or SessionManager()
     app.include_router(router)
+    app.include_router(cases_router)
 
     @app.get('/health', tags = ['health'])
     async def health() -> dict[str, str]:
