@@ -7,6 +7,8 @@ import {
 	type Account,
 	type ApplicationInput,
 	type ApplicationKind,
+	type CertificateCopy,
+	type CertificateDelivery,
 	type SubmittedApplication,
 	type ZamPeriod
 } from '../../features/account/accountApi';
@@ -31,8 +33,17 @@ const KINDS: Record<ApplicationKind, { label: string; hint: string; to: string }
 	urlop_macierzynski: { label: 'Wniosek o urlop macierzyński', hint: 'do pracodawcy – także wniosek łączny z rodzicielskim', to: 'pracodawcy' },
 	urlop_rodzicielski: { label: 'Wniosek o urlop rodzicielski', hint: 'do pracodawcy – co najmniej 21 dni przed', to: 'pracodawcy' },
 	urlop_ojcowski: { label: 'Wniosek o urlop ojcowski', hint: 'do pracodawcy – co najmniej 7 dni przed', to: 'pracodawcy' },
-	zam: { label: 'ZAM – wniosek o zasiłek macierzyński', hint: 'do ZUS przez PUE/eZUS', to: 'ZUS' }
+	zam: { label: 'ZAM – wniosek o zasiłek macierzyński', hint: 'do ZUS przez PUE/eZUS', to: 'ZUS' },
+	odpis_aktu_urodzenia: { label: 'Wniosek o odpis aktu urodzenia', hint: 'do urzędu stanu cywilnego przez gov.pl', to: 'urzędu stanu cywilnego' }
 };
+const COPIES: { value: CertificateCopy; label: string; hint: string }[] = [
+	{ value: 'skrocony', label: 'Odpis skrócony', hint: 'Podstawowe dane dziecka i rodziców – wystarcza do ZUS i pracodawcy.' },
+	{ value: 'zupelny', label: 'Odpis zupełny', hint: 'Pełna treść aktu z adnotacjami – np. do sądu lub za granicę.' }
+];
+const DELIVERIES: { value: CertificateDelivery; label: string }[] = [
+	{ value: 'elektronicznie', label: 'Elektronicznie – do skrzynki na koncie gov.pl' },
+	{ value: 'odbior_osobisty', label: 'Odbiór osobisty w urzędzie stanu cywilnego' }
+];
 const PERIODS: { value: ZamPeriod; label: string }[] = [
 	{ value: 'macierzynski', label: 'Urlop macierzyński' },
 	{ value: 'rodzicielski', label: 'Urlop rodzicielski' },
@@ -47,15 +58,25 @@ function availableKinds(account: Account): ApplicationKind[] {
 	if (employee) kinds.push('urlop_rodzicielski');
 	if (employee && account.role === 'father' && account.family.childBirthDate) kinds.push('urlop_ojcowski');
 	kinds.push('zam');
+	if (account.family.childBirthDate) kinds.push('odpis_aktu_urodzenia');
 	return kinds;
 }
 
-type Draft = { startDate: string; weeks: number; combined: boolean; period: ZamPeriod; bankAccount: string; confirmed: boolean };
+type Draft = {
+	startDate: string;
+	weeks: number;
+	combined: boolean;
+	period: ZamPeriod;
+	bankAccount: string;
+	copyType: CertificateCopy;
+	delivery: CertificateDelivery;
+	confirmed: boolean;
+};
 
 function defaults(kind: ApplicationKind, account: Account, today: string): Draft {
 	const birth = account.family.childBirthDate;
 	const expected = account.family.expectedBirthDate;
-	const base = { combined: false, bankAccount: '', confirmed: false };
+	const base = { combined: false, bankAccount: '', copyType: 'skrocony' as const, delivery: 'elektronicznie' as const, confirmed: false };
 	const period: ZamPeriod = account.role === 'father' ? (birth ? 'ojcowski' : 'rodzicielski') : 'macierzynski';
 	switch (kind) {
 		case 'urlop_macierzynski':
@@ -68,6 +89,8 @@ function defaults(kind: ApplicationKind, account: Account, today: string): Draft
 			const start = period === 'ojcowski' ? addDays(today, 7) : (birth ?? expected ?? today);
 			return { ...base, startDate: start, weeks: period === 'ojcowski' ? 2 : 20, period };
 		}
+		case 'odpis_aktu_urodzenia':
+			return { ...base, startDate: '', weeks: 0, period };
 	}
 }
 
@@ -136,28 +159,34 @@ function SubmitView({ account }: { account: Account }) {
 	const name = `${account.person.firstName} ${account.person.lastName}`;
 	const employer = title?.payer.name ?? 'pracodawca';
 
+	// Jeden rodzic: pula urlopu rodzicielskiego minus 9 tygodni przysługujących wyłącznie drugiemu (art. 182¹ᵃ § 4 KP).
+	const parentalPerParent = params.PARENTAL_WEEKS_SINGLE_CHILD - params.SECOND_PARENT_EXCLUSIVE_PARENTAL_WEEKS;
 	const maxWeeks =
 		kind === 'urlop_ojcowski' || (kind === 'zam' && draft.period === 'ojcowski')
 			? params.PATERNITY_TOTAL_WEEKS
 			: kind === 'urlop_rodzicielski' || (kind === 'zam' && draft.period === 'rodzicielski')
-				? params.PARENTAL_WEEKS_SINGLE_CHILD
+				? parentalPerParent
 				: params.MATERNITY_WEEKS_BY_CHILDREN[1];
+	const isCertificate = kind === 'odpis_aktu_urodzenia';
 	const endDate = draft.startDate && draft.weeks > 0 ? addDays(draft.startDate, draft.weeks * 7 - 1) : null;
 	const toZus = kind === 'zam' && !(title?.type === 'umowa_o_prace' && title.payer.over20Insured);
+	const sendTo = isCertificate ? 'urzędu stanu cywilnego' : kind === 'zam' && toZus ? 'ZUS' : 'pracodawcy';
 
 	async function submit() {
 		if (!token) return;
 		setError(null);
 		setStage('signing');
-		const input: ApplicationInput = {
-			kind,
-			startDate: draft.startDate,
-			weeks: draft.weeks,
-			combined: kind === 'urlop_macierzynski' ? draft.combined : undefined,
-			period: kind === 'zam' ? draft.period : undefined,
-			bankAccount: kind === 'zam' ? draft.bankAccount : undefined,
-			confirmed: draft.confirmed
-		};
+		const input: ApplicationInput = isCertificate
+			? { kind, copyType: draft.copyType, delivery: draft.delivery, confirmed: draft.confirmed }
+			: {
+					kind,
+					startDate: draft.startDate,
+					weeks: draft.weeks,
+					combined: kind === 'urlop_macierzynski' ? draft.combined : undefined,
+					period: kind === 'zam' ? draft.period : undefined,
+					bankAccount: kind === 'zam' ? draft.bankAccount : undefined,
+					confirmed: draft.confirmed
+				};
 		try {
 			// short pause so the mObywatel signature step is visible in the demo
 			const [sent] = await Promise.all([accountApi.submitApplication(token, input), new Promise((r) => setTimeout(r, 1100))]);
@@ -191,7 +220,15 @@ function SubmitView({ account }: { account: Account }) {
 					{account.person.city}, {plDate(today)}
 				</span>
 			</div>
-			<p className="text-right font-medium">{kind === 'zam' ? (toZus ? 'Zakład Ubezpieczeń Społecznych' : employer) : employer}</p>
+			<p className="text-right font-medium">
+				{isCertificate
+					? `Kierownik Urzędu Stanu Cywilnego – ${account.person.city}`
+					: kind === 'zam'
+						? toZus
+							? 'Zakład Ubezpieczeń Społecznych'
+							: employer
+						: employer}
+			</p>
 			<h3 className="text-center text-base font-bold">{KINDS[kind].label.replace('ZAM – w', 'W')}</h3>
 			{kind === 'urlop_macierzynski' && (
 				<p>
@@ -222,6 +259,13 @@ function SubmitView({ account }: { account: Account }) {
 					{draft.bankAccount && ` na rachunek ${draft.bankAccount}`}.
 				</p>
 			)}
+			{isCertificate && (
+				<p>
+					Wnoszę o wydanie {draft.copyType === 'zupelny' ? 'odpisu zupełnego' : 'odpisu skróconego'} aktu urodzenia mojego dziecka
+					{account.family.childBirthDate && ` urodzonego dnia ${plDate(account.family.childBirthDate)}`}. Odpis proszę{' '}
+					{draft.delivery === 'elektronicznie' ? 'przesłać na moje konto w serwisie gov.pl' : 'przygotować do odbioru osobistego w urzędzie'}.
+				</p>
+			)}
 			<p className="text-muted">Oświadczam, że dane zawarte we wniosku są zgodne z prawdą.</p>
 			<p className="text-right text-xs text-muted">podpisano w aplikacji mObywatel (symulacja)</p>
 		</article>
@@ -245,7 +289,7 @@ function SubmitView({ account }: { account: Account }) {
 
 			<p className="enter rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-100">
 				<span className="font-semibold">Wersja demonstracyjna.</span> Podpis i wysyłka są symulowane – wniosek nie trafia do prawdziwego
-				pracodawcy ani do ZUS.
+				pracodawcy, ZUS ani urzędu stanu cywilnego.
 			</p>
 
 			<div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
@@ -270,6 +314,11 @@ function SubmitView({ account }: { account: Account }) {
 									</button>
 								))}
 							</div>
+							{!account.family.childBirthDate && (
+								<p className="mt-2 text-xs text-muted">
+									Wniosek o odpis aktu urodzenia pojawi się tutaj po zarejestrowaniu urodzenia dziecka w urzędzie stanu cywilnego.
+								</p>
+							)}
 							{title?.type !== 'umowa_o_prace' && (
 								<p className="mt-2 text-xs text-muted">
 									Wnioski o urlop składa się do pracodawcy, więc dotyczą umowy o pracę. Przy umowie zlecenia i działalności wnioskujesz od razu
@@ -299,26 +348,72 @@ function SubmitView({ account }: { account: Account }) {
 							</Field>
 						)}
 
-						<div className="grid gap-4 sm:grid-cols-2">
-							<Field label="Od kiedy" hint={kind === 'urlop_macierzynski' ? `Najwcześniej ${params.MATERNITY_MAX_PRENATAL_WEEKS} tyg. przed porodem.` : undefined}>
-								{(id) => (
-									<input id={id} type="date" className={inputCls} value={draft.startDate} onChange={(e) => set('startDate', e.target.value)} />
-								)}
-							</Field>
-							<Field label="Liczba tygodni" hint={endDate ? `do ${plDate(endDate)} (maks. ${maxWeeks} tyg.)` : `maks. ${maxWeeks} tyg.`}>
-								{(id) => (
-									<input
-										id={id}
-										type="number"
-										min={1}
-										max={maxWeeks}
-										className={inputCls}
-										value={draft.weeks || ''}
-										onChange={(e) => set('weeks', Math.max(0, Math.min(maxWeeks, Number(e.target.value) || 0)))}
-									/>
-								)}
-							</Field>
-						</div>
+						{isCertificate && (
+							<>
+								<div>
+									<p className="mb-2 text-sm font-semibold text-ink">Rodzaj odpisu</p>
+									<div role="radiogroup" className="grid gap-2 sm:grid-cols-2">
+										{COPIES.map((c) => (
+											<button
+												key={c.value}
+												type="button"
+												role="radio"
+												aria-checked={draft.copyType === c.value}
+												onClick={() => set('copyType', c.value)}
+												className={cx(
+													'rounded-md border px-3 py-2.5 text-left transition',
+													draft.copyType === c.value
+														? 'border-brand bg-brand-soft/60 ring-1 ring-brand'
+														: 'border-line bg-paper hover:border-muted/60 hover:bg-hover'
+												)}>
+												<span className={cx('block text-sm font-semibold', draft.copyType === c.value ? 'text-brand-ink' : 'text-ink')}>
+													{c.label}
+												</span>
+												<span className="block text-xs text-muted">{c.hint}</span>
+											</button>
+										))}
+									</div>
+								</div>
+								<Field label="Jak chcesz odebrać odpis?">
+									{(id) => (
+										<select
+											id={id}
+											className={inputCls}
+											value={draft.delivery}
+											onChange={(e) => set('delivery', e.target.value as CertificateDelivery)}>
+											{DELIVERIES.map((d) => (
+												<option key={d.value} value={d.value}>
+													{d.label}
+												</option>
+											))}
+										</select>
+									)}
+								</Field>
+							</>
+						)}
+
+						{!isCertificate && (
+							<div className="grid gap-4 sm:grid-cols-2">
+								<Field label="Od kiedy" hint={kind === 'urlop_macierzynski' ? `Najwcześniej ${params.MATERNITY_MAX_PRENATAL_WEEKS} tyg. przed porodem.` : undefined}>
+									{(id) => (
+										<input id={id} type="date" className={inputCls} value={draft.startDate} onChange={(e) => set('startDate', e.target.value)} />
+									)}
+								</Field>
+								<Field label="Liczba tygodni" hint={endDate ? `do ${plDate(endDate)} (maks. ${maxWeeks} tyg.)` : `maks. ${maxWeeks} tyg.`}>
+									{(id) => (
+										<input
+											id={id}
+											type="number"
+											min={1}
+											max={maxWeeks}
+											className={inputCls}
+											value={draft.weeks || ''}
+											onChange={(e) => set('weeks', Math.max(0, Math.min(maxWeeks, Number(e.target.value) || 0)))}
+										/>
+									)}
+								</Field>
+							</div>
+						)}
 
 						{kind === 'urlop_macierzynski' && (
 							<label className="flex cursor-pointer items-start gap-3 rounded-md border border-line px-3 py-2.5 transition hover:bg-hover">
@@ -377,17 +472,17 @@ function SubmitView({ account }: { account: Account }) {
 							<p className="mt-1 font-mono text-2xl font-bold tracking-[0.3em] text-ink">{code}</p>
 							<p className="mt-2 inline-flex items-center gap-2 text-sm text-muted">
 								<LoaderCircle className="h-4 w-4 animate-spin" aria-hidden />
-								Podpisuję i wysyłam do {kind === 'zam' && toZus ? 'ZUS' : 'pracodawcy'}…
+								Podpisuję i wysyłam do {sendTo}…
 							</p>
 						</div>
 					) : (
 						<button
 							type="button"
 							onClick={() => void submit()}
-							disabled={!draft.confirmed || !draft.startDate || draft.weeks < 1}
+							disabled={!draft.confirmed || (!isCertificate && (!draft.startDate || draft.weeks < 1))}
 							className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-brand px-4 py-3 text-sm font-semibold text-white transition hover:bg-brand-strong disabled:cursor-not-allowed disabled:opacity-60">
 							<Send className="h-4 w-4" aria-hidden />
-							Podpisz w mObywatelu i wyślij do {kind === 'zam' && toZus ? 'ZUS' : 'pracodawcy'}
+							Podpisz w mObywatelu i wyślij do {sendTo}
 						</button>
 					)}
 				</section>
@@ -411,7 +506,9 @@ function Confirmation({ result, onAnother }: { result: SubmittedApplication; onA
 				<p className="text-muted">
 					{result.recipient.type === 'zus'
 						? 'ZUS przyjął wniosek. Urzędowe poświadczenie odbioru (UPO) znajdziesz poniżej i w „Moim koncie”.'
-						: `Wniosek został doręczony do: ${result.recipient.name}.`}
+						: result.recipient.type === 'usc'
+							? 'Urząd stanu cywilnego przyjął wniosek. Urzędowe poświadczenie przedłożenia (UPP) znajdziesz poniżej i w „Moim koncie”.'
+							: `Wniosek został doręczony do: ${result.recipient.name}.`}
 				</p>
 			</header>
 
@@ -435,7 +532,7 @@ function Confirmation({ result, onAnother }: { result: SubmittedApplication; onA
 					</div>
 					{result.upo && (
 						<div className="grid gap-1 py-2.5 text-sm sm:grid-cols-[12rem_1fr]">
-							<dt className="text-muted">UPO</dt>
+							<dt className="text-muted">{result.recipient.type === 'usc' ? 'UPP' : 'UPO'}</dt>
 							<dd className="text-ink">
 								{result.upo.number}
 								<span className="block break-all font-mono text-xs text-muted">skrót dokumentu: {result.upo.digest}</span>

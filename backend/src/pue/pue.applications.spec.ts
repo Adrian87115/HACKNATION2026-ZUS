@@ -67,4 +67,40 @@ describe('simulated e-applications', () => {
       buildApplication(account('dzialalnosc-z-zadluzeniem'), { ...base, bankAccount: '1234', confirmed: true }, DEFAULT_PARAMS_2026, NOW),
     ).toThrow(BadRequestException);
   });
+
+  it('limits parental leave of one parent to the pool minus the other parent\'s 9 weeks', () => {
+    const request = (weeks: number) =>
+      buildApplication(
+        account('ojciec-po-porodzie'),
+        { kind: 'urlop_rodzicielski', startDate: '2027-03-22', weeks, confirmed: true },
+        DEFAULT_PARAMS_2026,
+        NOW,
+      );
+    expect(request(32).fields.some((f) => f.value.includes('32 tyg.'))).toBe(true);
+    expect(() => request(33)).toThrow(BadRequestException);
+  });
+
+  it('files a birth certificate copy request with the civil registry office', () => {
+    const app = buildApplication(
+      account('ojciec-po-porodzie'),
+      { kind: 'odpis_aktu_urodzenia', copyType: 'skrocony', delivery: 'elektronicznie', confirmed: true },
+      DEFAULT_PARAMS_2026,
+      NOW,
+    );
+    expect(app.recipient.type).toBe('usc');
+    expect(app.number).toMatch(/^USC\/2026\//);
+    expect(app.upo?.number).toMatch(/^UPP\/2026\//);
+    expect(app.fields.some((f) => f.value.includes('odpis skrócony'))).toBe(true);
+  });
+
+  it('does not accept a birth certificate request before the child is born', () => {
+    expect(() =>
+      buildApplication(
+        account('pracownica-w-ciazy'),
+        { kind: 'odpis_aktu_urodzenia', copyType: 'skrocony', delivery: 'elektronicznie', confirmed: true },
+        DEFAULT_PARAMS_2026,
+        NOW,
+      ),
+    ).toThrow(BadRequestException);
+  });
 });

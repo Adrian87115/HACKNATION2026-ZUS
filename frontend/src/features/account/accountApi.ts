@@ -42,16 +42,20 @@ export type DebtCertificate = {
 	text: string;
 };
 
-export type ApplicationKind = 'urlop_macierzynski' | 'urlop_rodzicielski' | 'urlop_ojcowski' | 'zam';
+export type ApplicationKind = 'urlop_macierzynski' | 'urlop_rodzicielski' | 'urlop_ojcowski' | 'zam' | 'odpis_aktu_urodzenia';
 export type ZamPeriod = 'macierzynski' | 'rodzicielski' | 'ojcowski';
+export type CertificateCopy = 'skrocony' | 'zupelny';
+export type CertificateDelivery = 'elektronicznie' | 'odbior_osobisty';
 
 export type ApplicationInput = {
 	kind: ApplicationKind;
-	startDate: string;
-	weeks: number;
+	startDate?: string;
+	weeks?: number;
 	combined?: boolean;
 	period?: ZamPeriod;
 	bankAccount?: string;
+	copyType?: CertificateCopy;
+	delivery?: CertificateDelivery;
 	confirmed: boolean;
 };
 
@@ -60,7 +64,7 @@ export type SubmittedApplication = {
 	number: string;
 	kind: ApplicationKind;
 	title: string;
-	recipient: { type: 'pracodawca' | 'zus'; name: string };
+	recipient: { type: 'pracodawca' | 'zus' | 'usc'; name: string };
 	channel: string;
 	submittedAt: string;
 	status: 'doreczony' | 'przyjety';

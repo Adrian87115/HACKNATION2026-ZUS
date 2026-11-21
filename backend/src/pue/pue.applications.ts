@@ -1,5 +1,6 @@
 /**
- * Simulated e-applications: leave requests sent to the employer and the ZAM application sent to ZUS via PUE/eZUS.
+ * Simulated e-applications: leave requests sent to the employer, the ZAM application sent to ZUS via PUE/eZUS
+ * and the request for a copy of the child's birth certificate sent to the civil registry office (USC) via gov.pl.
  * Checks follow the Labour Code deadlines (Art. 180, 182^1a, 182^1d, 182^3 KP) and Art. 2a / 30a of the benefits act.
  * Problems that ZUS or the employer would raise later are returned as warnings, so the user learns about them now.
  */
@@ -8,8 +9,11 @@ import { BadRequestException } from '@nestjs/common';
 import type { BenefitParams } from '@zus/engine';
 import type { Account, InsuranceTitle } from './pue.data.js';
 
-export type ApplicationKind = 'urlop_macierzynski' | 'urlop_rodzicielski' | 'urlop_ojcowski' | 'zam';
+export type ApplicationKind = 'urlop_macierzynski' | 'urlop_rodzicielski' | 'urlop_ojcowski' | 'zam' | 'odpis_aktu_urodzenia';
 export type ZamPeriod = 'macierzynski' | 'rodzicielski' | 'ojcowski';
+/** Birth certificate copy: short (skrócony) or full (zupełny). */
+export type CertificateCopy = 'skrocony' | 'zupelny';
+export type CertificateDelivery = 'elektronicznie' | 'odbior_osobisty';
 
 export type ApplicationInput = {
   kind?: unknown;
@@ -20,6 +24,9 @@ export type ApplicationInput = {
   /** ZAM: which leave the benefit is for. */
   period?: unknown;
   bankAccount?: unknown;
+  /** Birth certificate request: copy type and how to receive it. */
+  copyType?: unknown;
+  delivery?: unknown;
   confirmed?: unknown;
 };
 
@@ -28,7 +35,7 @@ export type Application = {
   number: string;
   kind: ApplicationKind;
   title: string;
-  recipient: { type: 'pracodawca' | 'zus'; name: string };
+  recipient: { type: 'pracodawca' | 'zus' | 'usc'; name: string };
   channel: string;
   submittedAt: string;
   status: 'doreczony' | 'przyjety';
@@ -42,6 +49,15 @@ const TITLES: Record<ApplicationKind, string> = {
   urlop_rodzicielski: 'Wniosek o udzielenie urlopu rodzicielskiego',
   urlop_ojcowski: 'Wniosek o udzielenie urlopu ojcowskiego',
   zam: 'ZAM – wniosek o zasiłek macierzyński',
+  odpis_aktu_urodzenia: 'Wniosek o wydanie odpisu aktu urodzenia',
+};
+const COPY_LABEL: Record<CertificateCopy, string> = {
+  skrocony: 'odpis skrócony',
+  zupelny: 'odpis zupełny',
+};
+const DELIVERY_LABEL: Record<CertificateDelivery, string> = {
+  elektronicznie: 'elektronicznie – do skrzynki na koncie gov.pl',
+  odbior_osobisty: 'odbiór osobisty w urzędzie stanu cywilnego',
 };
 const PERIOD_LABEL: Record<ZamPeriod, string> = {
   macierzynski: 'urlopu macierzyńskiego',
@@ -76,6 +92,58 @@ export function normalizeBankAccount(v: unknown): string | null {
   return rest === 1 ? digits.replace(/(\d{2})(\d{4})(\d{4})(\d{4})(\d{4})(\d{4})(\d{4})/, '$1 $2 $3 $4 $5 $6 $7') : null;
 }
 
+/** Parental leave one parent can take: the pool minus the other parent's 9 non-transferable weeks. */
+export function parentalMaxPerParent(params: BenefitParams): number {
+  return params.PARENTAL_WEEKS_SINGLE_CHILD - params.SECOND_PARENT_EXCLUSIVE_PARENTAL_WEEKS;
+}
+
+/** Request for a copy of the child's birth certificate, filed with the civil registry office via gov.pl. */
+function buildCertificateRequest(
+  account: Account,
+  input: ApplicationInput,
+  birth: Date | null,
+  name: string,
+  now: Date,
+): Application {
+  if (!birth) {
+    throw new BadRequestException('Odpis aktu urodzenia można zamówić po zarejestrowaniu urodzenia dziecka w urzędzie stanu cywilnego.');
+  }
+  const copyType = input.copyType as CertificateCopy;
+  if (!(copyType in COPY_LABEL)) throw new BadRequestException('Wybierz rodzaj odpisu: skrócony albo zupełny.');
+  const delivery = input.delivery as CertificateDelivery;
+  if (!(delivery in DELIVERY_LABEL)) throw new BadRequestException('Wybierz, jak chcesz odebrać odpis.');
+
+  const fields: Application['fields'] = [
+    { label: 'Wnioskodawca', value: `${name}, PESEL ${account.person.peselMasked}` },
+    { label: 'Dokument', value: `${COPY_LABEL[copyType]} aktu urodzenia dziecka` },
+    { label: 'Data urodzenia dziecka', value: plDate(birth) },
+    { label: 'Sposób odbioru', value: DELIVERY_LABEL[delivery] },
+  ];
+  const warnings: string[] = [];
+  if (copyType === 'zupelny') {
+    warnings.push('Do wniosków o zasiłek wystarcza zwykle odpis skrócony – zupełny zawiera pełną historię aktu i bywa potrzebny głównie w sprawach sądowych lub za granicą.');
+  }
+  warnings.push('ZUS może sam pobrać dane o urodzeniu dziecka z rejestru stanu cywilnego – odpis przyda się, jeśli płatnik składek albo ZUS o niego poprosi.');
+
+  const submittedAt = now.toISOString();
+  const seq = String(randomInt(100000, 999999));
+  const number = `USC/${now.getUTCFullYear()}/${seq}`;
+  const digest = createHash('sha256').update(`${number}|${account.id}|${submittedAt}|${JSON.stringify(fields)}`).digest('hex');
+  return {
+    id: `${account.id}-${seq}`,
+    number,
+    kind: 'odpis_aktu_urodzenia',
+    title: TITLES.odpis_aktu_urodzenia,
+    recipient: { type: 'usc', name: `Urząd Stanu Cywilnego – ${account.person.city}` },
+    channel: 'gov.pl – rejestr stanu cywilnego',
+    submittedAt,
+    status: 'przyjety',
+    fields,
+    warnings,
+    upo: { number: `UPP/${now.getUTCFullYear()}/${seq}`, digest: digest.slice(0, 32) },
+  };
+}
+
 function currentTitle(account: Account, today: string): InsuranceTitle | null {
   return account.insurance.find((t) => t.from <= today && (!t.to || t.to >= today)) ?? null;
 }
@@ -89,6 +157,7 @@ export function buildApplication(account: Account, input: ApplicationInput, para
   const title = currentTitle(account, iso(today));
   const name = `${account.person.firstName} ${account.person.lastName}`;
   const birth = account.family.childBirthDate ? new Date(`${account.family.childBirthDate}T00:00:00Z`) : null;
+  if (kind === 'odpis_aktu_urodzenia') return buildCertificateRequest(account, input, birth, name, now);
   const expected = account.family.expectedBirthDate ? new Date(`${account.family.expectedBirthDate}T00:00:00Z`) : null;
   const start = parseDate(input.startDate, 'od kiedy');
   const daysAhead = Math.round((start.getTime() - today.getTime()) / DAY);
@@ -130,14 +199,11 @@ export function buildApplication(account: Account, input: ApplicationInput, para
   }
 
   if (kind === 'urlop_rodzicielski') {
-    const max = params.PARENTAL_WEEKS_SINGLE_CHILD;
-    const weeks = weeksInt(max);
+    // One parent can use at most the pool minus the other parent's non-transferable weeks (Art. 182^1a § 4 KP).
+    const weeks = weeksInt(parentalMaxPerParent(params));
     const end = addWeeks(start, weeks);
     if (daysAhead < 21) {
       warnings.push('Wniosek o urlop rodzicielski składa się co najmniej 21 dni przed jego rozpoczęciem (art. 182^1d § 1 KP). Pracodawca może przesunąć termin.');
-    }
-    if (weeks > max - params.SECOND_PARENT_EXCLUSIVE_PARENTAL_WEEKS) {
-      warnings.push(`Drugi rodzic ma wyłączne prawo do ${params.SECOND_PARENT_EXCLUSIVE_PARENTAL_WEEKS} tygodni urlopu rodzicielskiego – jeśli z nich nie skorzysta, przepadną.`);
     }
     fields.push({ label: 'Okres urlopu', value: `${plDate(start)} – ${plDate(end)} (${weeks} tyg.)` });
     fields.push({ label: 'Zasiłek za ten okres', value: `${Math.round(params.RATE_PARENTAL_70 * 100)}% podstawy wymiaru` });
@@ -153,7 +219,7 @@ export function buildApplication(account: Account, input: ApplicationInput, para
     }
     fields.push({ label: 'Okres urlopu macierzyńskiego', value: `od ${plDate(start)}, ${weeks} tyg.` });
     if (combined) {
-      const parental = params.PARENTAL_WEEKS_SINGLE_CHILD - params.SECOND_PARENT_EXCLUSIVE_PARENTAL_WEEKS;
+      const parental = parentalMaxPerParent(params);
       const deadline = birth ? new Date(birth.getTime() + params.COMBINED_APPLICATION_DEADLINE_DAYS * DAY) : null;
       fields.push({
         label: 'Bezpośrednio po nim urlop rodzicielski',
@@ -171,7 +237,7 @@ export function buildApplication(account: Account, input: ApplicationInput, para
     const bank = normalizeBankAccount(input.bankAccount);
     if (!bank) throw new BadRequestException('Numer rachunku jest niepoprawny – sprawdź 26 cyfr numeru konta.');
     const maxWeeks =
-      period === 'ojcowski' ? params.PATERNITY_TOTAL_WEEKS : period === 'rodzicielski' ? params.PARENTAL_WEEKS_SINGLE_CHILD : params.MATERNITY_WEEKS_BY_CHILDREN[1];
+      period === 'ojcowski' ? params.PATERNITY_TOTAL_WEEKS : period === 'rodzicielski' ? parentalMaxPerParent(params) : params.MATERNITY_WEEKS_BY_CHILDREN[1];
     const weeks = weeksInt(maxWeeks);
     fields.push({ label: 'Zasiłek macierzyński za okres', value: `${PERIOD_LABEL[period]}: od ${plDate(start)}, ${weeks} tyg.` });
     fields.push({ label: 'Rachunek do wypłaty', value: bank });
