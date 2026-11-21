@@ -24,7 +24,7 @@ export default function Home() {
 
 	return (
 		<BaseLayout>
-			<section className="mb-8 rounded-2xl bg-linear-to-br from-brand-600 to-brand-700 p-6 text-white sm:p-8">
+			<section className="mb-8 rounded-2xl bg-linear-to-br from-brand to-brand-strong p-6 text-white sm:p-8">
 				<Typography variant="h4" component="h1" className="font-bold">
 					{t('dashboard.welcome.title')}
 				</Typography>

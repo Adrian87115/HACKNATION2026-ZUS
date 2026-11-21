@@ -33,5 +33,26 @@
         "description": "Zaplanowane w tym miesiącu"
       }
     }
+  },
+  "accessibility": {
+    "title": "Ułatwienia dostępu",
+    "open": "Otwórz ustawienia ułatwień dostępu",
+    "theme": {
+      "label": "Motyw",
+      "light": "Jasny",
+      "dark": "Ciemny",
+      "system": "Systemowy"
+    },
+    "fontSize": {
+      "label": "Rozmiar tekstu",
+      "normal": "Normalny",
+      "large": "Duży",
+      "xlarge": "Bardzo duży"
+    },
+    "highContrast": "Wysoki kontrast",
+    "textSpacing": "Większe odstępy w tekście",
+    "underlineLinks": "Podkreślone linki",
+    "reduceMotion": "Ograniczenie animacji",
+    "reset": "Przywróć domyślne"
   }
 }

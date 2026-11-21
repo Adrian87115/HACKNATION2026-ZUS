@@ -5,6 +5,22 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ZUS</title>
+    <script>
+      // Apply saved accessibility settings before first paint (see src/accessibility/settings.ts)
+      (function () {
+        try {
+          var s = JSON.parse(localStorage.getItem('zus.a11y') || '{}');
+          var r = document.documentElement;
+          var dark = s.themeMode === 'dark' || (s.themeMode === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+          r.setAttribute('data-theme', dark ? 'dark' : 'light');
+          r.setAttribute('data-font-size', s.fontSize || 'normal');
+          if (s.highContrast) r.setAttribute('data-contrast', 'high');
+          if (s.textSpacing) r.setAttribute('data-text-spacing', 'true');
+          if (s.underlineLinks) r.setAttribute('data-underline-links', 'true');
+          if (s.reduceMotion) r.setAttribute('data-reduce-motion', 'true');
+        } catch (e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

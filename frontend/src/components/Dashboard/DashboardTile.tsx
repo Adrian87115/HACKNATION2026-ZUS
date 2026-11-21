@@ -12,7 +12,7 @@ export default function DashboardTile({
 	badge
 }: Props) {
 	return (
-		<div className="rounded-lg flex items-center bg-slate-50 p-4 shadow-sm transition hover:shadow-md">
+		<div className="rounded-lg flex items-center border border-line bg-paper p-4 shadow-sm transition hover:shadow-md">
 			<div className="flex-1">
 				<span className="text-lg font-semibold">{title}</span>
 			</div>
