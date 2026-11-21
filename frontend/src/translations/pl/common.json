@@ -7,7 +7,9 @@
     "label": "Nawigacja główna",
     "applications": "Wnioski",
     "risks": "Ryzyka",
-    "support": "Pomoc"
+    "support": "Pomoc",
+    "menu": "Menu",
+    "closeMenu": "Zamknij menu"
   },
   "footer": {
     "description": "Asystent, który pomaga rodzicom zaplanować urlopy i sprawdzić wysokość zasiłków z ZUS.",
@@ -182,6 +184,7 @@
   "account": {
     "login": "Zaloguj się",
     "logout": "Wyloguj",
-    "myAccount": "Moje konto"
+    "myAccount": "Moje konto",
+    "submitApplication": "Złóż wniosek online"
   }
 }
