@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Post, Put } from '@nestjs/common';
 import { EngineService } from './engine.service.js';
-import type { BasisInput, BenefitParams, MaternityPlanInput } from './index.js';
+import type { BasisInput, BenefitParams, MaternityPlanInput, PregnancyBenefitInput } from './index.js';
 
 @Controller('engine')
 export class EngineController {
@@ -10,6 +10,12 @@ export class EngineController {
   @Post('basis')
   calculateBasis(@Body() input: BasisInput) {
     return this.engineService.calculateBasis(input);
+  }
+
+  /** Kalkulator (a): zasiłek chorobowy w ciąży / zasiłek w wysokości zasiłku macierzyńskiego. */
+  @Post('pregnancy')
+  calculatePregnancyBenefits(@Body() input: PregnancyBenefitInput) {
+    return this.engineService.calculatePregnancyBenefits(input);
   }
 
   /** Kalkulatory (b)-(e): okres trwania i wysokość zasiłku macierzyńskiego. */

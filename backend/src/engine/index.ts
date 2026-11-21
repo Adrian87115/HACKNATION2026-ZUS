@@ -1,6 +1,11 @@
 import { calculateBasis, type BasisInput, type BasisResult } from './basis.js';
 import { planMaternity, type MaternityPlanInput, type MaternityPlanResult } from './maternityPlanner.js';
 import { DEFAULT_PARAMS_2026, withOverrides, type BenefitParams } from './params.js';
+import {
+  calculatePregnancyBenefits,
+  type PregnancyBenefitInput,
+  type PregnancyBenefitResult,
+} from './pregnancyBenefits.js';
 
 /**
  * Silnik kalkulatorów zasiłków. Niezależny od frameworka (czyste funkcje + parametry),
@@ -35,6 +40,11 @@ export class BenefitEngine {
     return calculateBasis(this.params, input);
   }
 
+  /** Kalkulator (a) – zasiłek chorobowy w ciąży i zasiłek w wysokości zasiłku macierzyńskiego. */
+  calculatePregnancyBenefits(input: PregnancyBenefitInput): PregnancyBenefitResult {
+    return calculatePregnancyBenefits(this.params, input);
+  }
+
   /** Kalkulatory (b)-(e) – okres i wysokość zasiłku macierzyńskiego dla obojga rodziców. */
   planMaternity(input: MaternityPlanInput): MaternityPlanResult {
     return planMaternity(this.params, input);
@@ -46,4 +56,5 @@ export * from './basis.js';
 export * from './leaveDurations.js';
 export * from './maternityPlanner.js';
 export * from './params.js';
+export * from './pregnancyBenefits.js';
 export { EngineInputError } from './utils.js';

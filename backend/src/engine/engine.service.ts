@@ -5,6 +5,7 @@ import {
   type BasisInput,
   type BenefitParams,
   type MaternityPlanInput,
+  type PregnancyBenefitInput,
 } from './index.js';
 
 @Injectable()
@@ -26,6 +27,10 @@ export class EngineService {
 
   calculateBasis(input: BasisInput) {
     return this.run(() => this.engine.calculateBasis(input));
+  }
+
+  calculatePregnancyBenefits(input: PregnancyBenefitInput) {
+    return this.run(() => this.engine.calculatePregnancyBenefits(input));
   }
 
   planMaternity(input: MaternityPlanInput) {

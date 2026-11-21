@@ -213,6 +213,116 @@ describe('adopcja i rodzina zastępcza (e)', () => {
   });
 });
 
+describe('zasiłek chorobowy w ciąży (a)', () => {
+  const employee = {
+    monthlyBasis: 6000,
+    insuranceKind: 'mandatory' as const,
+    insuranceStartDate: '2025-01-01',
+  };
+
+  it('pracownica: 33 dni wynagrodzenia od pracodawcy, potem zasiłek 100%', () => {
+    const r = engine.calculatePregnancyBenefits({
+      ...employee,
+      incapacity: { startDate: '2026-03-01', endDate: '2026-04-30' },
+    });
+    expect(r.entitled).toBe(true);
+    expect(r.segments.map((s) => [s.type, s.startDate, s.endDate, s.days, s.paidBy])).toEqual([
+      ['employer_sick_pay', '2026-03-01', '2026-04-02', 33, 'employer'],
+      ['sickness', '2026-04-03', '2026-04-30', 28, 'zus'],
+    ]);
+    expect(r.segments[1]).toMatchObject({ rate: 1, dailyAmount: 200, totalAmount: 5600 });
+    expect(r.totals).toEqual({ employer: 6600, benefit: 5600, all: 12200 });
+  });
+
+  it('ubezpieczenie dobrowolne: 90 dni wyczekiwania, zasiłek od 1. dnia po nim', () => {
+    const r = engine.calculatePregnancyBenefits({
+      monthlyBasis: 4500,
+      insuranceKind: 'voluntary',
+      insuranceStartDate: '2026-01-01',
+      incapacity: { startDate: '2026-02-01', endDate: '2026-04-30' },
+    });
+    expect(r.entitlementFromDate).toBe('2026-04-01');
+    expect(r.segments.map((s) => [s.type, s.days, s.totalAmount])).toEqual([
+      ['waiting_period', 59, 0],
+      ['sickness', 30, 4500],
+    ]);
+  });
+
+  it('wyczerpanie 270 dni okresu zasiłkowego', () => {
+    const r = engine.calculatePregnancyBenefits({
+      ...employee,
+      previousIncapacityDaysInPregnancy: 260,
+      employerSickDaysUsedThisYear: 33,
+      incapacity: { startDate: '2026-06-01', endDate: '2026-06-20' },
+    });
+    expect(r.segments.map((s) => [s.type, s.days])).toEqual([
+      ['sickness', 10],
+      ['period_exhausted', 10],
+    ]);
+    expect(r.sicknessPeriod).toMatchObject({ usedDays: 270, remainingDays: 0, exhaustedOn: '2026-06-11' });
+  });
+
+  it('limit 33 dni pracodawcy liczony od nowa w nowym roku', () => {
+    const r = engine.calculatePregnancyBenefits({
+      ...employee,
+      employerSickDaysUsedThisYear: 30,
+      incapacity: { startDate: '2025-12-20', endDate: '2026-01-31' },
+    });
+    expect(r.segments.map((s) => [s.type, s.days])).toEqual([
+      ['employer_sick_pay', 3],
+      ['sickness', 9],
+      ['employer_sick_pay', 31],
+    ]);
+  });
+
+  it('kończy zasiłek chorobowy w dniu porodu', () => {
+    const r = engine.calculatePregnancyBenefits({
+      ...employee,
+      expectedBirthDate: '2026-03-20',
+      incapacity: { startDate: '2026-03-01', endDate: '2026-03-31' },
+    });
+    expect(sum(r.segments.map((s) => s.days))).toBe(19);
+  });
+
+  it('e-ZLA bez kodu „B” – 80%', () => {
+    const r = engine.calculatePregnancyBenefits({
+      ...employee,
+      employerSickDaysUsedThisYear: 33,
+      incapacity: { startDate: '2026-03-01', endDate: '2026-03-10', pregnancyCodeB: false },
+    });
+    expect(r.segments[0]).toMatchObject({ rate: 0.8, dailyAmount: 160 });
+    expect(r.warnings.length).toBeGreaterThan(0);
+  });
+
+  it('likwidacja pracodawcy – zasiłek w wysokości macierzyńskiego do dnia porodu', () => {
+    const r = engine.calculatePregnancyBenefits({
+      ...employee,
+      expectedBirthDate: '2026-08-10',
+      jobLoss: { employmentEndDate: '2026-05-31', reason: 'employer_insolvency' },
+    });
+    expect(r.segments).toHaveLength(1);
+    expect(r.segments[0]).toMatchObject({
+      type: 'maternity_level',
+      startDate: '2026-06-01',
+      endDate: '2026-08-09',
+      days: 70,
+      totalAmount: 14000,
+    });
+  });
+
+  it('zadłużenie składkowe przedsiębiorczyni – brak wypłaty', () => {
+    const r = engine.calculatePregnancyBenefits({
+      monthlyBasis: 4500,
+      insuranceKind: 'voluntary',
+      insuranceStartDate: '2025-01-01',
+      contributionDebt: 300,
+      incapacity: { startDate: '2026-03-01', endDate: '2026-03-10' },
+    });
+    expect(r.entitled).toBe(false);
+    expect(r.totals.all).toBe(0);
+  });
+});
+
 describe('parametry (panel administracyjny)', () => {
   it('zmiana stawki wpływa na wynik bez zmian w kodzie', () => {
     const custom = new BenefitEngine();
