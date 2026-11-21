@@ -1,10 +1,18 @@
 // src/components/Timelines/ParentingDecisionTimeline.tsx
-import React, { useEffect, useId, useMemo, useRef, useState } from "react";
+import React, {
+  memo,
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   ArrowLeft,
   ArrowRight,
-  CalendarDays,
   Check,
+  ListOrdered,
   ChevronDown,
   CircleX,
   ExternalLink,
@@ -18,6 +26,7 @@ import {
 import {
   PARENTING_DECISION_TREE,
   type DecisionNode,
+  type SupportOrganization,
 } from "../../data/parentingDecisionTree.js";
 import { Link } from "react-router-dom";
 import { useBenefitEngine } from "../../hooks/useBenefitEngine.js";
@@ -32,58 +41,24 @@ import type {
 } from "../../engine/index.js";
 import { BasisCalculator } from "../BasisCalculator.js";
 import { Collapse } from "../Animations/Collapse.js";
+import { LeavePlanner } from "../Planner/LeavePlanner.js";
 
-/* ------------------------------------------------------------------ */
-/*  Słowniki                                                           */
-/* ------------------------------------------------------------------ */
-
-const ROLE_LABELS: Record<ParentRole, string> = {
-  primary: "Matka / Rodzic 1",
-  secondary: "Ojciec / Rodzic 2",
-};
-
-const ROLE_SHORT: Record<ParentRole, string> = {
-  primary: "Rodzic 1",
-  secondary: "Rodzic 2",
-};
-
-const SEGMENT_LABELS: Record<string, string> = {
-  maternity: "Urlop macierzyński",
-  maternity_conditions: "Urlop na warunkach macierzyńskiego",
-  supplementary_maternity:
-    "Uzupełniający urlop macierzyński (szpital/wcześniak)",
-  parental: "Urlop rodzicielski",
-  paternity: "Urlop ojcowski",
-};
-
-/** Kolor jest tylko dodatkiem – typ okresu zawsze jest też opisany tekstem. */
-const SEGMENT_COLOR: Record<string, string> = {
-  maternity: "#10b981",
-  maternity_conditions: "#14b8a6",
-  supplementary_maternity: "#8b5cf6",
-  parental: "#0ea5e9",
-  paternity: "#f59e0b",
-};
+/** Kalkulator podstawy nie zależy od planu urlopów – renderuje się tylko przy zmianie swoich danych. */
+const MemoBasisCalculator = memo(BasisCalculator);
+import {
+  ROLE_LABELS,
+  ROLE_SHORT,
+  SEGMENT_COLOR,
+  SEGMENT_LABELS,
+  fmtDate,
+  money,
+  percent,
+  vars,
+} from "../Planner/planShared.js";
 
 /* ------------------------------------------------------------------ */
 /*  Funkcje pomocnicze                                                 */
 /* ------------------------------------------------------------------ */
-
-const DAY_MS = 24 * 60 * 60 * 1000;
-
-const money = (n: number) =>
-  `${n.toLocaleString("pl-PL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} zł`;
-
-const percent = (rate: number) =>
-  `${(rate * 100).toLocaleString("pl-PL", { maximumFractionDigits: 1 })}%`;
-
-const fmtDate = (iso: string) =>
-  new Date(`${iso}T00:00:00Z`).toLocaleDateString("pl-PL", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "UTC",
-  });
 
 function fmtDuration(days: number): string {
   const weeks = days / 7;
@@ -103,10 +78,6 @@ function parseMoney(text: string): number {
 }
 
 const sameRate = (a: number, b: number) => Math.abs(a - b) < 1e-9;
-
-/** CSS custom properties (stagger index, segment color) for inline styles. */
-const vars = (v: Record<string, string | number>) =>
-  v as unknown as React.CSSProperties;
 
 /** Prosty język: dlaczego akurat taka stawka. */
 function rateExplanation(
@@ -278,53 +249,6 @@ function MoneyInput(props: {
   );
 }
 
-/** Wykres osi czasu – okresy mogą się nakładać (np. urlop ojcowski), więc każdy ma własny wiersz. */
-function Gantt({ segments }: { segments: PlanSegment[] }) {
-  if (segments.length === 0) return null;
-  const toMs = (s: string) => Date.parse(`${s}T00:00:00Z`);
-  const min = Math.min(...segments.map((s) => toMs(s.startDate)));
-  const max = Math.max(...segments.map((s) => toMs(s.endDate))) + DAY_MS;
-  const span = Math.max(max - min, DAY_MS);
-
-  return (
-    <div className="pt-gantt" aria-hidden="true">
-      {segments.map((seg, i) => {
-        const left = ((toMs(seg.startDate) - min) / span) * 100;
-        const width = Math.max(
-          ((toMs(seg.endDate) + DAY_MS - toMs(seg.startDate)) / span) * 100,
-          1.5,
-        );
-        const color = SEGMENT_COLOR[seg.type] ?? "#64748b";
-        return (
-          <div key={`${seg.type}-${seg.parent}-${i}`} className="pt-gantt-row">
-            <div className="pt-gantt-label">
-              <span className="pt-gantt-dot" style={{ background: color }} />
-              {SEGMENT_LABELS[seg.type] ?? seg.type} · {ROLE_SHORT[seg.parent]}
-            </div>
-            <div className="pt-gantt-track">
-              <div
-                className={`pt-gantt-bar${seg.payable ? "" : " pt-gantt-bar-off"}`}
-                style={{
-                  left: `${left}%`,
-                  width: `${width}%`,
-                  background: color,
-                  ...vars({ "--i": i }),
-                }}
-              />
-            </div>
-          </div>
-        );
-      })}
-      <div className="pt-gantt-axis">
-        <span>{fmtDate(new Date(min).toISOString().slice(0, 10))}</span>
-        <span>
-          {fmtDate(new Date(max - DAY_MS).toISOString().slice(0, 10))}
-        </span>
-      </div>
-    </div>
-  );
-}
-
 function FamilyTotal({ value }: { value: number }) {
   const animated = useCountUp(value);
   return (
@@ -345,6 +269,43 @@ function FamilyTotal({ value }: { value: number }) {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Wsparcie w sytuacjach szczególnych                                 */
+/* ------------------------------------------------------------------ */
+
+function SupportSection({
+  organizations,
+}: {
+  organizations: SupportOrganization[];
+}) {
+  return (
+    <div className="pt-support">
+      <h3 className="pt-h3">
+        <HeartHandshake size={18} aria-hidden /> Gdzie szukać wsparcia
+      </h3>
+      <p>
+        Poza urlopem możecie skorzystać z bezpłatnej pomocy psychologicznej i
+        prawnej:
+      </p>
+      <ul className="pt-support-list">
+        {organizations.map((org) => (
+          <li key={org.name} className="pt-support-item">
+            <div className="pt-support-name">{org.name}</div>
+            <div className="pt-hint">{org.description}</div>
+            <div className="pt-support-contact">
+              {org.contact} •{" "}
+              <a href={org.url} target="_blank" rel="noopener noreferrer">
+                {org.url.replace(/^https?:\/\//, "")}
+                <ExternalLink size={13} aria-hidden />
+              </a>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Wynik                                                              */
 /* ------------------------------------------------------------------ */
 
@@ -352,8 +313,11 @@ function ResultBody(props: {
   plan: PlanState;
   node: DecisionNode;
   params: BenefitParams;
+  edited: boolean;
+  onChangeInput: (next: MaternityPlanInput) => void;
+  onResetInput: () => void;
 }) {
-  const { plan, node, params } = props;
+  const { plan, node, params, edited, onChangeInput, onResetInput } = props;
 
   if (plan.kind === "error") {
     return (
@@ -361,6 +325,13 @@ function ResultBody(props: {
         <CircleX size={18} className="pt-callout-icon" aria-hidden />
         <div>
           <strong>Nie udało się wyliczyć planu.</strong> {plan.message}
+          {edited && (
+            <div>
+              <button type="button" className="pt-link-btn" onClick={onResetInput}>
+                <RotateCcw size={15} aria-hidden /> Przywróć przykładowy plan
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -370,20 +341,6 @@ function ResultBody(props: {
 
   return (
     <>
-      {result.errors.length > 0 && (
-        <div className="pt-callout pt-callout-err" role="alert">
-          <CircleX size={18} className="pt-callout-icon" aria-hidden />
-          <div>
-            <strong>W tym wariancie plan jest niezgodny z przepisami:</strong>
-            <ul>
-              {result.errors.map((e) => (
-                <li key={e}>{e}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      )}
-
       {node.specialLegalNote && (
         <div className="pt-callout pt-callout-warn" role="note">
           <TriangleExclamationPoint
@@ -427,11 +384,19 @@ function ResultBody(props: {
         })}
       </div>
 
-      {/* Oś czasu */}
+      {/* Interaktywny planer – oś czasu z klockami */}
+      <LeavePlanner
+        input={input}
+        result={result}
+        params={params}
+        edited={edited}
+        onChange={onChangeInput}
+        onReset={onResetInput}
+      />
+
       <h3 className="pt-h3">
-        <CalendarDays size={18} aria-hidden /> Kiedy i ile? Harmonogram okresów
+        <ListOrdered size={18} aria-hidden /> Kiedy i ile? Szczegóły okresów
       </h3>
-      <Gantt segments={result.segments} />
       <ol className="pt-segments">
         {result.segments.map((seg, idx) => {
           const why = rateExplanation(seg, input, params);
@@ -520,8 +485,8 @@ function ResultBody(props: {
         className="pt-assumptions"
       >
         <ul>
-          {describeAssumptions(input).map((a) => (
-            <li key={a}>{a}</li>
+          {describeAssumptions(input).map((a, i) => (
+            <li key={`${i}-${a}`}>{a}</li>
           ))}
         </ul>
         <p className="pt-hint">
@@ -529,33 +494,6 @@ function ResultBody(props: {
           podział ustalicie wspólnie z pracodawcami.
         </p>
       </Disclosure>
-
-      {node.supportOrganizations && (
-        <div className="pt-support">
-          <h3 className="pt-h3">
-            <HeartHandshake size={18} aria-hidden /> Gdzie szukać wsparcia
-          </h3>
-          <p>
-            Poza urlopem możecie skorzystać z bezpłatnej pomocy psychologicznej
-            i prawnej:
-          </p>
-          <ul className="pt-support-list">
-            {node.supportOrganizations.map((org) => (
-              <li key={org.name} className="pt-support-item">
-                <div className="pt-support-name">{org.name}</div>
-                <div className="pt-hint">{org.description}</div>
-                <div className="pt-support-contact">
-                  {org.contact} •{" "}
-                  <a href={org.url} target="_blank" rel="noopener noreferrer">
-                    {org.url.replace(/^https?:\/\//, "")}
-                    <ExternalLink size={13} aria-hidden />
-                  </a>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
 
       <Link
         to={`${AppRoutePaths.APPLICATIONS}?swiadczenie=${node.id === "adoption" ? "adopcja" : "macierzynski"}`}
@@ -590,6 +528,15 @@ export function ParentingDecisionTimeline() {
   const currentNode = path[path.length - 1];
   const isLeaf = Boolean(currentNode.buildPlanInput);
 
+  /* Plan edytowany w planerze – ważny tylko dla tej sytuacji i tej daty. */
+  const [draft, setDraft] = useState<{
+    key: string;
+    input: MaternityPlanInput;
+  } | null>(null);
+  const draftKey = `${currentNode.id}|${eventDate}`;
+  const edited = draft?.key === draftKey;
+  const draftInput = edited ? draft.input : null;
+
   const plan: PlanState | null = useMemo(() => {
     if (!currentNode.buildPlanInput) return null;
     if (!eventDate) {
@@ -600,10 +547,12 @@ export function ParentingDecisionTimeline() {
       };
     }
     try {
-      const input = currentNode.buildPlanInput(eventDate, {
+      const base = currentNode.buildPlanInput(eventDate, {
         primary: primaryBasis,
         secondary: secondaryBasis,
       });
+      // Podstawy zawsze bierzemy z kroku 1 – edycja planu ich nie nadpisuje.
+      const input = draftInput ? { ...draftInput, parents: base.parents } : base;
       return { kind: "ok", input, result: engine.planMaternity(input) };
     } catch (err) {
       return {
@@ -614,7 +563,7 @@ export function ParentingDecisionTimeline() {
             : "Sprawdź wpisane dane i spróbuj ponownie.",
       };
     }
-  }, [currentNode, eventDate, primaryBasis, secondaryBasis, engine]);
+  }, [currentNode, eventDate, primaryBasis, secondaryBasis, engine, draftInput]);
 
   /* Fokus: po wyborze przenosimy go na nowy krok albo na wynik (czytniki ekranu, klawiatura). */
   const stepRef = useRef<HTMLHeadingElement>(null);
@@ -628,14 +577,15 @@ export function ParentingDecisionTimeline() {
     (isLeaf ? resultRef : stepRef).current?.focus();
   }, [currentNode.id, isLeaf]);
 
-  const changePrimary = (v: number) => {
+  // Stabilne referencje – dzięki nim kalkulator podstawy (memo) nie renderuje się przy zmianach planu.
+  const changePrimary = useCallback((v: number) => {
     setTouched(true);
     setPrimaryBasis(v);
-  };
-  const changeSecondary = (v: number) => {
+  }, []);
+  const changeSecondary = useCallback((v: number) => {
     setTouched(true);
     setSecondaryBasis(v);
-  };
+  }, []);
 
   const select = (branch: DecisionNode) => setPath((prev) => [...prev, branch]);
   const jumpTo = (index: number) => setPath((prev) => prev.slice(0, index + 1));
@@ -706,7 +656,7 @@ export function ParentingDecisionTimeline() {
           />
         </div>
 
-        <BasisCalculator
+        <MemoBasisCalculator
           engine={engine}
           primaryBasis={primaryBasis}
           secondaryBasis={secondaryBasis}
@@ -826,14 +776,22 @@ export function ParentingDecisionTimeline() {
               state="active"
               headingRef={resultRef}
             />
-            {currentNode.supportOrganizations && (
-              <p className="pt-empathy">
-                Bardzo nam przykro z powodu Waszej straty. Poniżej znajdziecie
-                informacje o urlopie oraz o miejscach, w których możecie uzyskać
-                wsparcie.
-              </p>
+            {currentNode.supportMessage && (
+              <p className="pt-empathy">{currentNode.supportMessage}</p>
             )}
-            <ResultBody plan={plan} node={currentNode} params={params} />
+            {currentNode.supportOrganizations && (
+              <SupportSection
+                organizations={currentNode.supportOrganizations}
+              />
+            )}
+            <ResultBody
+              plan={plan}
+              node={currentNode}
+              params={params}
+              edited={edited}
+              onChangeInput={(next) => setDraft({ key: draftKey, input: next })}
+              onResetInput={() => setDraft(null)}
+            />
           </div>
         ) : (
           <>
@@ -981,16 +939,6 @@ const CSS = `
 .pt-dl dt{color:var(--muted)}
 .pt-dl dd{margin:0;font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
 
-/* Gantt */
-.pt-gantt{margin:0 0 16px;padding:16px 18px;background:var(--surface);border-radius:8px;border:1px solid var(--line)}
-.pt-gantt-row+.pt-gantt-row{margin-top:12px}
-.pt-gantt-label{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-bottom:6px}
-.pt-gantt-dot{width:8px;height:8px;border-radius:2px;flex:none}
-.pt-gantt-track{position:relative;height:10px;background:var(--line);border-radius:3px;overflow:hidden}
-.pt-gantt-bar{position:absolute;top:0;bottom:0;border-radius:3px;transform-origin:left center;transition:left .45s var(--pt-ease),width .45s var(--pt-ease);animation:pt-grow-x .8s var(--pt-ease) backwards;animation-delay:calc(var(--i,0) * 90ms + 200ms)}
-.pt-gantt-bar-off{opacity:.35}
-.pt-gantt-axis{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:10px}
-
 /* Okresy */
 .pt-segments{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
 .pt-segment{position:relative;display:grid;grid-template-columns:1fr auto;gap:8px 16px;padding:16px 18px 10px;border:1px solid var(--line);border-radius:8px;background:var(--paper);overflow:hidden;
@@ -1020,7 +968,7 @@ const CSS = `
 
 /* Wsparcie */
 .pt-empathy{padding:14px 16px;border-radius:8px;background:var(--pt-care-bg);border:1px solid var(--pt-care-line);color:var(--pt-care-ink);margin:0 0 16px}
-.pt-support{margin-top:20px;padding:18px;border-radius:8px;background:var(--pt-care-bg);border:1px solid var(--pt-care-line)}
+.pt-support{margin:0 0 20px;padding:18px;border-radius:8px;background:var(--pt-care-bg);border:1px solid var(--pt-care-line)}
 .pt-support .pt-h3{margin-top:0;color:var(--pt-care-ink)}
 .pt-support>p{margin:0 0 12px}
 .pt-support-list{list-style:none;margin:0;padding:0;display:grid;gap:10px}

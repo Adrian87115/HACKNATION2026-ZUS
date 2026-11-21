@@ -85,8 +85,12 @@ export interface MaternityPlanInput {
   /** Część urlopu macierzyńskiego przejęta przez drugiego rodzica (Art. 180 § 4-13 KP). */
   maternityTransfer?: {
     weeks: number;
-    /** standard = po 14 tyg.; special = po 8 tyg. (szpital, niezdolność do samodzielnej egzystencji, porzucenie). */
-    circumstance?: 'standard' | 'special';
+    /**
+     * standard = po 14 tyg.; special = po 8 tyg. (szpital, niezdolność do samodzielnej egzystencji, porzucenie);
+     * death = zgon matki – urlop matki kończy się w dniu zgonu, ojciec przejmuje resztę bez minimum (Art. 180 KP).
+     * Przy `death` liczba tygodni może być ułamkowa (dzień zgonu nie musi wypadać na koniec tygodnia).
+     */
+    circumstance?: 'standard' | 'special' | 'death';
   };
   /** Urlop ojcowski – maks. 2 części po min. 1 tydzień (Art. 182^3 KP). */
   paternity?: { weeks: number; startDate?: string }[];
@@ -111,6 +115,8 @@ export interface PlanSegment {
   payable: boolean;
   notPayableReason?: string;
   legalBasis: string;
+  /** Indeks części we wsadzie (parentalParts / paternity) – pozwala UI powiązać okres z edytowanym elementem. */
+  partIndex?: number;
 }
 
 export interface MaternityPlanResult {
@@ -187,6 +193,7 @@ export function planMaternity(p: BenefitParams, input: MaternityPlanInput): Mate
     leaveWeeks: number,
     rate: number,
     workFte = 0,
+    partIndex?: number,
   ): Date => {
     const reason = notPayableReason(role);
     const amount = benefitAmount(p, {
@@ -214,6 +221,7 @@ export function planMaternity(p: BenefitParams, input: MaternityPlanInput): Mate
       payable: !reason,
       notPayableReason: reason,
       legalBasis: LEGAL_BASIS[type],
+      partIndex,
     });
     return addDays(start, days);
   };
@@ -277,13 +285,17 @@ export function planMaternity(p: BenefitParams, input: MaternityPlanInput): Mate
   const maternityRate = benefitRate(p, maternityType, { combinedApplication: combined });
   const transferWeeks = requireNonNegative(input.maternityTransfer?.weeks ?? 0, 'maternityTransfer.weeks');
   const transferDays = Math.round(transferWeeks * 7);
+  const motherDeceased = input.maternityTransfer?.circumstance === 'death';
   if (transferDays > 0) {
-    const minWeeks =
-      input.maternityTransfer?.circumstance === 'special'
+    const minWeeks = motherDeceased
+      ? 0
+      : input.maternityTransfer?.circumstance === 'special'
         ? p.MOTHER_MIN_POSTPARTUM_WEEKS_SPECIAL
         : p.MOTHER_MIN_POSTPARTUM_WEEKS_STANDARD;
     if (!input.parents.secondary) errors.push('Przejęcie urlopu macierzyńskiego wymaga danych drugiego rodzica.');
-    if (maternityDays - prenatalDays - transferDays < minWeeks * 7) {
+    if (motherDeceased && transferDays >= maternityDays) {
+      errors.push('Ojciec przejmuje urlop macierzyński od dnia następującego po dniu zgonu matki – sprawdź datę zgonu.');
+    } else if (maternityDays - prenatalDays - transferDays < minWeeks * 7) {
       errors.push(
         `Przed przekazaniem urlopu matka musi wykorzystać co najmniej ${minWeeks} tyg. po porodzie (Art. 180 § 4 i 6 KP, Art. 29 ust. 3 i 5 ustawy zasiłkowej).`,
       );
@@ -341,6 +353,12 @@ export function planMaternity(p: BenefitParams, input: MaternityPlanInput): Mate
   }
   if (parts.length > 0 && parentalWeeks === 0) {
     errors.push('Urlop rodzicielski nie przysługuje – brak dziecka pozostałego przy życiu.');
+  }
+  if (motherDeceased && parts.some((part) => part.parent === 'primary')) {
+    errors.push('Po zgonie matki z urlopu rodzicielskiego może korzystać tylko ojciec.');
+  }
+  if (motherDeceased && transferDays > 0) {
+    notes.push('Zgon matki: ojciec przejmuje pozostałą część urlopu macierzyńskiego od dnia następującego po dniu zgonu.');
   }
 
   // Pierwszy przebieg: daty startu części (potrzebne dla Art. 31 ust. 3g i ust. 4).
@@ -401,7 +419,7 @@ export function planMaternity(p: BenefitParams, input: MaternityPlanInput): Mate
         secondParentExclusivePart: piece.exclusive,
       });
       const days = Math.round((piece.weeks * 7) / (1 - part.workFte));
-      segmentStart = addSegment('parental', part.parent, segmentStart, days, piece.weeks, rate, part.workFte);
+      segmentStart = addSegment('parental', part.parent, segmentStart, days, piece.weeks, rate, part.workFte, i);
     }
     cursor = segmentStart;
     used[part.parent] += part.weeks;
@@ -467,7 +485,7 @@ export function planMaternity(p: BenefitParams, input: MaternityPlanInput): Mate
       }
       totalPaternityWeeks += weeks;
       const start = part.startDate ? parseDate(part.startDate, `paternity[${i}].startDate`) : paternityCursor;
-      paternityCursor = addSegment('paternity', 'secondary', start, weeks * 7, weeks, benefitRate(p, 'paternity', { combinedApplication: combined }));
+      paternityCursor = addSegment('paternity', 'secondary', start, weeks * 7, weeks, benefitRate(p, 'paternity', { combinedApplication: combined }), 0, i);
       if (addDays(paternityCursor, -1) > paternityDeadline) {
         errors.push(`Urlop ojcowski trzeba wykorzystać do ${formatDatePl(paternityDeadline)} (Art. 182^3 § 1 KP).`);
       }
