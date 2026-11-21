@@ -11,3 +11,4 @@ dist/
 /python/__pycache__
 # Backend (NestJS) admin parameter overrides
 /backend/data/
+/python/knowledge/__pycache__

@@ -1,0 +1,104 @@
+[
+  {
+    "code": "ZAM",
+    "name": "Wniosek o zasiłek macierzyński",
+    "page": "https://www.zus.pl/-/wniosek-zas-54",
+    "download": "https://www.zus.pl/documents/10182/4223950/ZAM_pobierz+i+drukuj.pdf/f1ad7e3f-0eaa-fdbc-20ec-5b07ab59566a"
+  },
+  {
+    "code": "Z-3",
+    "name": "Zaświadczenie płatnika składek (dotyczące pracowników)",
+    "page": "https://www.zus.pl/-/zaswiadczenie-zus-z-3",
+    "download": "https://www.zus.pl/documents/10182/12636166/Z-3_do+druku.pdf/388eed46-ea41-6a75-cb21-739c5f83aac7"
+  },
+  {
+    "code": "Z-3a",
+    "name": "Zaświadczenie płatnika składek (dotyczące osób niebędących pracownikami)",
+    "page": "https://www.zus.pl/-/zaswiadczenie-zus-z-3a",
+    "download": "https://www.zus.pl/documents/10182/4223950/Z-3a_pobierz_plik_do_wydruku.pdf/7dd8fb4c-e8f6-05c8-7f69-92b82fa33571"
+  },
+  {
+    "code": "ZAS-55",
+    "name": "Wniosek o zasiłek w wysokości zasiłku macierzyńskiego i zasiłek wyrównawczy",
+    "page": "https://www.zus.pl/-/wnioski-zas-55",
+    "download": "https://www.zus.pl/documents/10182/4223950/ZAS-55_pobierz_plik_drukowany.pdf/6346a0af-1507-87c3-eaee-ec215604d96e"
+  },
+  {
+    "code": "ZAS-26",
+    "name": "Oświadczenie o przyjęciu na wychowanie dziecka do ustalenia prawa do zasiłku macierzyńskiego",
+    "page": "https://www.zus.pl/-/oswiadczenie-zas-26",
+    "download": "https://www.zus.pl/documents/10182/788036/ZAS-26_do+pobrania.pdf/bd817b19-f5c6-46ba-8afb-2c7b3a89be51"
+  },
+  {
+    "code": "ZAS-33",
+    "name": "Oświadczenie o porzuceniu dziecka przez matkę lub o śmierci matki dziecka",
+    "page": "https://www.zus.pl/-/oswiadczenie-zas-33",
+    "download": "https://www.zus.pl/documents/10182/788036/ZAS-33_do+pobrania+i+wydruku.pdf/0b9c07a2-94b8-497a-a15d-390bf5c72b2d"
+  },
+  {
+    "code": "ZAS-39",
+    "name": "Oświadczenie, że matka dziecka pobiera zasiłek macierzyński w okresie 8 tygodni po porodzie",
+    "page": "https://www.zus.pl/-/oswiadczenie-zas-39",
+    "download": "https://www.zus.pl/documents/10182/788036/ZAS-39+do+pobrania+i+wydruku.pdf/311c8367-ad3f-4d27-ac52-69fce5171014"
+  },
+  {
+    "code": "ZAS-40",
+    "name": "Zaświadczenie lekarskie o okresie, w którym ubezpieczona matka dziecka przebywa w szpitalu",
+    "page": "https://www.zus.pl/-/zaswiadczenie-zas-40",
+    "download": "https://www.zus.pl/documents/10182/788036/ZAS-40_do+zapisu.pdf/8281bd5b-9a46-4102-8806-14bbad39ca09"
+  },
+  {
+    "code": "ZAS-15",
+    "name": "Zaświadczenie płatnika składek o urlopie macierzyńskim, rodzicielskim, ojcowskim [...]",
+    "page": "https://www.zus.pl/-/zaswiadczenie-zas-2",
+    "download": "https://www.zus.pl/documents/10182/788036/ZAS-15.pdf/4106da67-3b59-4e40-9e4b-585e84234e15"
+  },
+  {
+    "code": "ZAS-24",
+    "name": "Zaświadczenie o okresach wypłaconego/przysługującego zasiłku macierzyńskiego",
+    "page": "https://www.zus.pl/-/zaswiadczenie-zas-3",
+    "download": "https://www.zus.pl/documents/10182/18428/ZAS_24+do+wydruku.pdf/8a3ef8bf-5471-40b8-b227-1a0eebcc1e07"
+  },
+  {
+    "code": "ZPW",
+    "name": "Wniosek o wydanie zaświadczenia w sprawie zasiłku",
+    "page": "https://www.zus.pl/-/wniosek-zus-eprz",
+    "download": "https://www.zus.pl/documents/10182/788036/ZPW_nowy.pdf/19d05959-05ce-4151-a4f2-48a824d2f3d4"
+  },
+  {
+    "code": "ZAS-53",
+    "name": "Wniosek o zasiłek chorobowy",
+    "page": "https://www.zus.pl/-/zaswiadczenie-zas-53",
+    "download": "https://www.zus.pl/documents/10182/10157865/ZAS-53_do+wydruku.pdf/fb9f344f-b24d-031a-d1ca-18e26c19027d"
+  },
+  {
+    "code": "Z-10",
+    "name": "Oświadczenie (zasiłek chorobowy / świadczenie rehabilitacyjne po ustaniu tytułu ubezpieczenia)",
+    "page": "https://www.zus.pl/-/oswiadczenie-zus-z-10",
+    "download": "https://www.zus.pl/documents/10182/4223950/Z-10_wydrukuj_wype%C5%82nij.pdf/a97222d7-e70c-0f2a-dc2f-fb9bb5089a38"
+  },
+  {
+    "code": "ZAS-12",
+    "name": "Zaświadczenie płatnika składek – zasiłek chorobowy lub opiekuńczy za dalszy okres",
+    "page": "https://www.zus.pl/-/zaswiadczenie-zas-4",
+    "download": "https://www.zus.pl/documents/10182/4447142/ZAS-12_pobierz_plik.pdf/85b82e86-6c8d-93c2-95f0-8fc46dcb7683"
+  },
+  {
+    "code": "ZAS-2",
+    "name": "Zaświadczenie lekarskie wystawione w związku z ciążą",
+    "page": "https://www.zus.pl/-/zaswiadczenie-zas-2-1",
+    "download": "https://www.zus.pl/documents/10182/788036/ZAS-2_do+pobrania.pdf/13b127b3-a550-4561-a41f-675143754de1"
+  },
+  {
+    "code": "ZNp-7",
+    "name": "Wniosek o świadczenie rehabilitacyjne",
+    "page": "https://www.zus.pl/-/oswiadczenie-zus-np-7",
+    "download": "https://www.zus.pl/documents/10182/4447142/ZNp-7_pobierz+i+wydrukuj.pdf/80a29902-a38f-6020-61e6-925e783e1676"
+  },
+  {
+    "code": "RWN",
+    "name": "Wniosek płatnika składek o wydanie zaświadczenia o niezaleganiu w opłacaniu składek",
+    "page": "https://www.zus.pl/-/wniosek-zus-ewn",
+    "download": "https://www.zus.pl/documents/10182/788036/RWN_RODO.pdf/f9ca1421-b5a3-4c1a-924d-bb9e0e5b48ea"
+  }
+]

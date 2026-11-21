@@ -8,6 +8,7 @@ from google.genai import errors, types
 
 from python.case_schemas import CaseExtraction
 from python.config import setting
+from python.knowledge import KnowledgeBase
 
 logger = logging.getLogger(__name__)
 
@@ -31,6 +32,8 @@ class ZUSia:
         with open(file_path, 'r', encoding = 'utf-8') as file:
             self.persona = file.read()
 
+        self.knowledge = KnowledgeBase()
+
     def create_chat(self, history = None):
         chat = self.client.chats.create(model = self.model,
                                         config = types.GenerateContentConfig(system_instruction = self.persona),
@@ -51,8 +54,15 @@ class ZUSia:
                 time.sleep(delay)
                 delay *= 2
 
+    def _turn_config(self, question: str) -> types.GenerateContentConfig:
+        """System instruction for one turn: the persona plus the verified data that matches the question."""
+        data = self.knowledge.context(question)
+        return types.GenerateContentConfig(
+            system_instruction = f'{self.persona}\n\n<|PROTECTED_INTERNAL_DATA|>\n{data}\n</|PROTECTED_INTERNAL_DATA|>')
+
     def text(self, chat, message):
-        response = self._retry(lambda: chat.send_message(message))
+        config = self._turn_config(message)
+        response = self._retry(lambda: chat.send_message(message, config = config))
         return response.text
 
     def img(self, chat, message = '', img_path = None, image_bytes = None, mime_type = None):
@@ -67,7 +77,8 @@ class ZUSia:
         if image_bytes is not None:
             parts.append(types.Part.from_bytes(data = image_bytes, mime_type = mime_type or 'image/jpeg'))
 
-        response = self._retry(lambda: chat.send_message(parts))
+        config = self._turn_config(message)
+        response = self._retry(lambda: chat.send_message(parts, config = config))
         return response.text
 
     def pdf(self, chat, message = '', pdf_bytes = None):
@@ -80,7 +91,8 @@ class ZUSia:
             raise ValueError('PDF data is required')
 
         parts.append(types.Part.from_bytes(data = pdf_bytes, mime_type = 'application/pdf'))
-        response = self._retry(lambda: chat.send_message(parts))
+        config = self._turn_config(message)
+        response = self._retry(lambda: chat.send_message(parts, config = config))
         return response.text
 
     def extract_case(self, files: list[tuple[bytes, str]]) -> CaseExtraction:
