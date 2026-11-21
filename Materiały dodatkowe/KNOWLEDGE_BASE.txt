@@ -1,0 +1,128 @@
+ŹRÓDŁA DOKUMENTÓW – folder nowe_dokumenty/
+Data pobrania: 2026-11-21
+
+================================================================================
+PRAWO (folder prawo/)
+Źródło: API Sejmu RP (ELI) – oficjalne teksty aktów z Dziennika Ustaw, te same co w ISAP (isap.sejm.gov.pl)
+================================================================================
+
+Plik:       prawo/ustawa_zasilkowa_tekst_jednolity_DzU_2026_poz_854.pdf
+Akt:        Ustawa z dnia 25 czerwca 1999 r. o świadczeniach pieniężnych z ubezpieczenia społecznego w razie choroby i macierzyństwa – tekst jednolity (Dz.U. 2026 poz. 854)
+Strona aktu: https://api.sejm.gov.pl/eli/acts/DU/2026/854
+Pobrano z:  https://api.sejm.gov.pl/eli/acts/DU/2026/854/text/U/D20260854Lj.pdf
+
+Plik:       prawo/kodeks_pracy_tekst_jednolity_DzU_2026_poz_1245.pdf
+Akt:        Ustawa z dnia 26 czerwca 1974 r. – Kodeks pracy – tekst jednolity (Dz.U. 2026 poz. 1245)
+Strona aktu: https://api.sejm.gov.pl/eli/acts/DU/2026/1245
+Pobrano z:  https://api.sejm.gov.pl/eli/acts/DU/2026/1245/text/T/D20261245L.pdf
+
+Plik:       prawo/rozporzadzenie_dokumenty_do_zasilkow_DzU_2026_poz_1316.pdf
+Akt:        Rozporządzenie MRPiPS z dnia 27 września 2026 r. w sprawie zakresu informacji o okolicznościach mających wpływ na prawo do zasiłków [...] oraz dokumentów niezbędnych do przyznania i wypłaty zasiłków (Dz.U. 2026 poz. 1316)
+Strona aktu: https://api.sejm.gov.pl/eli/acts/DU/2026/1316
+Pobrano z:  https://api.sejm.gov.pl/eli/acts/DU/2026/1316/text/I/D20261316.pdf
+
+Plik:       prawo/rozporzadzenie_wnioski_urlopy_rodzicielskie_DzU_2025_poz_322.pdf
+Akt:        Rozporządzenie MRPiPS z dnia 11 marca 2025 r. w sprawie wniosków dotyczących uprawnień pracowników związanych z rodzicielstwem oraz dokumentów dołączanych do takich wniosków (Dz.U. 2025 poz. 322)
+Strona aktu: https://api.sejm.gov.pl/eli/acts/DU/2025/322
+Pobrano z:  https://api.sejm.gov.pl/eli/acts/DU/2025/322/text/I/D20250322.pdf
+
+Plik:       prawo/ustawa_o_systemie_ubezpieczen_spolecznych_ujednolicona.pdf
+Akt:        Ustawa z dnia 13 października 1998 r. o systemie ubezpieczeń społecznych – tekst ujednolicony (Dz.U. 1998 Nr 137 poz. 887 ze zm.)
+Strona aktu: https://api.sejm.gov.pl/eli/acts/DU/1998/887
+Pobrano z:  https://api.sejm.gov.pl/eli/acts/DU/1998/887/text/U/D19980887Lj.pdf
+
+Plik:       prawo/ustawa_za_zyciem_ujednolicona.pdf
+Akt:        Ustawa z dnia 4 listopada 2016 r. o wsparciu kobiet w ciąży i rodzin „Za życiem” – tekst ujednolicony (Dz.U. 2016 poz. 1860 ze zm.)
+Strona aktu: https://api.sejm.gov.pl/eli/acts/DU/2016/1860
+Pobrano z:  https://api.sejm.gov.pl/eli/acts/DU/2016/1860/text/U/D20161860Lj.pdf
+
+================================================================================
+WNIOSKI I ZAŚWIADCZENIA ZUS (folder wnioski/)
+Źródło: www.zus.pl – Wzory formularzy (https://www.zus.pl/wzory-formularzy), sekcja „Zasiłki”
+Pobrana wersja: plik „Pobierz plik” (wersja do druku)
+================================================================================
+
+Plik:       wnioski/ZAM_wniosek_o_zasilek_macierzynski.pdf
+Formularz:  ZAM – Wniosek o zasiłek macierzyński
+Strona:     https://www.zus.pl/-/wniosek-zas-54
+Pobrano z:  https://www.zus.pl/documents/10182/4223950/ZAM_pobierz+i+drukuj.pdf/f1ad7e3f-0eaa-fdbc-20ec-5b07ab59566a
+
+Plik:       wnioski/Z-3_zaswiadczenie_platnika_skladek_pracownicy.pdf
+Formularz:  Z-3 – Zaświadczenie płatnika składek (dotyczące pracowników)
+Strona:     https://www.zus.pl/-/zaswiadczenie-zus-z-3
+Pobrano z:  https://www.zus.pl/documents/10182/12636166/Z-3_do+druku.pdf/388eed46-ea41-6a75-cb21-739c5f83aac7
+
+Plik:       wnioski/Z-3a_zaswiadczenie_platnika_skladek_niepracownicy_zlecenie.pdf
+Formularz:  Z-3a – Zaświadczenie płatnika składek (dotyczące osób niebędących pracownikami)
+Strona:     https://www.zus.pl/-/zaswiadczenie-zus-z-3a
+Pobrano z:  https://www.zus.pl/documents/10182/4223950/Z-3a_pobierz_plik_do_wydruku.pdf/7dd8fb4c-e8f6-05c8-7f69-92b82fa33571
+
+Plik:       wnioski/ZAS-55_wniosek_o_zasilek_w_wysokosci_zasilku_macierzynskiego_i_wyrownawczy.pdf
+Formularz:  ZAS-55 – Wniosek o zasiłek w wysokości zasiłku macierzyńskiego i zasiłek wyrównawczy
+Strona:     https://www.zus.pl/-/wnioski-zas-55
+Pobrano z:  https://www.zus.pl/documents/10182/4223950/ZAS-55_pobierz_plik_drukowany.pdf/6346a0af-1507-87c3-eaee-ec215604d96e
+
+Plik:       wnioski/ZAS-26_oswiadczenie_o_przyjeciu_dziecka_na_wychowanie.pdf
+Formularz:  ZAS-26 – Oświadczenie o przyjęciu na wychowanie dziecka do ustalenia prawa do zasiłku macierzyńskiego
+Strona:     https://www.zus.pl/-/oswiadczenie-zas-26
+Pobrano z:  https://www.zus.pl/documents/10182/788036/ZAS-26_do+pobrania.pdf/bd817b19-f5c6-46ba-8afb-2c7b3a89be51
+
+Plik:       wnioski/ZAS-33_oswiadczenie_o_porzuceniu_dziecka_lub_smierci_matki.pdf
+Formularz:  ZAS-33 – Oświadczenie o porzuceniu dziecka przez matkę lub o śmierci matki dziecka
+Strona:     https://www.zus.pl/-/oswiadczenie-zas-33
+Pobrano z:  https://www.zus.pl/documents/10182/788036/ZAS-33_do+pobrania+i+wydruku.pdf/0b9c07a2-94b8-497a-a15d-390bf5c72b2d
+
+Plik:       wnioski/ZAS-39_oswiadczenie_matka_pobiera_zasilek_8_tygodni_po_porodzie.pdf
+Formularz:  ZAS-39 – Oświadczenie, że matka dziecka pobiera zasiłek macierzyński w okresie 8 tygodni po porodzie
+Strona:     https://www.zus.pl/-/oswiadczenie-zas-39
+Pobrano z:  https://www.zus.pl/documents/10182/788036/ZAS-39+do+pobrania+i+wydruku.pdf/311c8367-ad3f-4d27-ac52-69fce5171014
+
+Plik:       wnioski/ZAS-40_zaswiadczenie_lekarskie_matka_w_szpitalu.pdf
+Formularz:  ZAS-40 – Zaświadczenie lekarskie o okresie, w którym ubezpieczona matka dziecka przebywa w szpitalu
+Strona:     https://www.zus.pl/-/zaswiadczenie-zas-40
+Pobrano z:  https://www.zus.pl/documents/10182/788036/ZAS-40_do+zapisu.pdf/8281bd5b-9a46-4102-8806-14bbad39ca09
+
+Plik:       wnioski/ZAS-15_zaswiadczenie_platnika_o_urlopach_rodzicielskich.pdf
+Formularz:  ZAS-15 – Zaświadczenie płatnika składek o urlopie macierzyńskim, rodzicielskim, ojcowskim [...]
+Strona:     https://www.zus.pl/-/zaswiadczenie-zas-2
+Pobrano z:  https://www.zus.pl/documents/10182/788036/ZAS-15.pdf/4106da67-3b59-4e40-9e4b-585e84234e15
+
+Plik:       wnioski/ZAS-24_zaswiadczenie_o_okresach_zasilku_macierzynskiego.pdf
+Formularz:  ZAS-24 – Zaświadczenie o okresach wypłaconego/przysługującego zasiłku macierzyńskiego
+Strona:     https://www.zus.pl/-/zaswiadczenie-zas-3
+Pobrano z:  https://www.zus.pl/documents/10182/18428/ZAS_24+do+wydruku.pdf/8a3ef8bf-5471-40b8-b227-1a0eebcc1e07
+
+Plik:       wnioski/ZPW_wniosek_o_wydanie_zaswiadczenia_w_sprawie_zasilku.pdf
+Formularz:  ZPW – Wniosek o wydanie zaświadczenia w sprawie zasiłku
+Strona:     https://www.zus.pl/-/wniosek-zus-eprz
+Pobrano z:  https://www.zus.pl/documents/10182/788036/ZPW_nowy.pdf/19d05959-05ce-4151-a4f2-48a824d2f3d4
+
+Plik:       wnioski/ZAS-53_wniosek_o_zasilek_chorobowy.pdf
+Formularz:  ZAS-53 – Wniosek o zasiłek chorobowy
+Strona:     https://www.zus.pl/-/zaswiadczenie-zas-53
+Pobrano z:  https://www.zus.pl/documents/10182/10157865/ZAS-53_do+wydruku.pdf/fb9f344f-b24d-031a-d1ca-18e26c19027d
+
+Plik:       wnioski/Z-10_oswiadczenie_zasilek_po_ustaniu_ubezpieczenia.pdf
+Formularz:  Z-10 – Oświadczenie (zasiłek chorobowy / świadczenie rehabilitacyjne po ustaniu tytułu ubezpieczenia)
+Strona:     https://www.zus.pl/-/oswiadczenie-zus-z-10
+Pobrano z:  https://www.zus.pl/documents/10182/4223950/Z-10_wydrukuj_wype%C5%82nij.pdf/a97222d7-e70c-0f2a-dc2f-fb9bb5089a38
+
+Plik:       wnioski/ZAS-12_zaswiadczenie_platnika_zasilek_chorobowy_za_dalszy_okres.pdf
+Formularz:  ZAS-12 – Zaświadczenie płatnika składek – zasiłek chorobowy lub opiekuńczy za dalszy okres
+Strona:     https://www.zus.pl/-/zaswiadczenie-zas-4
+Pobrano z:  https://www.zus.pl/documents/10182/4447142/ZAS-12_pobierz_plik.pdf/85b82e86-6c8d-93c2-95f0-8fc46dcb7683
+
+Plik:       wnioski/ZAS-2_zaswiadczenie_lekarskie_w_zwiazku_z_ciaza.pdf
+Formularz:  ZAS-2 – Zaświadczenie lekarskie wystawione w związku z ciążą
+Strona:     https://www.zus.pl/-/zaswiadczenie-zas-2-1
+Pobrano z:  https://www.zus.pl/documents/10182/788036/ZAS-2_do+pobrania.pdf/13b127b3-a550-4561-a41f-675143754de1
+
+Plik:       wnioski/ZNp-7_wniosek_o_swiadczenie_rehabilitacyjne.pdf
+Formularz:  ZNp-7 – Wniosek o świadczenie rehabilitacyjne
+Strona:     https://www.zus.pl/-/oswiadczenie-zus-np-7
+Pobrano z:  https://www.zus.pl/documents/10182/4447142/ZNp-7_pobierz+i+wydrukuj.pdf/80a29902-a38f-6020-61e6-925e783e1676
+
+Plik:       wnioski/RWN_wniosek_o_zaswiadczenie_o_niezaleganiu_w_skladkach.pdf
+Formularz:  RWN – Wniosek płatnika składek o wydanie zaświadczenia o niezaleganiu w opłacaniu składek
+Strona:     https://www.zus.pl/-/wniosek-zus-ewn
+Pobrano z:  https://www.zus.pl/documents/10182/788036/RWN_RODO.pdf/f9ca1421-b5a3-4c1a-924d-bb9e0e5b48ea
