@@ -15,7 +15,7 @@ export default function Header() {
 					<img src={zusiaLogo} alt={t('appName')} className="h-9 w-auto" width={467} height={160} />
 				</Link>
 
-				<nav className="flex flex-1 items-center gap-1">
+				<nav aria-label={t('navigation.label')} className="flex flex-1 items-center gap-1">
 					{NavigationItems.map((item) => (
 						<NavLink
 							key={item.href}

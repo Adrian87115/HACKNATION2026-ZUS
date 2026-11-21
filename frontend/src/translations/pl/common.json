@@ -3,7 +3,8 @@
   "navigation": {
     "home": "Strona główna",
     "calculators": "Kalkulatory",
-    "parentingGuide": "Przewodnik rodzica"
+    "parentingGuide": "Przewodnik rodzica",
+    "label": "Nawigacja główna"
   },
   "footer": {
     "description": "Asystent, który pomaga rodzicom zaplanować urlopy i sprawdzić wysokość zasiłków z ZUS.",
@@ -159,5 +160,12 @@
     },
     "autosave": "Zmiany zapisują się automatycznie",
     "reset": "Przywróć domyślne"
+  },
+  "notFound": {
+    "code": "Błąd 404",
+    "title": "Nie znaleziono strony",
+    "description": "Ta strona nie istnieje albo została przeniesiona. Sprawdź adres lub przejdź do jednego z naszych narzędzi.",
+    "home": "Strona główna",
+    "guide": "Przewodnik rodzica"
   }
 }

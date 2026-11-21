@@ -4,10 +4,19 @@
     <meta charset="UTF-8" />
     <!-- CSS layer order must be declared before MUI/emotion injects styles, otherwise Tailwind's reset overrides MUI -->
     <style>@layer theme, base, mui, components, utilities;</style>
-    <link rel="icon" type="image/png" href="/zusia-icon.png" />
-    <link rel="apple-touch-icon" href="/zusia-icon.png" />
+    <!-- MUI inserts global styles (CssBaseline) right before this marker. It must come AFTER the layer order above,
+         otherwise `@layer mui` is registered first, ends up lowest, and Tailwind's reset wipes MUI component styles. -->
+    <meta name="emotion-insertion-point" content="" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ZUSia</title>
+    <!-- Route-specific title, description, canonical, robots, Open Graph, Twitter and JSON-LD: see seo.plugin.ts -->
+    <!--seo-->
+    <meta name="theme-color" content="#00843d" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" type="image/png" href="/icon-192.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
     <script>
       // Apply saved accessibility settings before first paint (see src/accessibility/settings.ts)
       (function () {
@@ -26,6 +35,7 @@
     </script>
   </head>
   <body>
+    <noscript>ZUSia – planer urlopów i kalkulatory zasiłków dla rodziców. Aby z niej skorzystać, włącz JavaScript w przeglądarce.</noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
