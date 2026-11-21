@@ -5,7 +5,8 @@
     "calculators": "Kalkulatory",
     "parentingGuide": "Przewodnik rodzica",
     "label": "Nawigacja główna",
-    "applications": "Wnioski"
+    "applications": "Wnioski",
+    "risks": "Ryzyka"
   },
   "footer": {
     "description": "Asystent, który pomaga rodzicom zaplanować urlopy i sprawdzić wysokość zasiłków z ZUS.",
@@ -21,7 +22,8 @@
     "rights": "Wszelkie prawa zastrzeżone.",
     "disclaimer": "Wyliczenia są orientacyjne i nie zastępują decyzji ZUS.",
     "tagline": "HackNation 2026",
-    "applications": "Dokumenty i wnioski"
+    "applications": "Dokumenty i wnioski",
+    "risks": "Ryzyka i ochrona"
   },
   "home": {
     "eyebrow": "Świadczenia rodzicielskie {{year}}",

@@ -10,7 +10,8 @@ const TOOLS: { label: TranslationKey; to: string }[] = [
 	{ label: 'footer.guide', to: AppRoutePaths.PARENTING_GUIDE },
 	{ label: 'footer.leaveCalculator', to: `${AppRoutePaths.CALCULATORS}?tab=maternity` },
 	{ label: 'footer.pregnancyCalculator', to: `${AppRoutePaths.CALCULATORS}?tab=pregnancy` },
-	{ label: 'footer.applications', to: AppRoutePaths.APPLICATIONS }
+	{ label: 'footer.applications', to: AppRoutePaths.APPLICATIONS },
+	{ label: 'footer.risks', to: AppRoutePaths.RISKS }
 ];
 
 const SOURCES: { label: TranslationKey; href: string; external: boolean }[] = [

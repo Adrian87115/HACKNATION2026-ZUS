@@ -63,6 +63,14 @@ export const SEO_ROUTES: SeoMeta[] = [
 			'Sprawdź, kto wypłaci zasiłek – pracodawca czy ZUS – jakie wnioski złożyć (ZAM, Z-3, ZAS-53), w jakich terminach i gdzie, przy ciąży, urlopie macierzyńskim, ojcowskim i rodzicielskim.',
 		name: 'Dokumenty i wnioski',
 		sitemap: { changefreq: 'monthly', priority: 0.8 }
+	},
+	{
+		path: AppRoutePaths.RISKS,
+		title: 'Kiedy można stracić zasiłek macierzyński? Ryzyka i ochrona | ZUSia',
+		description:
+			'Sprawdź, co może odebrać lub obniżyć zasiłek: brak ubezpieczenia w dniu porodu, umowa dla pozoru, podwyższenie podstawy w ciąży, zaległości w składkach – i jak chroni Cię Kodeks pracy.',
+		name: 'Ryzyka i ochrona',
+		sitemap: { changefreq: 'monthly', priority: 0.8 }
 	}
 ];
 

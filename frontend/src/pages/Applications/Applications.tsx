@@ -1,6 +1,7 @@
 import { ArrowUpRight, Building2, Landmark, Scale } from 'lucide-react';
 import { useId, type CSSProperties, type ReactNode } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
+import { AppRoutePaths } from '../../types/shared';
 import BaseLayout from '../../components/Layouts/BaseLayout';
 import {
 	BENEFITS,
@@ -249,6 +250,12 @@ export default function Applications() {
 								</ul>
 							</Panel>
 						)}
+
+						<Link
+							to={AppRoutePaths.RISKS}
+							className="block rounded-lg border border-line bg-paper px-5 py-4 text-sm font-semibold text-ink shadow-sm transition hover:border-brand">
+							Co może odebrać lub obniżyć zasiłek? →
+						</Link>
 
 						<Panel title="Oficjalne źródła">
 							<ul className="space-y-2 text-sm">

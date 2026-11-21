@@ -2,5 +2,6 @@ export const AppRoutePaths = {
 	HOME: '/',
 	CALCULATORS: '/kalkulatory',
 	PARENTING_GUIDE: '/przewodnik-rodzica',
-	APPLICATIONS: '/dokumenty-i-wnioski'
+	APPLICATIONS: '/dokumenty-i-wnioski',
+	RISKS: '/ryzyka-i-ochrona'
 } as const;

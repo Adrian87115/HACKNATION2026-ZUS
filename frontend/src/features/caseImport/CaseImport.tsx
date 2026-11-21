@@ -15,6 +15,8 @@ import {
 	X
 } from 'lucide-react';
 import { useId, useMemo, useRef, useState, type DragEvent, type ReactNode } from 'react';
+import { Link } from 'react-router-dom';
+import { AppRoutePaths } from '../../types/shared';
 import { useBenefitEngine } from '../../hooks/useBenefitEngine';
 import {
 	ACCEPTED_FILE_TYPES,
@@ -426,6 +428,11 @@ function Review({
 						<li key={r}>{r}</li>
 					))}
 				</ul>
+				{(analysis.insurance.status !== 'insured' || (x.contribution_debt ?? 0) > 0) && (
+					<Link to={AppRoutePaths.RISKS} className="mt-2 inline-block pl-7 text-sm font-semibold underline underline-offset-4">
+						Sprawdź, co to oznacza dla zasiłku →
+					</Link>
+				)}
 			</div>
 
 			<dl className="grid gap-px overflow-hidden rounded-md border border-line bg-line sm:grid-cols-2 *:bg-paper">

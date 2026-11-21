@@ -6,6 +6,7 @@ import Calculators from './pages/Calculators/Calculators';
 import Home from './pages/Home/Home';
 import NotFound from './pages/NotFound/NotFound';
 import ParentingGuide from './pages/ParentingGuide/ParentingGuide';
+import Risks from './pages/Risks/Risks';
 import RouteSeo from './seo/RouteSeo';
 import { LEGACY_REDIRECTS } from './seo/routes';
 import { AppRoutePaths } from './types/shared';
@@ -20,6 +21,7 @@ function App() {
 				<Route path={AppRoutePaths.CALCULATORS} element={<Calculators />} />
 				<Route path={AppRoutePaths.PARENTING_GUIDE} element={<ParentingGuide />} />
 				<Route path={AppRoutePaths.APPLICATIONS} element={<Applications />} />
+				<Route path={AppRoutePaths.RISKS} element={<Risks />} />
 				{LEGACY_REDIRECTS.map(({ from, to }) => (
 					<Route key={from} path={from} element={<LegacyRedirect to={to} />} />
 				))}

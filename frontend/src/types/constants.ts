@@ -22,5 +22,9 @@ export const NavigationItems: NavigationItem[] = [
 	{
 		label: 'navigation.applications',
 		href: AppRoutePaths.APPLICATIONS
+	},
+	{
+		label: 'navigation.risks',
+		href: AppRoutePaths.RISKS
 	}
 ];

@@ -15,14 +15,16 @@ export default function Header() {
 					<img src={zusiaLogo} alt={t('appName')} className="h-9 w-auto" width={467} height={160} />
 				</Link>
 
-				<nav aria-label={t('navigation.label')} className="flex flex-1 items-center gap-1">
+				<nav
+					aria-label={t('navigation.label')}
+					className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto [scrollbar-width:none]">
 					{NavigationItems.map((item) => (
 						<NavLink
 							key={item.href}
 							to={item.href}
 							end
 							className={({ isActive }) =>
-								`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+								`shrink-0 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
 									isActive ? 'bg-brand-soft text-brand-ink' : 'text-muted hover:bg-hover hover:text-ink'
 								}`
 							}>
