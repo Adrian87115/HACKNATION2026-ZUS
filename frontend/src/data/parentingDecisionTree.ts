@@ -44,6 +44,7 @@ export const PARENTING_DECISION_TREE: DecisionNode = {
       buildPlanInput: (eventDate, bases) => ({
         event: "birth",
         eventDate,
+        childBirthDate: eventDate,
         childrenCount: 1,
         combinedApplicationWithin21Days: true,
         parents: {
@@ -127,7 +128,7 @@ export const PARENTING_DECISION_TREE: DecisionNode = {
           buildPlanInput: (eventDate, bases) => ({
             event: "adoption",
             eventDate,
-            childBirthDate: "2024-05-10",
+            childBirthDate: eventDate,
             adoptionDecreeDate: eventDate,
             childrenCount: 1,
             combinedApplicationWithin21Days: true,
