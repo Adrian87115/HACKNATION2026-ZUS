@@ -4,7 +4,7 @@ import { defineConfig } from 'vite'
 import seoPlugin from './seo.plugin.ts'
 
 // Dev proxy targets (override with env vars when the services run elsewhere)
-const ZUSIA_API_URL = process.env.ZUSIA_API_URL ?? 'http://127.0.0.1:8000' // python/ (FastAPI: chat, case import)
+const ZUSIA_API_URL = process.env.ZUSIA_API_URL ?? 'http://127.0.0.1:8001' // python/ (FastAPI: chat, case import)
 const BACKEND_API_URL = process.env.BACKEND_API_URL ?? 'http://127.0.0.1:3000' // backend/ (NestJS: engine params)
 
 // https://vite.dev/config/

@@ -3,6 +3,7 @@
  * then turn the extracted data into calculator presets.
  * Mirrors python/case_schemas.py.
  */
+import { ZUSIA_API } from '../../config/api';
 import type { BenefitEngine, BasisInput } from '../../engine/index';
 import type {
 	MaternityPreset,
@@ -72,7 +73,6 @@ export type StoredFile = { id: string; name: string; size: number; content_type:
 /*  API                                                                */
 /* ------------------------------------------------------------------ */
 
-const ZUSIA_API = ((import.meta.env.VITE_ZUSIA_API_URL as string | undefined) || '/api/zusia').replace(/\/+$/, '');
 
 export const ACCEPTED_FILE_TYPES = 'application/pdf,image/png,image/jpeg,image/webp,image/heic,image/heif';
 export const MAX_FILES = 10;

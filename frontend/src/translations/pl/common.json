@@ -171,5 +171,9 @@
     "description": "Ta strona nie istnieje albo została przeniesiona. Sprawdź adres lub przejdź do jednego z naszych narzędzi.",
     "home": "Strona główna",
     "guide": "Przewodnik rodzica"
+  },
+  "chat": {
+    "open": "Zapytaj ZUSię",
+    "close": "Zwiń ZUSię"
   }
 }
