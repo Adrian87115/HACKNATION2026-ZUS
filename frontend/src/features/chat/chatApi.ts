@@ -96,13 +96,15 @@ export const getHistory = (sessionId: string) =>
 export const deleteChat = (sessionId: string) =>
 	request<void>(`/chats/${encodeURIComponent(sessionId)}`, { method: 'DELETE' }).catch(() => undefined);
 
-export async function sendMessage(sessionId: string, message: string, file?: File, signal?: AbortSignal): Promise<string> {
+/** `context` – the signed-in user's account data and the current screen, used for this answer only. */
+export async function sendMessage(sessionId: string, message: string, file?: File, context?: string, signal?: AbortSignal): Promise<string> {
 	const id = encodeURIComponent(sessionId);
+	const ctx = context ? context.slice(0, 20000) : undefined;
 	if (!file) {
 		const r = await request<{ reply: string }>(`/chats/${id}/messages`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ message }),
+			body: JSON.stringify({ message, context: ctx }),
 			signal
 		});
 		return r.reply;
@@ -110,6 +112,7 @@ export async function sendMessage(sessionId: string, message: string, file?: Fil
 	const kind = file.type === 'application/pdf' || /\.pdf$/i.test(file.name) ? 'pdfs' : 'images';
 	const body = new FormData();
 	body.append('file', file, file.name);
+	if (ctx) body.append('context', ctx);
 	const query = message ? `?message=${encodeURIComponent(message)}` : '';
 	const r = await request<{ reply: string }>(`/chats/${id}/${kind}${query}`, { method: 'POST', body, signal });
 	return r.reply;

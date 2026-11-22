@@ -1,4 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useAuth } from '../account/AuthContext';
+import { useBenefitEngine } from '../../hooks/useBenefitEngine';
+import { accountContext, screenContext } from './userContext';
 import { ChatApiError, checkHealth, createChat, deleteChat, getHistory, sendMessage, setPersistence } from './chatApi';
 
 export type ChatMessage = {
@@ -23,6 +26,8 @@ type ChatContextValue = {
 	send: (text: string, file?: File) => Promise<void>;
 	retry: (messageId: string) => Promise<void>;
 	newChat: () => void;
+	/** Open the panel and ask a question right away (e.g. "check my application"). */
+	ask: (text: string) => void;
 	/** The user agreed to keep the conversation (history and files) – off by default. */
 	remember: boolean;
 	setRemember: (remember: boolean) => Promise<void>;
@@ -52,6 +57,8 @@ const write = (key: string, value: string | null) => {
 const uid = () => crypto.randomUUID();
 
 export function ChatProvider({ children }: { children: ReactNode }) {
+	const { account } = useAuth();
+	const engine = useBenefitEngine();
 	const [open, setOpenState] = useState(() => read(OPEN_KEY) === '1');
 	const [messages, setMessages] = useState<ChatMessage[]>([]);
 	const [sending, setSending] = useState(false);
@@ -128,16 +135,27 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 		write(SESSION_KEY, value && sessionRef.current ? sessionRef.current : null);
 	}, []);
 
+	/** Account of the signed-in user (only theirs) and the current screen – sent with each message, not stored. */
+	const buildContext = useCallback(() => {
+		const params = engine.getParams();
+		const threshold = Math.round(params.MIN_WAGE_2026_GROSS * params.DEBT_EXCLUSION_MIN_WAGE_RATIO * 100) / 100;
+		return [
+			account ? accountContext(account, threshold) : 'Użytkownik nie jest zalogowany – nie masz dostępu do danych z jego konta ZUS. Jeśli pyta o swoje dane, zaproponuj logowanie przez mObywatel (symulacja).',
+			screenContext()
+		].join('\n\n');
+	}, [account, engine]);
+
 	const deliver = useCallback(
 		async (userMessage: ChatMessage, text: string, file?: File) => {
 			setSending(true);
 			try {
 				let reply: string;
+				const context = buildContext();
 				try {
-					reply = await sendMessage(await ensureSession(), text, file);
+					reply = await sendMessage(await ensureSession(), text, file, context);
 				} catch (err) {
 					// Session expired on the server (e.g. restart) – start a new one and resend once.
-					if (err instanceof ChatApiError && err.status === 404) reply = await sendMessage(await ensureSession(true), text, file);
+					if (err instanceof ChatApiError && err.status === 404) reply = await sendMessage(await ensureSession(true), text, file, context);
 					else throw err;
 				}
 				pendingFiles.current.delete(userMessage.id);
@@ -153,7 +171,7 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 				setSending(false);
 			}
 		},
-		[ensureSession]
+		[ensureSession, buildContext]
 	);
 
 	const send = useCallback(
@@ -183,6 +201,14 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 		[deliver, messages, sending]
 	);
 
+	const ask = useCallback(
+		(text: string) => {
+			setOpen(true);
+			void send(text);
+		},
+		[setOpen, send]
+	);
+
 	const newChat = useCallback(() => {
 		if (sessionRef.current) void deleteChat(sessionRef.current);
 		sessionRef.current = null;
@@ -192,8 +218,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 	}, []);
 
 	const value = useMemo(
-		() => ({ open, setOpen, toggle, messages, sending, loadingHistory, available, recheck, send, retry, newChat, remember, setRemember }),
-		[open, setOpen, toggle, messages, sending, loadingHistory, available, recheck, send, retry, newChat, remember, setRemember]
+		() => ({ open, setOpen, toggle, messages, sending, loadingHistory, available, recheck, send, retry, newChat, ask, remember, setRemember }),
+		[open, setOpen, toggle, messages, sending, loadingHistory, available, recheck, send, retry, newChat, ask, remember, setRemember]
 	);
 
 	return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

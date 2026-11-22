@@ -140,7 +140,7 @@ function AccountView({ account }: { account: AccountData }) {
 				</div>
 				<button
 					type="button"
-					onClick={() => chat.setOpen(true)}
+					onClick={() => chat.ask('Co dane z mojego konta ZUS oznaczają dla moich zasiłków? Czy coś mi grozi albo o czym powinnam/powinienem pamiętać?')}
 					className="inline-flex items-center gap-2 rounded-md border border-line bg-paper px-3 py-2 text-sm font-semibold text-ink transition hover:bg-hover">
 					<MessageCircle className="h-4 w-4" aria-hidden />
 					Zapytaj ZUSię o swoje dane

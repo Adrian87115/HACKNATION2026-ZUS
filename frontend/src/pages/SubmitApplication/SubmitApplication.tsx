@@ -1,4 +1,4 @@
-import { ArrowLeft, CircleCheck, LoaderCircle, Printer, Send, TriangleExclamationPoint } from 'lucide-react';
+import { ArrowLeft, CircleCheck, LoaderCircle, MessageCircle, Printer, Send, TriangleExclamationPoint } from 'lucide-react';
 import { useEffect, useId, useMemo, useState, type ReactNode } from 'react';
 import { Link, Navigate, useLocation, useSearchParams } from 'react-router-dom';
 import BaseLayout from '../../components/Layouts/BaseLayout';
@@ -14,6 +14,7 @@ import {
 } from '../../features/account/accountApi';
 import { currentTitle, dueDate } from '../../features/account/accountToCase';
 import { useAuth } from '../../features/account/AuthContext';
+import { useChat } from '../../features/chat/ChatContext';
 import { useBenefitEngine } from '../../hooks/useBenefitEngine';
 import { AppRoutePaths } from '../../types/shared';
 
@@ -134,6 +135,7 @@ export default function SubmitApplication() {
 type Stage = 'form' | 'signing' | 'sent';
 
 function SubmitView({ account }: { account: Account }) {
+	const chat = useChat();
 	const { token } = useAuth();
 	const engine = useBenefitEngine();
 	const params = engine.getParams();
@@ -285,6 +287,16 @@ function SubmitView({ account }: { account: Account }) {
 					Wniosek uzupełniliśmy danymi z Twojego konta. Sprawdź daty, podpisz w mObywatelu i wyślij – potwierdzenie zobaczysz od razu, a
 					wniosek trafi do historii w „Moim koncie”.
 				</p>
+				<button
+					type="button"
+					onClick={() =>
+						chat.ask('Sprawdź wniosek, który teraz wypełniam: czy przysługuje mi to, o co wnioskuję, czy daty i terminy są dobre i co jeszcze poprawić?')
+					}
+					className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-ink hover:underline hover:underline-offset-4">
+					<MessageCircle className="h-4 w-4" aria-hidden />
+					Sprawdź wniosek z ZUSią
+				</button>
+				<p className="text-xs text-muted">ZUSia widzi wypełniany formularz i dane z Twojego konta, ale niczego za Ciebie nie zmienia ani nie wysyła.</p>
 			</header>
 
 			<p className="enter rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-100">

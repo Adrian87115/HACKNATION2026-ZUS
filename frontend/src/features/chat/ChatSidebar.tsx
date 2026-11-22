@@ -1,10 +1,13 @@
 import { FileText, Image as ImageIcon, LoaderCircle, PanelRightClose, Paperclip, RotateCcw, Send, SquarePen, X } from 'lucide-react';
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
+import { useAuth } from '../account/AuthContext';
 import { useChat, type ChatMessage } from './ChatContext';
 import { CHAT_FILE_TYPES, CHAT_MAX_FILE_BYTES } from './chatApi';
 import Markdown from './Markdown';
 
 const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(' ');
+
+const ACCOUNT_SUGGESTION = 'Co wynika z moich danych w ZUS – czy dostanę zasiłek?';
 
 const SUGGESTIONS = [
 	'Ile wyniesie mój zasiłek macierzyński?',
@@ -20,6 +23,7 @@ export default function ChatSidebar() {
 	const { open, setOpen, messages, sending, loadingHistory, available, recheck, send, retry, newChat, remember, setRemember } =
 		useChat();
 	const [rememberError, setRememberError] = useState<string | null>(null);
+	const { account } = useAuth();
 	const offline = available === false;
 	const titleId = useId();
 	const [text, setText] = useState('');
@@ -163,7 +167,7 @@ export default function ChatSidebar() {
 							<div>
 								<p className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted">Przykładowe pytania</p>
 								<ul className="space-y-2">
-									{SUGGESTIONS.map((s) => (
+									{(account ? [ACCOUNT_SUGGESTION, ...SUGGESTIONS] : SUGGESTIONS).map((s) => (
 										<li key={s}>
 											<button
 												type="button"
