@@ -16,6 +16,7 @@ import ParentingGuide from './pages/ParentingGuide/ParentingGuide';
 import Risks from './pages/Risks/Risks';
 import Support from './pages/Support/Support';
 import Knowledge from './pages/Knowledge/Knowledge';
+import KnowledgeDocument from './pages/Knowledge/KnowledgeDocument';
 import RouteSeo from './seo/RouteSeo';
 import { LEGACY_REDIRECTS } from './seo/routes';
 import { AppRoutePaths } from './types/shared';
@@ -35,6 +36,7 @@ function App() {
 						<Route path={AppRoutePaths.RISKS} element={<Risks />} />
 						<Route path={AppRoutePaths.SUPPORT} element={<Support />} />
 						<Route path={AppRoutePaths.KNOWLEDGE} element={<Knowledge />} />
+						<Route path={AppRoutePaths.KNOWLEDGE_DOCUMENT} element={<KnowledgeDocument />} />
 						<Route path={AppRoutePaths.ADMIN} element={<Admin />} />
 						<Route path={AppRoutePaths.LOGIN} element={<Login />} />
 						<Route path={AppRoutePaths.ACCOUNT} element={<Account />} />

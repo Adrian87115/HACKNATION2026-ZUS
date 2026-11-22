@@ -21,6 +21,39 @@ MAX_TEXTS = 6
 AMENDMENTS_SINCE = '2022-01-01'
 MAX_AMENDMENTS = 10
 
+MANIFEST = Path(__file__).resolve().parent / 'data' / 'documents.json'
+
+# act id → local file from KNOWLEDGE_BASE.txt and section
+ACT_FILES = {
+    'DU/1999/636': ('prawo/ustawa_zasilkowa_tekst_jednolity_DzU_2026_poz_854.pdf', 'ustawy'),
+    'DU/1974/141': ('prawo/kodeks_pracy_tekst_jednolity_DzU_2026_poz_1245.pdf', 'ustawy'),
+    'DU/1998/887': ('prawo/ustawa_o_systemie_ubezpieczen_spolecznych_ujednolicona.pdf', 'ustawy'),
+    'DU/2016/1860': ('prawo/ustawa_za_zyciem_ujednolicona.pdf', 'ustawy'),
+    'DU/2026/1316': ('prawo/rozporzadzenie_dokumenty_do_zasilkow_DzU_2026_poz_1316.pdf', 'rozporzadzenia'),
+    'DU/2025/322': ('prawo/rozporzadzenie_wnioski_urlopy_rodzicielskie_DzU_2025_poz_322.pdf', 'rozporzadzenia'),
+}
+
+# form code → (section, who fills it in and when)
+FORMS = {
+    'ZAM': ('wnioski', 'Wniosek o wypłatę zasiłku macierzyńskiego. Składasz go płatnikowi składek albo bezpośrednio w ZUS (np. przy umowie zlecenia lub działalności).'),
+    'ZAS-55': ('wnioski', 'Wniosek o zasiłek w wysokości zasiłku macierzyńskiego (m.in. po utracie pracy w ciąży z powodu upadłości lub likwidacji pracodawcy) oraz o zasiłek wyrównawczy.'),
+    'ZAS-53': ('wnioski', 'Wniosek o zasiłek chorobowy – gdy zasiłek wypłaca ZUS, a dane z e-ZLA nie wystarczą (np. po ustaniu ubezpieczenia).'),
+    'ZPW': ('wnioski', 'Wniosek o wydanie przez ZUS zaświadczenia w sprawie zasiłku, np. o okresach i kwotach wypłaconych świadczeń.'),
+    'ZNp-7': ('wnioski', 'Wniosek o świadczenie rehabilitacyjne po wyczerpaniu zasiłku chorobowego (w ciąży – 100% podstawy).'),
+    'RWN': ('wnioski', 'Wniosek o zaświadczenie o niezaleganiu w składkach – przydatny przed porodem przy własnej działalności (art. 2a).'),
+    'Z-3': ('zaswiadczenia', 'Zaświadczenie wypełnia pracodawca, gdy zasiłek wypłaca ZUS – zawiera wynagrodzenie potrzebne do podstawy zasiłku.'),
+    'Z-3a': ('zaswiadczenia', 'Zaświadczenie płatnika dla osób niebędących pracownikami (np. zleceniobiorców) – dane do podstawy zasiłku.'),
+    'ZAS-15': ('zaswiadczenia', 'Zaświadczenie płatnika składek o wykorzystanych urlopach macierzyńskim, rodzicielskim i ojcowskim.'),
+    'ZAS-24': ('zaswiadczenia', 'Zaświadczenie o okresach wypłaconego lub przysługującego zasiłku macierzyńskiego – np. przy podziale urlopu między rodziców.'),
+    'ZAS-12': ('zaswiadczenia', 'Zaświadczenie płatnika składek potrzebne do zasiłku chorobowego lub opiekuńczego za kolejny okres.'),
+    'ZAS-40': ('zaswiadczenia', 'Zaświadczenie lekarskie o pobycie matki dziecka w szpitalu – gdy w tym czasie opiekę i zasiłek przejmuje ojciec.'),
+    'ZAS-2': ('zaswiadczenia', 'Zaświadczenie lekarskie wystawiane w związku z ciążą (m.in. o przewidywanej dacie porodu).'),
+    'ZAS-26': ('oswiadczenia', 'Oświadczenie o przyjęciu dziecka na wychowanie (adopcja, rodzina zastępcza) – do ustalenia prawa do zasiłku macierzyńskiego.'),
+    'ZAS-33': ('oswiadczenia', 'Oświadczenie o porzuceniu dziecka przez matkę lub o jej śmierci – gdy zasiłek przejmuje ojciec lub inny członek rodziny.'),
+    'ZAS-39': ('oswiadczenia', 'Oświadczenie, że matka dziecka pobiera zasiłek macierzyński w okresie 8 tygodni po porodzie.'),
+    'Z-10': ('oswiadczenia', 'Oświadczenie do zasiłku chorobowego lub świadczenia rehabilitacyjnego po ustaniu tytułu ubezpieczenia.'),
+}
+
 # act id → (library id, short title, description, topics)
 ACTS = [
     ('DU/1999/636', 'ustawa-zasilkowa', 'Ustawa zasiłkowa',
@@ -80,6 +113,11 @@ def label(eli_id: str) -> str:
     return f'Dz.U. {year} poz. {pos}'
 
 
+def local_file(name: str) -> dict | None:
+    manifest = json.loads(MANIFEST.read_text(encoding = 'utf-8')) if MANIFEST.exists() else {}
+    return manifest.get(name)
+
+
 def act_entry(eli_id: str, doc_id: str, title: str, description: str, topics: list[str]) -> dict:
     act = get(eli_id)
     refs = act.get('references', {})
@@ -118,9 +156,12 @@ def act_entry(eli_id: str, doc_id: str, title: str, description: str, topics: li
         elif replaced and not texts:
             version['changes'] = 'Zastąpiło: ' + ', '.join(r['source'] for r in replaced)
 
+    file_name, section = ACT_FILES[eli_id]
+    versions[0]['file'] = local_file(file_name)
     return {
         'id': doc_id, 'kind': 'akt_prawny', 'code': None, 'title': title, 'fullTitle': act.get('title', '').strip(),
-        'description': description, 'topics': topics, 'status': 'obowiazujacy', 'pageUrl': isap(eli_id),
+        'description': description, 'topics': topics, 'category': 'prawo', 'section': section,
+        'status': 'obowiazujacy', 'pageUrl': isap(eli_id),
         'versions': versions, 'amendments': changes, 'withdrawn': None,
     }
 
@@ -135,17 +176,19 @@ def main() -> None:
     for form in forms:
         docs.append({
             'id': f"formularz-{form['code'].lower()}", 'kind': 'formularz', 'code': form['code'], 'title': form['name'],
-            'fullTitle': f"{form['code']} – {form['name']}", 'description': '', 'topics': FORM_TOPICS.get(form['code'], []),
+            'fullTitle': f"{form['code']} – {form['name']}", 'description': FORMS[form['code']][1],
+            'topics': FORM_TOPICS.get(form['code'], []), 'category': 'formularze', 'section': FORMS[form['code']][0],
             'status': 'obowiazujacy', 'pageUrl': form['page'],
             'versions': [{'version': 'wersja z zus.pl', 'label': 'Wzór do druku', 'validFrom': RETRIEVED, 'url': form['download'],
-                          'changes': 'Wzór pobrany ze strony ZUS „Wzory formularzy”.', 'addedAt': RETRIEVED}],
+                          'changes': 'Wzór pobrany ze strony ZUS „Wzory formularzy”.', 'addedAt': RETRIEVED,
+                          'file': local_file(form['file'])}],
             'amendments': [], 'withdrawn': None,
         })
 
     for doc_id, title, description, url, topics in GUIDES:
         docs.append({
             'id': doc_id, 'kind': 'poradnik', 'code': None, 'title': title, 'fullTitle': title, 'description': description,
-            'topics': topics, 'status': 'obowiazujacy', 'pageUrl': url,
+            'topics': topics, 'category': 'poradniki', 'section': 'instytucje', 'status': 'obowiazujacy', 'pageUrl': url,
             'versions': [{'version': '1', 'label': 'Strona oficjalna', 'validFrom': RETRIEVED, 'url': url, 'changes': '', 'addedAt': RETRIEVED}],
             'amendments': [], 'withdrawn': None,
         })

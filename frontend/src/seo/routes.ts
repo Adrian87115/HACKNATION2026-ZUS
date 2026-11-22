@@ -127,7 +127,8 @@ export const NOT_FOUND_SEO: SeoMeta = {
 
 export const findSeoRoute = (pathname: string): SeoMeta | undefined => {
 	const normalized = pathname.length > 1 ? pathname.replace(/\/+$/, '') : pathname;
-	return SEO_ROUTES.find((r) => r.path === normalized);
+	// nested pages (e.g. a document of the knowledge base) share the metadata of their section
+	return SEO_ROUTES.find((r) => r.path === normalized) ?? SEO_ROUTES.find((r) => r.path === AppRoutePaths.KNOWLEDGE && normalized.startsWith(`${r.path}/`));
 };
 
 export const absoluteUrl = (siteUrl: string, path: string): string =>

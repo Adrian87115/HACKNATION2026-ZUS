@@ -15,6 +15,8 @@ export const LIBRARY_SEED: LibraryDocument[] = [
       "rodzicielski",
       "skladki"
     ],
+    "category": "prawo",
+    "section": "ustawy",
     "status": "obowiazujacy",
     "pageUrl": "https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU19990000636",
     "versions": [
@@ -24,7 +26,15 @@ export const LIBRARY_SEED: LibraryDocument[] = [
         "validFrom": "2026-06-19",
         "url": "https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU20260000854",
         "changes": "Uwzględnia zmiany: Ustawa z dnia 18 grudnia 2025 r. o zmianie ustawy o systemie ubezpieczeń społecznych oraz niektórych innych ustaw (Dz.U. 2026 poz. 26, w mocy od 2026-04-13); Ustawa z dnia 25 lipca 2025 r. o zmianie ustawy o systemie ubezpieczeń społecznych oraz niektórych innych ustaw (Dz.U. 2025 poz. 1083, w mocy od 2026-01-01)",
-        "addedAt": "2026-11-21"
+        "addedAt": "2026-11-21",
+        "file": {
+          "path": "/dokumenty/prawo/ustawa_zasilkowa_tekst_jednolity_DzU_2026_poz_854.pdf",
+          "size": 539633,
+          "pages": 63,
+          "sha256": "29bdb1a038d5fc2a419ef005c0769cd7cb8edd1a21b28d37a8c7da6d7ff01c4b",
+          "downloadedAt": "2026-11-22",
+          "source": "https://api.sejm.gov.pl/eli/acts/DU/2026/854/text/U/D20260854Lj.pdf"
+        }
       },
       {
         "version": "Dz.U. 2025 poz. 501",
@@ -144,6 +154,8 @@ export const LIBRARY_SEED: LibraryDocument[] = [
       "adopcja",
       "ciaza"
     ],
+    "category": "prawo",
+    "section": "ustawy",
     "status": "obowiazujacy",
     "pageUrl": "https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU19740000141",
     "versions": [
@@ -153,7 +165,15 @@ export const LIBRARY_SEED: LibraryDocument[] = [
         "validFrom": "2026-09-01",
         "url": "https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU20260001245",
         "changes": "Uwzględnia zmiany: Ustawa z dnia 11 marca 2026 r. o zmianie ustawy o Państwowej Inspekcji Pracy oraz niektórych innych ustaw (Dz.U. 2026 poz. 473, w mocy od 2026-07-08); Ustawa z dnia 4 grudnia 2025 r. o zmianie ustawy - Kodeks pracy oraz ustawy o zakładowym funduszu świadczeń socjalnych (Dz.U. 2026 poz. 25, w mocy od 2026-01-27); Ustawa z dnia 26 września 2025 r. o zmianie ustawy - Kodeks pracy oraz niektórych innych ustaw (Dz.U. 2025 poz. 1423, w mocy od 2026-01-01); Ustawa z dnia 4 czerwca 2025 r. o zmianie ustawy - Kodeks pracy (Dz.U. 2025 poz. 807, w mocy od 2025-12-24); Ustawa z dnia 5 listopada 2025 r. o układach zbiorowych pracy i porozumieniach zbiorowych (Dz.U. 2025 poz. 1661, w mocy od 2025-12-13); Ustawa z dnia 6 grudnia 2024 r. o zmianie ustawy - Kodeks pracy oraz niektórych innych ustaw (Dz.U. 2024 poz. 1871, w mocy od 2025-03-19)",
-        "addedAt": "2026-11-21"
+        "addedAt": "2026-11-21",
+        "file": {
+          "path": "/dokumenty/prawo/kodeks_pracy_tekst_jednolity_DzU_2026_poz_1245.pdf",
+          "size": 1181631,
+          "pages": 97,
+          "sha256": "49e2b27fb3668d7d778ba62646b4ccb74eec86233d32182b7969c92d1afcd226",
+          "downloadedAt": "2026-11-22",
+          "source": "https://api.sejm.gov.pl/eli/acts/DU/2026/1245/text/T/D20261245L.pdf"
+        }
       },
       {
         "version": "Dz.U. 2025 poz. 277",
@@ -270,6 +290,8 @@ export const LIBRARY_SEED: LibraryDocument[] = [
     "topics": [
       "skladki"
     ],
+    "category": "prawo",
+    "section": "ustawy",
     "status": "obowiazujacy",
     "pageUrl": "https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU19980000887",
     "versions": [
@@ -279,7 +301,15 @@ export const LIBRARY_SEED: LibraryDocument[] = [
         "validFrom": "2026-10-09",
         "url": "https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU20260001474",
         "changes": "Uwzględnia zmiany: Ustawa z dnia 11 marca 2026 r. o zmianie ustawy o Państwowej Inspekcji Pracy oraz niektórych innych ustaw (Dz.U. 2026 poz. 473, w mocy od 2026-07-08); Ustawa z dnia 15 maja 2026 r. o zmianie ustawy o systemie teleinformatycznym do obsługi niektórych umów oraz niektórych innych ustaw (Dz.U. 2026 poz. 734, w mocy od 2026-06-20); Ustawa z dnia 27 lutego 2026 r. o zmianie ustawy o finansach publicznych oraz niektórych innych ustaw (Dz.U. 2026 poz. 426, w mocy od 2026-04-14); Ustawa z dnia 18 grudnia 2025 r. o zmianie ustawy o systemie ubezpieczeń społecznych oraz niektórych innych ustaw (Dz.U. 2026 poz. 26, w mocy od 2026-04-13); Ustawa z dnia 23 stycznia 2026 r. o zmianie ustawy o krajowym systemie cyberbezpieczeństwa oraz niektórych innych ustaw (Dz.U. 2026 poz. 252, w mocy od 2026-04-03)",
-        "addedAt": "2026-11-21"
+        "addedAt": "2026-11-21",
+        "file": {
+          "path": "/dokumenty/prawo/ustawa_o_systemie_ubezpieczen_spolecznych_ujednolicona.pdf",
+          "size": 1343305,
+          "pages": 209,
+          "sha256": "761092254071e63752a8546b538ed697404a23ba2ea5cce71987ef811b011ead",
+          "downloadedAt": "2026-11-22",
+          "source": "https://api.sejm.gov.pl/eli/acts/DU/1998/887/text/U/D19980887Lj.pdf"
+        }
       },
       {
         "version": "Dz.U. 2026 poz. 199",
@@ -397,6 +427,8 @@ export const LIBRARY_SEED: LibraryDocument[] = [
       "ciaza",
       "rodzicielski"
     ],
+    "category": "prawo",
+    "section": "ustawy",
     "status": "obowiazujacy",
     "pageUrl": "https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU20160001860",
     "versions": [
@@ -406,7 +438,15 @@ export const LIBRARY_SEED: LibraryDocument[] = [
         "validFrom": "2024-12-06",
         "url": "https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU20240001829",
         "changes": "Uwzględnia zmiany: Ustawa z dnia 1 października 2024 r. o dochodach jednostek samorządu terytorialnego (Dz.U. 2024 poz. 1572, w mocy od 2024-10-25)",
-        "addedAt": "2026-11-21"
+        "addedAt": "2026-11-21",
+        "file": {
+          "path": "/dokumenty/prawo/ustawa_za_zyciem_ujednolicona.pdf",
+          "size": 220104,
+          "pages": 9,
+          "sha256": "00aae023cfb66efdad9c07f9eb3caeaa327fab1a9101bbf54388ca138433a06c",
+          "downloadedAt": "2026-11-22",
+          "source": "https://api.sejm.gov.pl/eli/acts/DU/2016/1860/text/U/D20161860Lj.pdf"
+        }
       },
       {
         "version": "Dz.U. 2023 poz. 1923",
@@ -461,6 +501,8 @@ export const LIBRARY_SEED: LibraryDocument[] = [
       "ciaza",
       "skladki"
     ],
+    "category": "prawo",
+    "section": "rozporzadzenia",
     "status": "obowiazujacy",
     "pageUrl": "https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU20260001316",
     "versions": [
@@ -470,7 +512,15 @@ export const LIBRARY_SEED: LibraryDocument[] = [
         "validFrom": "2026-10-24",
         "url": "https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU20260001316",
         "changes": "Zastąpiło: Dz.U. 2026 poz. 890, Dz.U. 2025 poz. 969, Dz.U. 2025 poz. 343",
-        "addedAt": "2026-11-21"
+        "addedAt": "2026-11-21",
+        "file": {
+          "path": "/dokumenty/prawo/rozporzadzenie_dokumenty_do_zasilkow_DzU_2026_poz_1316.pdf",
+          "size": 467834,
+          "pages": 18,
+          "sha256": "e6511c161723a2f8f511483effc5a1e5426157b6f392c40de5a80e62d7d79adc",
+          "downloadedAt": "2026-11-22",
+          "source": "https://api.sejm.gov.pl/eli/acts/DU/2026/1316/text/I/D20261316.pdf"
+        }
       }
     ],
     "amendments": [],
@@ -488,6 +538,8 @@ export const LIBRARY_SEED: LibraryDocument[] = [
       "rodzicielski",
       "adopcja"
     ],
+    "category": "prawo",
+    "section": "rozporzadzenia",
     "status": "obowiazujacy",
     "pageUrl": "https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU20250000322",
     "versions": [
@@ -497,7 +549,15 @@ export const LIBRARY_SEED: LibraryDocument[] = [
         "validFrom": "2025-03-19",
         "url": "https://isap.sejm.gov.pl/isap.nsf/DocDetails.xsp?id=WDU20250000322",
         "changes": "",
-        "addedAt": "2026-11-21"
+        "addedAt": "2026-11-21",
+        "file": {
+          "path": "/dokumenty/prawo/rozporzadzenie_wnioski_urlopy_rodzicielskie_DzU_2025_poz_322.pdf",
+          "size": 243188,
+          "pages": 10,
+          "sha256": "aa2087ed9162f7dca449426d18b8f39992711901f6ee166c4f7367535169ceae",
+          "downloadedAt": "2026-11-22",
+          "source": "https://api.sejm.gov.pl/eli/acts/DU/2025/322/text/I/D20250322.pdf"
+        }
       }
     ],
     "amendments": [],
@@ -509,10 +569,12 @@ export const LIBRARY_SEED: LibraryDocument[] = [
     "code": "ZAM",
     "title": "Wniosek o zasiłek macierzyński",
     "fullTitle": "ZAM – Wniosek o zasiłek macierzyński",
-    "description": "",
+    "description": "Wniosek o wypłatę zasiłku macierzyńskiego. Składasz go płatnikowi składek albo bezpośrednio w ZUS (np. przy umowie zlecenia lub działalności).",
     "topics": [
       "macierzynski"
     ],
+    "category": "formularze",
+    "section": "wnioski",
     "status": "obowiazujacy",
     "pageUrl": "https://www.zus.pl/-/wniosek-zas-54",
     "versions": [
@@ -522,7 +584,15 @@ export const LIBRARY_SEED: LibraryDocument[] = [
         "validFrom": "2026-11-21",
         "url": "https://www.zus.pl/documents/10182/4223950/ZAM_pobierz+i+drukuj.pdf/f1ad7e3f-0eaa-fdbc-20ec-5b07ab59566a",
         "changes": "Wzór pobrany ze strony ZUS „Wzory formularzy”.",
-        "addedAt": "2026-11-21"
+        "addedAt": "2026-11-21",
+        "file": {
+          "path": "/dokumenty/wnioski/ZAM_wniosek_o_zasilek_macierzynski.pdf",
+          "size": 757670,
+          "pages": 7,
+          "sha256": "45597ebb0278edf7518e24cf8eb764f242661638c7d1288ab0b6edf70186c639",
+          "downloadedAt": "2026-11-22",
+          "source": "https://www.zus.pl/documents/10182/4223950/ZAM_pobierz+i+drukuj.pdf/f1ad7e3f-0eaa-fdbc-20ec-5b07ab59566a"
+        }
       }
     ],
     "amendments": [],
@@ -534,11 +604,13 @@ export const LIBRARY_SEED: LibraryDocument[] = [
     "code": "Z-3",
     "title": "Zaświadczenie płatnika składek (dotyczące pracowników)",
     "fullTitle": "Z-3 – Zaświadczenie płatnika składek (dotyczące pracowników)",
-    "description": "",
+    "description": "Zaświadczenie wypełnia pracodawca, gdy zasiłek wypłaca ZUS – zawiera wynagrodzenie potrzebne do podstawy zasiłku.",
     "topics": [
       "macierzynski",
       "ciaza"
     ],
+    "category": "formularze",
+    "section": "zaswiadczenia",
     "status": "obowiazujacy",
     "pageUrl": "https://www.zus.pl/-/zaswiadczenie-zus-z-3",
     "versions": [
@@ -548,7 +620,15 @@ export const LIBRARY_SEED: LibraryDocument[] = [
         "validFrom": "2026-11-21",
         "url": "https://www.zus.pl/documents/10182/12636166/Z-3_do+druku.pdf/388eed46-ea41-6a75-cb21-739c5f83aac7",
         "changes": "Wzór pobrany ze strony ZUS „Wzory formularzy”.",
-        "addedAt": "2026-11-21"
+        "addedAt": "2026-11-21",
+        "file": {
+          "path": "/dokumenty/wnioski/Z-3_zaswiadczenie_platnika_skladek_pracownicy.pdf",
+          "size": 342335,
+          "pages": 9,
+          "sha256": "6be222cddbea638b0544265bd65a8ef813b9baf2c108b85eabfdef71dbdaf703",
+          "downloadedAt": "2026-11-22",
+          "source": "https://www.zus.pl/documents/10182/12636166/Z-3_do+druku.pdf/388eed46-ea41-6a75-cb21-739c5f83aac7"
+        }
       }
     ],
     "amendments": [],
@@ -560,11 +640,13 @@ export const LIBRARY_SEED: LibraryDocument[] = [
     "code": "Z-3a",
     "title": "Zaświadczenie płatnika składek (dotyczące osób niebędących pracownikami)",
     "fullTitle": "Z-3a – Zaświadczenie płatnika składek (dotyczące osób niebędących pracownikami)",
-    "description": "",
+    "description": "Zaświadczenie płatnika dla osób niebędących pracownikami (np. zleceniobiorców) – dane do podstawy zasiłku.",
     "topics": [
       "macierzynski",
       "ciaza"
     ],
+    "category": "formularze",
+    "section": "zaswiadczenia",
     "status": "obowiazujacy",
     "pageUrl": "https://www.zus.pl/-/zaswiadczenie-zus-z-3a",
     "versions": [
@@ -574,7 +656,15 @@ export const LIBRARY_SEED: LibraryDocument[] = [
         "validFrom": "2026-11-21",
         "url": "https://www.zus.pl/documents/10182/4223950/Z-3a_pobierz_plik_do_wydruku.pdf/7dd8fb4c-e8f6-05c8-7f69-92b82fa33571",
         "changes": "Wzór pobrany ze strony ZUS „Wzory formularzy”.",
-        "addedAt": "2026-11-21"
+        "addedAt": "2026-11-21",
+        "file": {
+          "path": "/dokumenty/wnioski/Z-3a_zaswiadczenie_platnika_skladek_niepracownicy_zlecenie.pdf",
+          "size": 299338,
+          "pages": 7,
+          "sha256": "408b1e7636c4d63c50aca309dcbf05c0fd526c488cad412b7fc0b8667fc93b63",
+          "downloadedAt": "2026-11-22",
+          "source": "https://www.zus.pl/documents/10182/4223950/Z-3a_pobierz_plik_do_wydruku.pdf/7dd8fb4c-e8f6-05c8-7f69-92b82fa33571"
+        }
       }
     ],
     "amendments": [],
@@ -586,10 +676,12 @@ export const LIBRARY_SEED: LibraryDocument[] = [
     "code": "ZAS-55",
     "title": "Wniosek o zasiłek w wysokości zasiłku macierzyńskiego i zasiłek wyrównawczy",
     "fullTitle": "ZAS-55 – Wniosek o zasiłek w wysokości zasiłku macierzyńskiego i zasiłek wyrównawczy",
-    "description": "",
+    "description": "Wniosek o zasiłek w wysokości zasiłku macierzyńskiego (m.in. po utracie pracy w ciąży z powodu upadłości lub likwidacji pracodawcy) oraz o zasiłek wyrównawczy.",
     "topics": [
       "ciaza"
     ],
+    "category": "formularze",
+    "section": "wnioski",
     "status": "obowiazujacy",
     "pageUrl": "https://www.zus.pl/-/wnioski-zas-55",
     "versions": [
@@ -599,7 +691,15 @@ export const LIBRARY_SEED: LibraryDocument[] = [
         "validFrom": "2026-11-21",
         "url": "https://www.zus.pl/documents/10182/4223950/ZAS-55_pobierz_plik_drukowany.pdf/6346a0af-1507-87c3-eaee-ec215604d96e",
         "changes": "Wzór pobrany ze strony ZUS „Wzory formularzy”.",
-        "addedAt": "2026-11-21"
+        "addedAt": "2026-11-21",
+        "file": {
+          "path": "/dokumenty/wnioski/ZAS-55_wniosek_o_zasilek_w_wysokosci_zasilku_macierzynskiego_i_wyrownawczy.pdf",
+          "size": 203920,
+          "pages": 2,
+          "sha256": "10ef8184c9a959ddb2de6b20424de1064543db59f8bc228ccb70c4d0eb59fae4",
+          "downloadedAt": "2026-11-22",
+          "source": "https://www.zus.pl/documents/10182/4223950/ZAS-55_pobierz_plik_drukowany.pdf/6346a0af-1507-87c3-eaee-ec215604d96e"
+        }
       }
     ],
     "amendments": [],
@@ -611,10 +711,12 @@ export const LIBRARY_SEED: LibraryDocument[] = [
     "code": "ZAS-26",
     "title": "Oświadczenie o przyjęciu na wychowanie dziecka do ustalenia prawa do zasiłku macierzyńskiego",
     "fullTitle": "ZAS-26 – Oświadczenie o przyjęciu na wychowanie dziecka do ustalenia prawa do zasiłku macierzyńskiego",
-    "description": "",
+    "description": "Oświadczenie o przyjęciu dziecka na wychowanie (adopcja, rodzina zastępcza) – do ustalenia prawa do zasiłku macierzyńskiego.",
     "topics": [
       "adopcja"
     ],
+    "category": "formularze",
+    "section": "oswiadczenia",
     "status": "obowiazujacy",
     "pageUrl": "https://www.zus.pl/-/oswiadczenie-zas-26",
     "versions": [
@@ -624,7 +726,15 @@ export const LIBRARY_SEED: LibraryDocument[] = [
         "validFrom": "2026-11-21",
         "url": "https://www.zus.pl/documents/10182/788036/ZAS-26_do+pobrania.pdf/bd817b19-f5c6-46ba-8afb-2c7b3a89be51",
         "changes": "Wzór pobrany ze strony ZUS „Wzory formularzy”.",
-        "addedAt": "2026-11-21"
+        "addedAt": "2026-11-21",
+        "file": {
+          "path": "/dokumenty/wnioski/ZAS-26_oswiadczenie_o_przyjeciu_dziecka_na_wychowanie.pdf",
+          "size": 162850,
+          "pages": 2,
+          "sha256": "f9d6b32712570744da7249bc4a8626500a385825b20f04bdd13a572fb8d50b08",
+          "downloadedAt": "2026-11-22",
+          "source": "https://www.zus.pl/documents/10182/788036/ZAS-26_do+pobrania.pdf/bd817b19-f5c6-46ba-8afb-2c7b3a89be51"
+        }
       }
     ],
     "amendments": [],
@@ -636,10 +746,12 @@ export const LIBRARY_SEED: LibraryDocument[] = [
     "code": "ZAS-33",
     "title": "Oświadczenie o porzuceniu dziecka przez matkę lub o śmierci matki dziecka",
     "fullTitle": "ZAS-33 – Oświadczenie o porzuceniu dziecka przez matkę lub o śmierci matki dziecka",
-    "description": "",
+    "description": "Oświadczenie o porzuceniu dziecka przez matkę lub o jej śmierci – gdy zasiłek przejmuje ojciec lub inny członek rodziny.",
     "topics": [
       "rodzicielski"
     ],
+    "category": "formularze",
+    "section": "oswiadczenia",
     "status": "obowiazujacy",
     "pageUrl": "https://www.zus.pl/-/oswiadczenie-zas-33",
     "versions": [
@@ -649,7 +761,15 @@ export const LIBRARY_SEED: LibraryDocument[] = [
         "validFrom": "2026-11-21",
         "url": "https://www.zus.pl/documents/10182/788036/ZAS-33_do+pobrania+i+wydruku.pdf/0b9c07a2-94b8-497a-a15d-390bf5c72b2d",
         "changes": "Wzór pobrany ze strony ZUS „Wzory formularzy”.",
-        "addedAt": "2026-11-21"
+        "addedAt": "2026-11-21",
+        "file": {
+          "path": "/dokumenty/wnioski/ZAS-33_oswiadczenie_o_porzuceniu_dziecka_lub_smierci_matki.pdf",
+          "size": 161816,
+          "pages": 2,
+          "sha256": "f8239346e15e74d38e0312bed3e0be0fd5ef4b990e87bb502de65c585a5b66bc",
+          "downloadedAt": "2026-11-22",
+          "source": "https://www.zus.pl/documents/10182/788036/ZAS-33_do+pobrania+i+wydruku.pdf/0b9c07a2-94b8-497a-a15d-390bf5c72b2d"
+        }
       }
     ],
     "amendments": [],
@@ -661,10 +781,12 @@ export const LIBRARY_SEED: LibraryDocument[] = [
     "code": "ZAS-39",
     "title": "Oświadczenie, że matka dziecka pobiera zasiłek macierzyński w okresie 8 tygodni po porodzie",
     "fullTitle": "ZAS-39 – Oświadczenie, że matka dziecka pobiera zasiłek macierzyński w okresie 8 tygodni po porodzie",
-    "description": "",
+    "description": "Oświadczenie, że matka dziecka pobiera zasiłek macierzyński w okresie 8 tygodni po porodzie.",
     "topics": [
       "rodzicielski"
     ],
+    "category": "formularze",
+    "section": "oswiadczenia",
     "status": "obowiazujacy",
     "pageUrl": "https://www.zus.pl/-/oswiadczenie-zas-39",
     "versions": [
@@ -674,7 +796,15 @@ export const LIBRARY_SEED: LibraryDocument[] = [
         "validFrom": "2026-11-21",
         "url": "https://www.zus.pl/documents/10182/788036/ZAS-39+do+pobrania+i+wydruku.pdf/311c8367-ad3f-4d27-ac52-69fce5171014",
         "changes": "Wzór pobrany ze strony ZUS „Wzory formularzy”.",
-        "addedAt": "2026-11-21"
+        "addedAt": "2026-11-21",
+        "file": {
+          "path": "/dokumenty/wnioski/ZAS-39_oswiadczenie_matka_pobiera_zasilek_8_tygodni_po_porodzie.pdf",
+          "size": 186533,
+          "pages": 2,
+          "sha256": "a3442115c40ba271e5f14f11f66c48633ca0b1a81c6451d04d31858e8c029c45",
+          "downloadedAt": "2026-11-22",
+          "source": "https://www.zus.pl/documents/10182/788036/ZAS-39+do+pobrania+i+wydruku.pdf/311c8367-ad3f-4d27-ac52-69fce5171014"
+        }
       }
     ],
     "amendments": [],
@@ -686,10 +816,12 @@ export const LIBRARY_SEED: LibraryDocument[] = [
     "code": "ZAS-40",
     "title": "Zaświadczenie lekarskie o okresie, w którym ubezpieczona matka dziecka przebywa w szpitalu",
     "fullTitle": "ZAS-40 – Zaświadczenie lekarskie o okresie, w którym ubezpieczona matka dziecka przebywa w szpitalu",
-    "description": "",
+    "description": "Zaświadczenie lekarskie o pobycie matki dziecka w szpitalu – gdy w tym czasie opiekę i zasiłek przejmuje ojciec.",
     "topics": [
       "macierzynski"
     ],
+    "category": "formularze",
+    "section": "zaswiadczenia",
     "status": "obowiazujacy",
     "pageUrl": "https://www.zus.pl/-/zaswiadczenie-zas-40",
     "versions": [
@@ -699,7 +831,15 @@ export const LIBRARY_SEED: LibraryDocument[] = [
         "validFrom": "2026-11-21",
         "url": "https://www.zus.pl/documents/10182/788036/ZAS-40_do+zapisu.pdf/8281bd5b-9a46-4102-8806-14bbad39ca09",
         "changes": "Wzór pobrany ze strony ZUS „Wzory formularzy”.",
-        "addedAt": "2026-11-21"
+        "addedAt": "2026-11-21",
+        "file": {
+          "path": "/dokumenty/wnioski/ZAS-40_zaswiadczenie_lekarskie_matka_w_szpitalu.pdf",
+          "size": 180272,
+          "pages": 1,
+          "sha256": "6864622cf94820b1ceaceb50ff24557b6551f7fd92ea3355b2bfa71fe217043c",
+          "downloadedAt": "2026-11-22",
+          "source": "https://www.zus.pl/documents/10182/788036/ZAS-40_do+zapisu.pdf/8281bd5b-9a46-4102-8806-14bbad39ca09"
+        }
       }
     ],
     "amendments": [],
@@ -711,11 +851,13 @@ export const LIBRARY_SEED: LibraryDocument[] = [
     "code": "ZAS-15",
     "title": "Zaświadczenie płatnika składek o urlopie macierzyńskim, rodzicielskim, ojcowskim [...]",
     "fullTitle": "ZAS-15 – Zaświadczenie płatnika składek o urlopie macierzyńskim, rodzicielskim, ojcowskim [...]",
-    "description": "",
+    "description": "Zaświadczenie płatnika składek o wykorzystanych urlopach macierzyńskim, rodzicielskim i ojcowskim.",
     "topics": [
       "macierzynski",
       "rodzicielski"
     ],
+    "category": "formularze",
+    "section": "zaswiadczenia",
     "status": "obowiazujacy",
     "pageUrl": "https://www.zus.pl/-/zaswiadczenie-zas-2",
     "versions": [
@@ -725,7 +867,15 @@ export const LIBRARY_SEED: LibraryDocument[] = [
         "validFrom": "2026-11-21",
         "url": "https://www.zus.pl/documents/10182/788036/ZAS-15.pdf/4106da67-3b59-4e40-9e4b-585e84234e15",
         "changes": "Wzór pobrany ze strony ZUS „Wzory formularzy”.",
-        "addedAt": "2026-11-21"
+        "addedAt": "2026-11-21",
+        "file": {
+          "path": "/dokumenty/wnioski/ZAS-15_zaswiadczenie_platnika_o_urlopach_rodzicielskich.pdf",
+          "size": 651780,
+          "pages": 2,
+          "sha256": "fb80aca00c478265b24c144aa713fd8a19d6f851ea421b05daef61506c431907",
+          "downloadedAt": "2026-11-22",
+          "source": "https://www.zus.pl/documents/10182/788036/ZAS-15.pdf/4106da67-3b59-4e40-9e4b-585e84234e15"
+        }
       }
     ],
     "amendments": [],
@@ -737,10 +887,12 @@ export const LIBRARY_SEED: LibraryDocument[] = [
     "code": "ZAS-24",
     "title": "Zaświadczenie o okresach wypłaconego/przysługującego zasiłku macierzyńskiego",
     "fullTitle": "ZAS-24 – Zaświadczenie o okresach wypłaconego/przysługującego zasiłku macierzyńskiego",
-    "description": "",
+    "description": "Zaświadczenie o okresach wypłaconego lub przysługującego zasiłku macierzyńskiego – np. przy podziale urlopu między rodziców.",
     "topics": [
       "macierzynski"
     ],
+    "category": "formularze",
+    "section": "zaswiadczenia",
     "status": "obowiazujacy",
     "pageUrl": "https://www.zus.pl/-/zaswiadczenie-zas-3",
     "versions": [
@@ -750,7 +902,15 @@ export const LIBRARY_SEED: LibraryDocument[] = [
         "validFrom": "2026-11-21",
         "url": "https://www.zus.pl/documents/10182/18428/ZAS_24+do+wydruku.pdf/8a3ef8bf-5471-40b8-b227-1a0eebcc1e07",
         "changes": "Wzór pobrany ze strony ZUS „Wzory formularzy”.",
-        "addedAt": "2026-11-21"
+        "addedAt": "2026-11-21",
+        "file": {
+          "path": "/dokumenty/wnioski/ZAS-24_zaswiadczenie_o_okresach_zasilku_macierzynskiego.pdf",
+          "size": 656272,
+          "pages": 3,
+          "sha256": "01bee64c051bf962c0a68176396bed9eab6de7325fd3e87bbb1ac8363bc25dfb",
+          "downloadedAt": "2026-11-22",
+          "source": "https://www.zus.pl/documents/10182/18428/ZAS_24+do+wydruku.pdf/8a3ef8bf-5471-40b8-b227-1a0eebcc1e07"
+        }
       }
     ],
     "amendments": [],
@@ -762,10 +922,12 @@ export const LIBRARY_SEED: LibraryDocument[] = [
     "code": "ZPW",
     "title": "Wniosek o wydanie zaświadczenia w sprawie zasiłku",
     "fullTitle": "ZPW – Wniosek o wydanie zaświadczenia w sprawie zasiłku",
-    "description": "",
+    "description": "Wniosek o wydanie przez ZUS zaświadczenia w sprawie zasiłku, np. o okresach i kwotach wypłaconych świadczeń.",
     "topics": [
       "skladki"
     ],
+    "category": "formularze",
+    "section": "wnioski",
     "status": "obowiazujacy",
     "pageUrl": "https://www.zus.pl/-/wniosek-zus-eprz",
     "versions": [
@@ -775,7 +937,15 @@ export const LIBRARY_SEED: LibraryDocument[] = [
         "validFrom": "2026-11-21",
         "url": "https://www.zus.pl/documents/10182/788036/ZPW_nowy.pdf/19d05959-05ce-4151-a4f2-48a824d2f3d4",
         "changes": "Wzór pobrany ze strony ZUS „Wzory formularzy”.",
-        "addedAt": "2026-11-21"
+        "addedAt": "2026-11-21",
+        "file": {
+          "path": "/dokumenty/wnioski/ZPW_wniosek_o_wydanie_zaswiadczenia_w_sprawie_zasilku.pdf",
+          "size": 269200,
+          "pages": 4,
+          "sha256": "35962a37622a2b11ac14daa843cde3bbd3915df04cda245c7b840f44e92d04e9",
+          "downloadedAt": "2026-11-22",
+          "source": "https://www.zus.pl/documents/10182/788036/ZPW_nowy.pdf/19d05959-05ce-4151-a4f2-48a824d2f3d4"
+        }
       }
     ],
     "amendments": [],
@@ -787,10 +957,12 @@ export const LIBRARY_SEED: LibraryDocument[] = [
     "code": "ZAS-53",
     "title": "Wniosek o zasiłek chorobowy",
     "fullTitle": "ZAS-53 – Wniosek o zasiłek chorobowy",
-    "description": "",
+    "description": "Wniosek o zasiłek chorobowy – gdy zasiłek wypłaca ZUS, a dane z e-ZLA nie wystarczą (np. po ustaniu ubezpieczenia).",
     "topics": [
       "ciaza"
     ],
+    "category": "formularze",
+    "section": "wnioski",
     "status": "obowiazujacy",
     "pageUrl": "https://www.zus.pl/-/zaswiadczenie-zas-53",
     "versions": [
@@ -800,7 +972,15 @@ export const LIBRARY_SEED: LibraryDocument[] = [
         "validFrom": "2026-11-21",
         "url": "https://www.zus.pl/documents/10182/10157865/ZAS-53_do+wydruku.pdf/fb9f344f-b24d-031a-d1ca-18e26c19027d",
         "changes": "Wzór pobrany ze strony ZUS „Wzory formularzy”.",
-        "addedAt": "2026-11-21"
+        "addedAt": "2026-11-21",
+        "file": {
+          "path": "/dokumenty/wnioski/ZAS-53_wniosek_o_zasilek_chorobowy.pdf",
+          "size": 729516,
+          "pages": 4,
+          "sha256": "3206611d3cb539d1036f32573f5f672a02190b4230bfede77e754a8438416b7f",
+          "downloadedAt": "2026-11-22",
+          "source": "https://www.zus.pl/documents/10182/10157865/ZAS-53_do+wydruku.pdf/fb9f344f-b24d-031a-d1ca-18e26c19027d"
+        }
       }
     ],
     "amendments": [],
@@ -812,10 +992,12 @@ export const LIBRARY_SEED: LibraryDocument[] = [
     "code": "Z-10",
     "title": "Oświadczenie (zasiłek chorobowy / świadczenie rehabilitacyjne po ustaniu tytułu ubezpieczenia)",
     "fullTitle": "Z-10 – Oświadczenie (zasiłek chorobowy / świadczenie rehabilitacyjne po ustaniu tytułu ubezpieczenia)",
-    "description": "",
+    "description": "Oświadczenie do zasiłku chorobowego lub świadczenia rehabilitacyjnego po ustaniu tytułu ubezpieczenia.",
     "topics": [
       "ciaza"
     ],
+    "category": "formularze",
+    "section": "oswiadczenia",
     "status": "obowiazujacy",
     "pageUrl": "https://www.zus.pl/-/oswiadczenie-zus-z-10",
     "versions": [
@@ -825,7 +1007,15 @@ export const LIBRARY_SEED: LibraryDocument[] = [
         "validFrom": "2026-11-21",
         "url": "https://www.zus.pl/documents/10182/4223950/Z-10_wydrukuj_wype%C5%82nij.pdf/a97222d7-e70c-0f2a-dc2f-fb9bb5089a38",
         "changes": "Wzór pobrany ze strony ZUS „Wzory formularzy”.",
-        "addedAt": "2026-11-21"
+        "addedAt": "2026-11-21",
+        "file": {
+          "path": "/dokumenty/wnioski/Z-10_oswiadczenie_zasilek_po_ustaniu_ubezpieczenia.pdf",
+          "size": 684757,
+          "pages": 4,
+          "sha256": "c948239d0a539ed31a2b9460981ca9f8f7584aedd0c845ad0b0063aeeac9a920",
+          "downloadedAt": "2026-11-22",
+          "source": "https://www.zus.pl/documents/10182/4223950/Z-10_wydrukuj_wype%C5%82nij.pdf/a97222d7-e70c-0f2a-dc2f-fb9bb5089a38"
+        }
       }
     ],
     "amendments": [],
@@ -837,10 +1027,12 @@ export const LIBRARY_SEED: LibraryDocument[] = [
     "code": "ZAS-12",
     "title": "Zaświadczenie płatnika składek – zasiłek chorobowy lub opiekuńczy za dalszy okres",
     "fullTitle": "ZAS-12 – Zaświadczenie płatnika składek – zasiłek chorobowy lub opiekuńczy za dalszy okres",
-    "description": "",
+    "description": "Zaświadczenie płatnika składek potrzebne do zasiłku chorobowego lub opiekuńczego za kolejny okres.",
     "topics": [
       "ciaza"
     ],
+    "category": "formularze",
+    "section": "zaswiadczenia",
     "status": "obowiazujacy",
     "pageUrl": "https://www.zus.pl/-/zaswiadczenie-zas-4",
     "versions": [
@@ -850,7 +1042,15 @@ export const LIBRARY_SEED: LibraryDocument[] = [
         "validFrom": "2026-11-21",
         "url": "https://www.zus.pl/documents/10182/4447142/ZAS-12_pobierz_plik.pdf/85b82e86-6c8d-93c2-95f0-8fc46dcb7683",
         "changes": "Wzór pobrany ze strony ZUS „Wzory formularzy”.",
-        "addedAt": "2026-11-21"
+        "addedAt": "2026-11-21",
+        "file": {
+          "path": "/dokumenty/wnioski/ZAS-12_zaswiadczenie_platnika_zasilek_chorobowy_za_dalszy_okres.pdf",
+          "size": 201471,
+          "pages": 3,
+          "sha256": "9fea1285e72af0049a843d928d53fe3bb7e5ad5678b6fd18e1ad812f3cf00a7a",
+          "downloadedAt": "2026-11-22",
+          "source": "https://www.zus.pl/documents/10182/4447142/ZAS-12_pobierz_plik.pdf/85b82e86-6c8d-93c2-95f0-8fc46dcb7683"
+        }
       }
     ],
     "amendments": [],
@@ -862,10 +1062,12 @@ export const LIBRARY_SEED: LibraryDocument[] = [
     "code": "ZAS-2",
     "title": "Zaświadczenie lekarskie wystawione w związku z ciążą",
     "fullTitle": "ZAS-2 – Zaświadczenie lekarskie wystawione w związku z ciążą",
-    "description": "",
+    "description": "Zaświadczenie lekarskie wystawiane w związku z ciążą (m.in. o przewidywanej dacie porodu).",
     "topics": [
       "ciaza"
     ],
+    "category": "formularze",
+    "section": "zaswiadczenia",
     "status": "obowiazujacy",
     "pageUrl": "https://www.zus.pl/-/zaswiadczenie-zas-2-1",
     "versions": [
@@ -875,7 +1077,15 @@ export const LIBRARY_SEED: LibraryDocument[] = [
         "validFrom": "2026-11-21",
         "url": "https://www.zus.pl/documents/10182/788036/ZAS-2_do+pobrania.pdf/13b127b3-a550-4561-a41f-675143754de1",
         "changes": "Wzór pobrany ze strony ZUS „Wzory formularzy”.",
-        "addedAt": "2026-11-21"
+        "addedAt": "2026-11-21",
+        "file": {
+          "path": "/dokumenty/wnioski/ZAS-2_zaswiadczenie_lekarskie_w_zwiazku_z_ciaza.pdf",
+          "size": 179996,
+          "pages": 1,
+          "sha256": "eb26898a471dac4fac6c8ef4658e7257c331f67f1994095f99c98d019385031d",
+          "downloadedAt": "2026-11-22",
+          "source": "https://www.zus.pl/documents/10182/788036/ZAS-2_do+pobrania.pdf/13b127b3-a550-4561-a41f-675143754de1"
+        }
       }
     ],
     "amendments": [],
@@ -887,10 +1097,12 @@ export const LIBRARY_SEED: LibraryDocument[] = [
     "code": "ZNp-7",
     "title": "Wniosek o świadczenie rehabilitacyjne",
     "fullTitle": "ZNp-7 – Wniosek o świadczenie rehabilitacyjne",
-    "description": "",
+    "description": "Wniosek o świadczenie rehabilitacyjne po wyczerpaniu zasiłku chorobowego (w ciąży – 100% podstawy).",
     "topics": [
       "ciaza"
     ],
+    "category": "formularze",
+    "section": "wnioski",
     "status": "obowiazujacy",
     "pageUrl": "https://www.zus.pl/-/oswiadczenie-zus-np-7",
     "versions": [
@@ -900,7 +1112,15 @@ export const LIBRARY_SEED: LibraryDocument[] = [
         "validFrom": "2026-11-21",
         "url": "https://www.zus.pl/documents/10182/4447142/ZNp-7_pobierz+i+wydrukuj.pdf/80a29902-a38f-6020-61e6-925e783e1676",
         "changes": "Wzór pobrany ze strony ZUS „Wzory formularzy”.",
-        "addedAt": "2026-11-21"
+        "addedAt": "2026-11-21",
+        "file": {
+          "path": "/dokumenty/wnioski/ZNp-7_wniosek_o_swiadczenie_rehabilitacyjne.pdf",
+          "size": 229950,
+          "pages": 4,
+          "sha256": "405b0a8c218bd5b9751f0056ad4263a5e3606ff0e20be033f8bd347f0185844d",
+          "downloadedAt": "2026-11-22",
+          "source": "https://www.zus.pl/documents/10182/4447142/ZNp-7_pobierz+i+wydrukuj.pdf/80a29902-a38f-6020-61e6-925e783e1676"
+        }
       }
     ],
     "amendments": [],
@@ -912,10 +1132,12 @@ export const LIBRARY_SEED: LibraryDocument[] = [
     "code": "RWN",
     "title": "Wniosek płatnika składek o wydanie zaświadczenia o niezaleganiu w opłacaniu składek",
     "fullTitle": "RWN – Wniosek płatnika składek o wydanie zaświadczenia o niezaleganiu w opłacaniu składek",
-    "description": "",
+    "description": "Wniosek o zaświadczenie o niezaleganiu w składkach – przydatny przed porodem przy własnej działalności (art. 2a).",
     "topics": [
       "skladki"
     ],
+    "category": "formularze",
+    "section": "wnioski",
     "status": "obowiazujacy",
     "pageUrl": "https://www.zus.pl/-/wniosek-zus-ewn",
     "versions": [
@@ -925,7 +1147,15 @@ export const LIBRARY_SEED: LibraryDocument[] = [
         "validFrom": "2026-11-21",
         "url": "https://www.zus.pl/documents/10182/788036/RWN_RODO.pdf/f9ca1421-b5a3-4c1a-924d-bb9e0e5b48ea",
         "changes": "Wzór pobrany ze strony ZUS „Wzory formularzy”.",
-        "addedAt": "2026-11-21"
+        "addedAt": "2026-11-21",
+        "file": {
+          "path": "/dokumenty/wnioski/RWN_wniosek_o_zaswiadczenie_o_niezaleganiu_w_skladkach.pdf",
+          "size": 165646,
+          "pages": 1,
+          "sha256": "7cf16e0c7c2827b2e3a8a03baecc9f2d96f67c377a2e6d3b161eb40e00a3fd74",
+          "downloadedAt": "2026-11-22",
+          "source": "https://www.zus.pl/documents/10182/788036/RWN_RODO.pdf/f9ca1421-b5a3-4c1a-924d-bb9e0e5b48ea"
+        }
       }
     ],
     "amendments": [],
@@ -941,6 +1171,8 @@ export const LIBRARY_SEED: LibraryDocument[] = [
     "topics": [
       "macierzynski"
     ],
+    "category": "poradniki",
+    "section": "instytucje",
     "status": "obowiazujacy",
     "pageUrl": "https://www.zus.pl/swiadczenia/zasilki/zasilek-macierzynski",
     "versions": [
@@ -966,6 +1198,8 @@ export const LIBRARY_SEED: LibraryDocument[] = [
     "topics": [
       "rodzicielski"
     ],
+    "category": "poradniki",
+    "section": "instytucje",
     "status": "obowiazujacy",
     "pageUrl": "https://www.gov.pl/web/rodzina/urlop-rodzicielski",
     "versions": [
@@ -993,6 +1227,8 @@ export const LIBRARY_SEED: LibraryDocument[] = [
       "rodzicielski",
       "ciaza"
     ],
+    "category": "poradniki",
+    "section": "instytucje",
     "status": "obowiazujacy",
     "pageUrl": "https://www.pip.gov.pl/dla-pracodawcow/porady-prawne/rodzicielstwo",
     "versions": [
@@ -1018,6 +1254,8 @@ export const LIBRARY_SEED: LibraryDocument[] = [
     "topics": [
       "ciaza"
     ],
+    "category": "poradniki",
+    "section": "instytucje",
     "status": "obowiazujacy",
     "pageUrl": "https://www.zus.pl/swiadczenia/zasilki/zasilek-chorobowy",
     "versions": [

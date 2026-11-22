@@ -5,6 +5,8 @@ import {
 	LibraryApiError,
 	libraryApi,
 	plDate,
+	CATEGORY_OF_KIND,
+	type LibraryCategory,
 	type LibraryDocument,
 	type LibraryKind,
 	type LibraryLogEntry,
@@ -43,6 +45,22 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
 			{children}
 			{hint && <span className="mt-1 block text-xs text-muted">{hint}</span>}
 		</label>
+	);
+}
+
+function SectionSelect({ categories, kind, value, onChange }: { categories: LibraryCategory[]; kind: LibraryKind; value: string; onChange: (v: string) => void }) {
+	const category = categories.find((c) => c.value === CATEGORY_OF_KIND[kind]);
+	return (
+		<Field label="Sekcja" hint={category ? `Kategoria: ${category.label}` : undefined}>
+			<select required value={value} onChange={(e) => onChange(e.target.value)} className={cx(inputCls, 'cursor-pointer')}>
+				<option value="">— wybierz —</option>
+				{category?.sections.map((s) => (
+					<option key={s.value} value={s.value}>
+						{s.label}
+					</option>
+				))}
+			</select>
+		</Field>
 	);
 }
 
@@ -98,6 +116,7 @@ function VersionFields({ draft, set, requireChanges }: { draft: VersionDraft; se
 export default function DocumentsAdmin({ token, onUnauthorized }: { token: string; onUnauthorized: () => void }) {
 	const [docs, setDocs] = useState<LibraryDocument[] | null>(null);
 	const [topics, setTopics] = useState<LibraryTopic[]>([]);
+	const [categories, setCategories] = useState<LibraryCategory[]>([]);
 	const [log, setLog] = useState<LibraryLogEntry[]>([]);
 	const [error, setError] = useState<string | null>(null);
 	const [query, setQuery] = useState('');
@@ -118,6 +137,7 @@ export default function DocumentsAdmin({ token, onUnauthorized }: { token: strin
 			.then(([list, entries]) => {
 				setDocs(list.documents);
 				setTopics(list.topics);
+				setCategories(list.categories);
 				setLog(entries);
 			})
 			.catch(fail);
@@ -253,12 +273,12 @@ export default function DocumentsAdmin({ token, onUnauthorized }: { token: strin
 				)}
 			</section>
 
-			{dialog?.type === 'create' && <CreateDialog topics={topics} onClose={() => setDialog(null)} onSubmit={(input) => done(libraryApi.create(token, input), 'Dodano')} onError={fail} />}
+			{dialog?.type === 'create' && <CreateDialog topics={topics} categories={categories} onClose={() => setDialog(null)} onSubmit={(input) => done(libraryApi.create(token, input), 'Dodano')} onError={fail} />}
 			{dialog?.type === 'version' && (
 				<VersionDialog doc={dialog.doc} onClose={() => setDialog(null)} onSubmit={(input) => done(libraryApi.addVersion(token, dialog.doc.id, input), 'Opublikowano nową wersję')} onError={fail} />
 			)}
 			{dialog?.type === 'edit' && (
-				<EditDialog doc={dialog.doc} topics={topics} onClose={() => setDialog(null)} onSubmit={(input) => done(libraryApi.update(token, dialog.doc.id, input), 'Zapisano')} onError={fail} />
+				<EditDialog doc={dialog.doc} topics={topics} categories={categories} onClose={() => setDialog(null)} onSubmit={(input) => done(libraryApi.update(token, dialog.doc.id, input), 'Zapisano')} onError={fail} />
 			)}
 			{dialog?.type === 'withdraw' && (
 				<WithdrawDialog
@@ -348,9 +368,9 @@ function DialogForm({
 
 type CreateInput = Parameters<typeof libraryApi.create>[1];
 
-function CreateDialog({ topics, onClose, onSubmit, onError }: { topics: LibraryTopic[]; onClose: () => void; onSubmit: (i: CreateInput) => Promise<void>; onError: (e: unknown) => void }) {
+function CreateDialog({ topics, categories, onClose, onSubmit, onError }: { topics: LibraryTopic[]; categories: LibraryCategory[]; onClose: () => void; onSubmit: (i: CreateInput) => Promise<void>; onError: (e: unknown) => void }) {
 	const { busy, error, run } = useSubmit(onError);
-	const [meta, setMeta] = useState({ kind: 'formularz' as LibraryKind, code: '', title: '', description: '', topics: [] as string[], pageUrl: '' });
+	const [meta, setMeta] = useState({ kind: 'formularz' as LibraryKind, section: '', code: '', title: '', description: '', topics: [] as string[], pageUrl: '' });
 	const [version, setVersion] = useState<VersionDraft>(emptyVersion);
 	return (
 		<DialogForm
@@ -362,7 +382,7 @@ function CreateDialog({ topics, onClose, onSubmit, onError }: { topics: LibraryT
 			onSubmit={() => run(() => onSubmit({ ...meta, ...version, validFrom: version.validFrom || null }))}>
 			<div className="grid gap-3 sm:grid-cols-2">
 				<Field label="Rodzaj">
-					<select value={meta.kind} onChange={(e) => setMeta({ ...meta, kind: e.target.value as LibraryKind })} className={cx(inputCls, 'cursor-pointer')}>
+					<select value={meta.kind} onChange={(e) => setMeta({ ...meta, kind: e.target.value as LibraryKind, section: '' })} className={cx(inputCls, 'cursor-pointer')}>
 						{(Object.keys(KIND_LABEL) as LibraryKind[]).map((k) => (
 							<option key={k} value={k}>
 								{KIND_LABEL[k]}
@@ -374,6 +394,7 @@ function CreateDialog({ topics, onClose, onSubmit, onError }: { topics: LibraryT
 					<input required={meta.kind === 'formularz'} value={meta.code} onChange={(e) => setMeta({ ...meta, code: e.target.value })} placeholder="np. ZAS-58" className={inputCls} />
 				</Field>
 			</div>
+			<SectionSelect categories={categories} kind={meta.kind} value={meta.section} onChange={(v) => setMeta({ ...meta, section: v })} />
 			<Field label="Nazwa">
 				<input required value={meta.title} onChange={(e) => setMeta({ ...meta, title: e.target.value })} className={inputCls} />
 			</Field>
@@ -412,23 +433,26 @@ function VersionDialog({ doc, onClose, onSubmit, onError }: { doc: LibraryDocume
 function EditDialog({
 	doc,
 	topics,
+	categories,
 	onClose,
 	onSubmit,
 	onError
 }: {
 	doc: LibraryDocument;
 	topics: LibraryTopic[];
+	categories: LibraryCategory[];
 	onClose: () => void;
 	onSubmit: (i: Parameters<typeof libraryApi.update>[2]) => Promise<void>;
 	onError: (e: unknown) => void;
 }) {
 	const { busy, error, run } = useSubmit(onError);
-	const [draft, setDraft] = useState({ title: doc.title, description: doc.description, topics: doc.topics, pageUrl: doc.pageUrl });
+	const [draft, setDraft] = useState({ title: doc.title, description: doc.description, topics: doc.topics, section: doc.section, pageUrl: doc.pageUrl });
 	return (
 		<DialogForm title={`Edytuj: ${doc.code ?? doc.title}`} busy={busy} error={error} submitLabel="Zapisz" onClose={onClose} onSubmit={() => run(() => onSubmit(draft))}>
 			<Field label="Nazwa">
 				<input required value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} className={inputCls} />
 			</Field>
+			<SectionSelect categories={categories} kind={doc.kind} value={draft.section} onChange={(v) => setDraft({ ...draft, section: v })} />
 			<Field label="Opis" hint="Krótko: do czego służy dokument i kiedy jest potrzebny.">
 				<textarea rows={3} maxLength={600} value={draft.description} onChange={(e) => setDraft({ ...draft, description: e.target.value })} className={areaCls} />
 			</Field>

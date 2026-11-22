@@ -10,6 +10,7 @@
     "infra": "docker compose up -d",
     "setup:zusia": "python3 -m venv .venv && .venv/bin/pip install -r requirements.txt",
     "knowledge:build": ".venv/bin/python -m python.knowledge.build",
+    "knowledge:fetch": ".venv/bin/python -m python.knowledge.fetch_documents && .venv/bin/python -m python.knowledge.library_seed",
     "dev:zusia": ".venv/bin/uvicorn python.main:app --port 8001 --reload"
   }
 }

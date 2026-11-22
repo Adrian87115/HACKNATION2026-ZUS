@@ -20,7 +20,7 @@ def parse_sources(path: Path = SOURCES_FILE) -> tuple[list[dict], list[dict]]:
             acts.append({'file': entry['file'], 'title': entry['act'], 'page': entry.get('page'), 'download': entry.get('download')})
         elif 'form' in entry:
             code, _, name = entry['form'].partition(' – ')
-            forms.append({'code': code.strip(), 'name': name.strip() or code.strip(), 'page': entry.get('page'),
+            forms.append({'file': entry['file'], 'code': code.strip(), 'name': name.strip() or code.strip(), 'page': entry.get('page'),
                           'download': entry.get('download')})
 
     for line in path.read_text(encoding='utf-8').splitlines():

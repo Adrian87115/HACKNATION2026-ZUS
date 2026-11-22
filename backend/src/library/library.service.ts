@@ -1,7 +1,14 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { LIBRARY_SEED } from './library.seed.js';
 import { LibraryStore, type LibraryLogEntry, type LibraryState } from './library.store.js';
-import { LIBRARY_TOPICS, type LibraryDocument, type LibraryKind, type LibraryVersion } from './library.types.js';
+import {
+  LIBRARY_CATEGORIES,
+  LIBRARY_TOPICS,
+  type LibraryCategory,
+  type LibraryDocument,
+  type LibraryKind,
+  type LibraryVersion,
+} from './library.types.js';
 
 const KINDS: LibraryKind[] = ['formularz', 'akt_prawny', 'poradnik'];
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
@@ -32,6 +39,13 @@ const topics = (v: unknown): string[] => {
   if (!list.length) throw new BadRequestException('Wybierz co najmniej jeden temat.');
   return [...new Set(list)];
 };
+const CATEGORY_BY_KIND: Record<LibraryKind, LibraryCategory> = { akt_prawny: 'prawo', formularz: 'formularze', poradnik: 'poradniki' };
+const section = (kind: LibraryKind, v: unknown): string => {
+  const sections = LIBRARY_CATEGORIES[CATEGORY_BY_KIND[kind]].sections as Record<string, string>;
+  if (typeof v === 'string' && v in sections) return v;
+  throw new BadRequestException(`Wybierz sekcję: ${Object.values(sections).join(', ')}.`);
+};
+
 const slug = (s: string) =>
   s
     .toLowerCase()
@@ -55,7 +69,25 @@ export class LibraryService {
   }
 
   private get documents(): LibraryDocument[] {
-    return this.state.documents ?? LIBRARY_SEED;
+    if (!this.state.documents) return LIBRARY_SEED;
+    // libraries saved before categories and local copies existed: take the missing fields from the seed
+    const seed = new Map(LIBRARY_SEED.map((d) => [d.id, d]));
+    return this.state.documents.map((d) => {
+      const s = seed.get(d.id);
+      const category = d.category ?? CATEGORY_BY_KIND[d.kind];
+      const fallbackSection = Object.keys(LIBRARY_CATEGORIES[category].sections)[0];
+      const versions = s && !d.versions[0]?.file ? d.versions.map((v) => (v.version === s.versions[0].version ? { ...v, file: s.versions[0].file } : v)) : d.versions;
+      return { ...d, category, section: d.section ?? s?.section ?? fallbackSection, versions };
+    });
+  }
+
+  categories() {
+    return Object.entries(LIBRARY_CATEGORIES).map(([value, c]) => ({
+      value,
+      label: c.label,
+      description: c.description,
+      sections: Object.entries(c.sections).map(([v, label]) => ({ value: v, label })),
+    }));
   }
 
   topics() {
@@ -91,6 +123,8 @@ export class LibraryService {
       fullTitle: code ? `${code} – ${title}` : title,
       description: text(input.description, 'Opis', 600, false),
       topics: topics(input.topics),
+      category: CATEGORY_BY_KIND[kind],
+      section: section(kind, input.section),
       status: 'obowiazujacy',
       pageUrl: url(input.pageUrl, 'Strona dokumentu'),
       versions: [this.version(input, 'Pierwsza wersja dodana przez administratora.')],
@@ -120,6 +154,7 @@ export class LibraryService {
       fullTitle: doc.code ? `${doc.code} – ${title}` : doc.kind === 'akt_prawny' ? doc.fullTitle : title,
       description: input.description === undefined ? doc.description : text(input.description, 'Opis', 600, false),
       topics: input.topics === undefined ? doc.topics : topics(input.topics),
+      section: input.section === undefined ? doc.section : section(doc.kind, input.section),
       pageUrl: input.pageUrl === undefined ? doc.pageUrl : url(input.pageUrl, 'Strona dokumentu'),
     };
     this.replace(next, { action: 'zmieniono', documentId: id, title: next.fullTitle, note: 'Zmieniono opis dokumentu.' });

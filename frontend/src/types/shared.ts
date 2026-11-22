@@ -9,5 +9,6 @@ export const AppRoutePaths = {
 	ACCOUNT: '/moje-konto',
 	SUBMIT_APPLICATION: '/moje-konto/wnioski',
 	SUPPORT: '/pomoc-i-wsparcie',
-	KNOWLEDGE: '/baza-wiedzy'
+	KNOWLEDGE: '/baza-wiedzy',
+	KNOWLEDGE_DOCUMENT: '/baza-wiedzy/:id'
 } as const;

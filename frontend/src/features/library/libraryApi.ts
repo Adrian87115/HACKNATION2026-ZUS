@@ -1,8 +1,20 @@
 /** Knowledge base of official documents (backend/src/library). Errors are user-facing Polish messages. */
 import { BACKEND_API } from '../../config/api';
+import { AppRoutePaths } from '../../types/shared';
 
 export type LibraryKind = 'formularz' | 'akt_prawny' | 'poradnik';
-export type LibraryVersion = { version: string; label: string; validFrom: string | null; url: string; changes: string; addedAt: string };
+export type LibraryFile = { path: string; size: number; pages: number | null; sha256: string; downloadedAt: string; source: string };
+export type LibraryVersion = {
+	version: string;
+	label: string;
+	validFrom: string | null;
+	url: string;
+	changes: string;
+	addedAt: string;
+	/** Local copy served by the app (frontend/public/dokumenty). */
+	file?: LibraryFile | null;
+};
+export type LibraryCategory = { value: string; label: string; description: string; sections: { value: string; label: string }[] };
 export type LibraryAmendment = { date: string; title: string; source: string; url: string };
 export type LibraryDocument = {
 	id: string;
@@ -12,6 +24,8 @@ export type LibraryDocument = {
 	fullTitle: string;
 	description: string;
 	topics: string[];
+	category: string;
+	section: string;
 	status: 'obowiazujacy' | 'wycofany';
 	pageUrl: string;
 	versions: LibraryVersion[];
@@ -27,9 +41,18 @@ export type NewDocumentInput = {
 	title: string;
 	description: string;
 	topics: string[];
+	section: string;
 	pageUrl: string;
 } & NewVersionInput;
 export type NewVersionInput = { version: string; label?: string; validFrom?: string | null; url: string; changes: string };
+
+export type LibraryData = { categories: LibraryCategory[]; topics: LibraryTopic[]; documents: LibraryDocument[] };
+
+/** Category of each kind of document (mirrors backend LIBRARY_CATEGORIES). */
+export const CATEGORY_OF_KIND: Record<LibraryKind, string> = { akt_prawny: 'prawo', formularz: 'formularze', poradnik: 'poradniki' };
+
+export const fileSize = (bytes: number) =>
+	bytes >= 1_048_576 ? `${(bytes / 1_048_576).toLocaleString('pl-PL', { maximumFractionDigits: 1 })} MB` : `${Math.round(bytes / 1024)} kB`;
 
 export const KIND_LABEL: Record<LibraryKind, string> = { formularz: 'Formularz', akt_prawny: 'Przepis prawny', poradnik: 'Poradnik' };
 
@@ -64,12 +87,12 @@ async function request<T>(path: string, init: RequestInit = {}, token?: string):
 const post = (body: unknown) => ({ method: 'POST', body: JSON.stringify(body) });
 
 export const libraryApi = {
-	list: () => request<{ topics: LibraryTopic[]; documents: LibraryDocument[] }>('/library'),
+	list: () => request<LibraryData>('/library'),
 	log: (token: string) => request<LibraryLogEntry[]>('/library/log', {}, token),
 	create: (token: string, input: NewDocumentInput) => request<LibraryDocument>('/library', post(input), token),
 	addVersion: (token: string, id: string, input: NewVersionInput) =>
 		request<LibraryDocument>(`/library/${encodeURIComponent(id)}/versions`, post(input), token),
-	update: (token: string, id: string, input: Partial<Pick<LibraryDocument, 'title' | 'description' | 'topics' | 'pageUrl'>>) =>
+	update: (token: string, id: string, input: Partial<Pick<LibraryDocument, 'title' | 'description' | 'topics' | 'section' | 'pageUrl'>>) =>
 		request<LibraryDocument>(`/library/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(input) }, token),
 	withdraw: (token: string, id: string, reason: string, replacedBy: string | null) =>
 		request<LibraryDocument>(`/library/${encodeURIComponent(id)}/withdraw`, post({ reason, replacedBy }), token),
@@ -78,3 +101,6 @@ export const libraryApi = {
 
 export const plDate = (iso: string | null) =>
 	iso ? new Date(`${iso.slice(0, 10)}T00:00:00Z`).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }) : '—';
+
+/** Address of a document's page in the knowledge base. */
+export const documentPath = (id: string) => AppRoutePaths.KNOWLEDGE_DOCUMENT.replace(':id', encodeURIComponent(id));

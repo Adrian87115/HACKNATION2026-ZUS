@@ -1,0 +1,186 @@
+{
+  "prawo/ustawa_zasilkowa_tekst_jednolity_DzU_2026_poz_854.pdf": {
+    "path": "/dokumenty/prawo/ustawa_zasilkowa_tekst_jednolity_DzU_2026_poz_854.pdf",
+    "size": 539633,
+    "pages": 63,
+    "sha256": "29bdb1a038d5fc2a419ef005c0769cd7cb8edd1a21b28d37a8c7da6d7ff01c4b",
+    "downloadedAt": "2026-11-22",
+    "source": "https://api.sejm.gov.pl/eli/acts/DU/2026/854/text/U/D20260854Lj.pdf"
+  },
+  "prawo/kodeks_pracy_tekst_jednolity_DzU_2026_poz_1245.pdf": {
+    "path": "/dokumenty/prawo/kodeks_pracy_tekst_jednolity_DzU_2026_poz_1245.pdf",
+    "size": 1181631,
+    "pages": 97,
+    "sha256": "49e2b27fb3668d7d778ba62646b4ccb74eec86233d32182b7969c92d1afcd226",
+    "downloadedAt": "2026-11-22",
+    "source": "https://api.sejm.gov.pl/eli/acts/DU/2026/1245/text/T/D20261245L.pdf"
+  },
+  "prawo/rozporzadzenie_dokumenty_do_zasilkow_DzU_2026_poz_1316.pdf": {
+    "path": "/dokumenty/prawo/rozporzadzenie_dokumenty_do_zasilkow_DzU_2026_poz_1316.pdf",
+    "size": 467834,
+    "pages": 18,
+    "sha256": "e6511c161723a2f8f511483effc5a1e5426157b6f392c40de5a80e62d7d79adc",
+    "downloadedAt": "2026-11-22",
+    "source": "https://api.sejm.gov.pl/eli/acts/DU/2026/1316/text/I/D20261316.pdf"
+  },
+  "prawo/rozporzadzenie_wnioski_urlopy_rodzicielskie_DzU_2025_poz_322.pdf": {
+    "path": "/dokumenty/prawo/rozporzadzenie_wnioski_urlopy_rodzicielskie_DzU_2025_poz_322.pdf",
+    "size": 243188,
+    "pages": 10,
+    "sha256": "aa2087ed9162f7dca449426d18b8f39992711901f6ee166c4f7367535169ceae",
+    "downloadedAt": "2026-11-22",
+    "source": "https://api.sejm.gov.pl/eli/acts/DU/2025/322/text/I/D20250322.pdf"
+  },
+  "prawo/ustawa_o_systemie_ubezpieczen_spolecznych_ujednolicona.pdf": {
+    "path": "/dokumenty/prawo/ustawa_o_systemie_ubezpieczen_spolecznych_ujednolicona.pdf",
+    "size": 1343305,
+    "pages": 209,
+    "sha256": "761092254071e63752a8546b538ed697404a23ba2ea5cce71987ef811b011ead",
+    "downloadedAt": "2026-11-22",
+    "source": "https://api.sejm.gov.pl/eli/acts/DU/1998/887/text/U/D19980887Lj.pdf"
+  },
+  "prawo/ustawa_za_zyciem_ujednolicona.pdf": {
+    "path": "/dokumenty/prawo/ustawa_za_zyciem_ujednolicona.pdf",
+    "size": 220104,
+    "pages": 9,
+    "sha256": "00aae023cfb66efdad9c07f9eb3caeaa327fab1a9101bbf54388ca138433a06c",
+    "downloadedAt": "2026-11-22",
+    "source": "https://api.sejm.gov.pl/eli/acts/DU/2016/1860/text/U/D20161860Lj.pdf"
+  },
+  "wnioski/ZAM_wniosek_o_zasilek_macierzynski.pdf": {
+    "path": "/dokumenty/wnioski/ZAM_wniosek_o_zasilek_macierzynski.pdf",
+    "size": 757670,
+    "pages": 7,
+    "sha256": "45597ebb0278edf7518e24cf8eb764f242661638c7d1288ab0b6edf70186c639",
+    "downloadedAt": "2026-11-22",
+    "source": "https://www.zus.pl/documents/10182/4223950/ZAM_pobierz+i+drukuj.pdf/f1ad7e3f-0eaa-fdbc-20ec-5b07ab59566a"
+  },
+  "wnioski/Z-3_zaswiadczenie_platnika_skladek_pracownicy.pdf": {
+    "path": "/dokumenty/wnioski/Z-3_zaswiadczenie_platnika_skladek_pracownicy.pdf",
+    "size": 342335,
+    "pages": 9,
+    "sha256": "6be222cddbea638b0544265bd65a8ef813b9baf2c108b85eabfdef71dbdaf703",
+    "downloadedAt": "2026-11-22",
+    "source": "https://www.zus.pl/documents/10182/12636166/Z-3_do+druku.pdf/388eed46-ea41-6a75-cb21-739c5f83aac7"
+  },
+  "wnioski/Z-3a_zaswiadczenie_platnika_skladek_niepracownicy_zlecenie.pdf": {
+    "path": "/dokumenty/wnioski/Z-3a_zaswiadczenie_platnika_skladek_niepracownicy_zlecenie.pdf",
+    "size": 299338,
+    "pages": 7,
+    "sha256": "408b1e7636c4d63c50aca309dcbf05c0fd526c488cad412b7fc0b8667fc93b63",
+    "downloadedAt": "2026-11-22",
+    "source": "https://www.zus.pl/documents/10182/4223950/Z-3a_pobierz_plik_do_wydruku.pdf/7dd8fb4c-e8f6-05c8-7f69-92b82fa33571"
+  },
+  "wnioski/ZAS-55_wniosek_o_zasilek_w_wysokosci_zasilku_macierzynskiego_i_wyrownawczy.pdf": {
+    "path": "/dokumenty/wnioski/ZAS-55_wniosek_o_zasilek_w_wysokosci_zasilku_macierzynskiego_i_wyrownawczy.pdf",
+    "size": 203920,
+    "pages": 2,
+    "sha256": "10ef8184c9a959ddb2de6b20424de1064543db59f8bc228ccb70c4d0eb59fae4",
+    "downloadedAt": "2026-11-22",
+    "source": "https://www.zus.pl/documents/10182/4223950/ZAS-55_pobierz_plik_drukowany.pdf/6346a0af-1507-87c3-eaee-ec215604d96e"
+  },
+  "wnioski/ZAS-26_oswiadczenie_o_przyjeciu_dziecka_na_wychowanie.pdf": {
+    "path": "/dokumenty/wnioski/ZAS-26_oswiadczenie_o_przyjeciu_dziecka_na_wychowanie.pdf",
+    "size": 162850,
+    "pages": 2,
+    "sha256": "f9d6b32712570744da7249bc4a8626500a385825b20f04bdd13a572fb8d50b08",
+    "downloadedAt": "2026-11-22",
+    "source": "https://www.zus.pl/documents/10182/788036/ZAS-26_do+pobrania.pdf/bd817b19-f5c6-46ba-8afb-2c7b3a89be51"
+  },
+  "wnioski/ZAS-33_oswiadczenie_o_porzuceniu_dziecka_lub_smierci_matki.pdf": {
+    "path": "/dokumenty/wnioski/ZAS-33_oswiadczenie_o_porzuceniu_dziecka_lub_smierci_matki.pdf",
+    "size": 161816,
+    "pages": 2,
+    "sha256": "f8239346e15e74d38e0312bed3e0be0fd5ef4b990e87bb502de65c585a5b66bc",
+    "downloadedAt": "2026-11-22",
+    "source": "https://www.zus.pl/documents/10182/788036/ZAS-33_do+pobrania+i+wydruku.pdf/0b9c07a2-94b8-497a-a15d-390bf5c72b2d"
+  },
+  "wnioski/ZAS-39_oswiadczenie_matka_pobiera_zasilek_8_tygodni_po_porodzie.pdf": {
+    "path": "/dokumenty/wnioski/ZAS-39_oswiadczenie_matka_pobiera_zasilek_8_tygodni_po_porodzie.pdf",
+    "size": 186533,
+    "pages": 2,
+    "sha256": "a3442115c40ba271e5f14f11f66c48633ca0b1a81c6451d04d31858e8c029c45",
+    "downloadedAt": "2026-11-22",
+    "source": "https://www.zus.pl/documents/10182/788036/ZAS-39+do+pobrania+i+wydruku.pdf/311c8367-ad3f-4d27-ac52-69fce5171014"
+  },
+  "wnioski/ZAS-40_zaswiadczenie_lekarskie_matka_w_szpitalu.pdf": {
+    "path": "/dokumenty/wnioski/ZAS-40_zaswiadczenie_lekarskie_matka_w_szpitalu.pdf",
+    "size": 180272,
+    "pages": 1,
+    "sha256": "6864622cf94820b1ceaceb50ff24557b6551f7fd92ea3355b2bfa71fe217043c",
+    "downloadedAt": "2026-11-22",
+    "source": "https://www.zus.pl/documents/10182/788036/ZAS-40_do+zapisu.pdf/8281bd5b-9a46-4102-8806-14bbad39ca09"
+  },
+  "wnioski/ZAS-15_zaswiadczenie_platnika_o_urlopach_rodzicielskich.pdf": {
+    "path": "/dokumenty/wnioski/ZAS-15_zaswiadczenie_platnika_o_urlopach_rodzicielskich.pdf",
+    "size": 651780,
+    "pages": 2,
+    "sha256": "fb80aca00c478265b24c144aa713fd8a19d6f851ea421b05daef61506c431907",
+    "downloadedAt": "2026-11-22",
+    "source": "https://www.zus.pl/documents/10182/788036/ZAS-15.pdf/4106da67-3b59-4e40-9e4b-585e84234e15"
+  },
+  "wnioski/ZAS-24_zaswiadczenie_o_okresach_zasilku_macierzynskiego.pdf": {
+    "path": "/dokumenty/wnioski/ZAS-24_zaswiadczenie_o_okresach_zasilku_macierzynskiego.pdf",
+    "size": 656272,
+    "pages": 3,
+    "sha256": "01bee64c051bf962c0a68176396bed9eab6de7325fd3e87bbb1ac8363bc25dfb",
+    "downloadedAt": "2026-11-22",
+    "source": "https://www.zus.pl/documents/10182/18428/ZAS_24+do+wydruku.pdf/8a3ef8bf-5471-40b8-b227-1a0eebcc1e07"
+  },
+  "wnioski/ZPW_wniosek_o_wydanie_zaswiadczenia_w_sprawie_zasilku.pdf": {
+    "path": "/dokumenty/wnioski/ZPW_wniosek_o_wydanie_zaswiadczenia_w_sprawie_zasilku.pdf",
+    "size": 269200,
+    "pages": 4,
+    "sha256": "35962a37622a2b11ac14daa843cde3bbd3915df04cda245c7b840f44e92d04e9",
+    "downloadedAt": "2026-11-22",
+    "source": "https://www.zus.pl/documents/10182/788036/ZPW_nowy.pdf/19d05959-05ce-4151-a4f2-48a824d2f3d4"
+  },
+  "wnioski/ZAS-53_wniosek_o_zasilek_chorobowy.pdf": {
+    "path": "/dokumenty/wnioski/ZAS-53_wniosek_o_zasilek_chorobowy.pdf",
+    "size": 729516,
+    "pages": 4,
+    "sha256": "3206611d3cb539d1036f32573f5f672a02190b4230bfede77e754a8438416b7f",
+    "downloadedAt": "2026-11-22",
+    "source": "https://www.zus.pl/documents/10182/10157865/ZAS-53_do+wydruku.pdf/fb9f344f-b24d-031a-d1ca-18e26c19027d"
+  },
+  "wnioski/Z-10_oswiadczenie_zasilek_po_ustaniu_ubezpieczenia.pdf": {
+    "path": "/dokumenty/wnioski/Z-10_oswiadczenie_zasilek_po_ustaniu_ubezpieczenia.pdf",
+    "size": 684757,
+    "pages": 4,
+    "sha256": "c948239d0a539ed31a2b9460981ca9f8f7584aedd0c845ad0b0063aeeac9a920",
+    "downloadedAt": "2026-11-22",
+    "source": "https://www.zus.pl/documents/10182/4223950/Z-10_wydrukuj_wype%C5%82nij.pdf/a97222d7-e70c-0f2a-dc2f-fb9bb5089a38"
+  },
+  "wnioski/ZAS-12_zaswiadczenie_platnika_zasilek_chorobowy_za_dalszy_okres.pdf": {
+    "path": "/dokumenty/wnioski/ZAS-12_zaswiadczenie_platnika_zasilek_chorobowy_za_dalszy_okres.pdf",
+    "size": 201471,
+    "pages": 3,
+    "sha256": "9fea1285e72af0049a843d928d53fe3bb7e5ad5678b6fd18e1ad812f3cf00a7a",
+    "downloadedAt": "2026-11-22",
+    "source": "https://www.zus.pl/documents/10182/4447142/ZAS-12_pobierz_plik.pdf/85b82e86-6c8d-93c2-95f0-8fc46dcb7683"
+  },
+  "wnioski/ZAS-2_zaswiadczenie_lekarskie_w_zwiazku_z_ciaza.pdf": {
+    "path": "/dokumenty/wnioski/ZAS-2_zaswiadczenie_lekarskie_w_zwiazku_z_ciaza.pdf",
+    "size": 179996,
+    "pages": 1,
+    "sha256": "eb26898a471dac4fac6c8ef4658e7257c331f67f1994095f99c98d019385031d",
+    "downloadedAt": "2026-11-22",
+    "source": "https://www.zus.pl/documents/10182/788036/ZAS-2_do+pobrania.pdf/13b127b3-a550-4561-a41f-675143754de1"
+  },
+  "wnioski/ZNp-7_wniosek_o_swiadczenie_rehabilitacyjne.pdf": {
+    "path": "/dokumenty/wnioski/ZNp-7_wniosek_o_swiadczenie_rehabilitacyjne.pdf",
+    "size": 229950,
+    "pages": 4,
+    "sha256": "405b0a8c218bd5b9751f0056ad4263a5e3606ff0e20be033f8bd347f0185844d",
+    "downloadedAt": "2026-11-22",
+    "source": "https://www.zus.pl/documents/10182/4447142/ZNp-7_pobierz+i+wydrukuj.pdf/80a29902-a38f-6020-61e6-925e783e1676"
+  },
+  "wnioski/RWN_wniosek_o_zaswiadczenie_o_niezaleganiu_w_skladkach.pdf": {
+    "path": "/dokumenty/wnioski/RWN_wniosek_o_zaswiadczenie_o_niezaleganiu_w_skladkach.pdf",
+    "size": 165646,
+    "pages": 1,
+    "sha256": "7cf16e0c7c2827b2e3a8a03baecc9f2d96f67c377a2e6d3b161eb40e00a3fd74",
+    "downloadedAt": "2026-11-22",
+    "source": "https://www.zus.pl/documents/10182/788036/RWN_RODO.pdf/f9ca1421-b5a3-4c1a-924d-bb9e0e5b48ea"
+  }
+}

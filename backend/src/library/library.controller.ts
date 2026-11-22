@@ -9,7 +9,7 @@ export class LibraryController {
 
   @Get()
   list() {
-    return { topics: this.library.topics(), documents: this.library.list() };
+    return { categories: this.library.categories(), topics: this.library.topics(), documents: this.library.list() };
   }
 
   @Get('log')
