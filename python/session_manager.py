@@ -2,8 +2,6 @@ import threading
 import uuid
 from collections import OrderedDict
 
-from google.genai import types
-
 from python.chat_store import ChatStore
 from python.zusia import ZUSia
 
@@ -64,22 +62,8 @@ class SessionManager:
             if rows is None:
                 raise KeyNotFoundError
 
-            history = []
-            display_history = []
-            for row in rows:
-                role = "user" if row["role"] == "user" else "model"
-                parts = []
-                if row["content"]:
-                    parts.append(types.Part.from_text(text=row["content"]))
-                if row["attachment"] is not None:
-                    parts.append(types.Part.from_bytes(
-                        data=row["attachment"],
-                        mime_type=row["attachment_mime"],
-                    ))
-                history.append(types.Content(role=role, parts=parts))
-                display_history.append({"role": row["role"], "content": row["content"]})
-
-            chat = self._bot().create_chat(history=history)
+            display_history = [{"role": row["role"], "content": row["content"]} for row in rows]
+            chat = self._bot().create_chat(history=rows)
             return self._cache(session_id, {
                 "chat": chat,
                 "history": display_history,

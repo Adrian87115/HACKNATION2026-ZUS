@@ -1,7 +1,7 @@
 """Settings for the ZUSia service.
 
 Values come from the environment first, then from the repo-root .env. An empty value counts as unset and
-.env is re-read on every lookup, so a key added while the service is running (e.g. ZUS_API_KEY) is picked up
+.env is re-read on every lookup, so a key added while the service is running (e.g. OPEN_AI_KEY) is picked up
 without a restart – load_dotenv() alone never overwrites a variable that was already loaded as empty.
 """
 import os

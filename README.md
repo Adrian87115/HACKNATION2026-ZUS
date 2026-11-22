@@ -59,10 +59,10 @@ Interfejs działa na komputerach i telefonach (RWD). Menu dostępności pozwala 
 
 **W działaniu aplikacji** AI wspiera dwie funkcje – obie wyraźnie oznaczone w interfejsie:
 
-- **Asystentka ZUSia** (czat) – model Google Gemini z wyszukiwaniem w bazie wiedzy (RAG): 471 artykułów ustawy zasiłkowej, Kodeksu pracy i rozporządzeń pobranych z API Sejmu RP oraz opisy formularzy ZUS. Odpowiedzi wskazują podstawę prawną, a aktualne parametry z panelu administracyjnego mają pierwszeństwo przed bazą wiedzy. Użytkownik może dołączyć zdjęcie lub PDF do interpretacji.
+- **Asystentka ZUSia** (czat) – model OpenAI (domyślnie `gpt-5.4-mini`) z wyszukiwaniem w bazie wiedzy (RAG): 471 artykułów ustawy zasiłkowej, Kodeksu pracy i rozporządzeń pobranych z API Sejmu RP oraz opisy formularzy ZUS. Odpowiedzi wskazują podstawę prawną, a aktualne parametry z panelu administracyjnego mają pierwszeństwo przed bazą wiedzy. Użytkownik może dołączyć zdjęcie lub PDF do interpretacji.
 - **Odczyt dokumentów sprawy** – model wyodrębnia z wgranych dokumentów dane potrzebne do kalkulatora (tytuł ubezpieczenia, okresy, wynagrodzenia); wszystkie pola można poprawić.
 
-**Wszystkie kwoty, okresy i terminy liczy deterministyczny silnik `@zus/engine`, a nie AI.** Model Gemini jest użyty na etapie prototypu; architektura pozwala zastąpić go modelem uruchomionym lokalnie na serwerach rządowych.
+**Wszystkie kwoty, okresy i terminy liczy deterministyczny silnik `@zus/engine`, a nie AI.** Model OpenAI jest użyty na etapie prototypu; architektura pozwala zastąpić go modelem uruchomionym lokalnie na serwerach rządowych.
 
 **W procesie tworzenia** AI było wykorzystywane do researchu oraz do pisania i przeglądu części kodu. Logo zostało wygenerowane przez Google Gemini. Otrzymane od ZUS dane poufne nie zostały przekazane modelom AI.
 
@@ -76,7 +76,7 @@ flowchart LR
   F -. import .-> E[(@zus/engine<br/>silnik obliczeń)]
   B -. import .-> E
   Z -- parametry silnika --> B
-  Z --> G[Google Gemini]
+  Z --> G[OpenAI]
   Z --> M[(MinIO / S3<br/>załączniki, sprawy)]
 ```
 
@@ -86,7 +86,7 @@ flowchart LR
 
 ## Uruchomienie lokalne
 
-**Wymagania:** Node.js 22+, pnpm 10, Python 3.10+, Docker (dla MinIO), klucz API Google Gemini.
+**Wymagania:** Node.js 22+, pnpm 10, Python 3.10+, Docker (dla MinIO), klucz API OpenAI.
 
 ```bash
 # 1. Zależności
@@ -94,7 +94,7 @@ pnpm install
 pnpm setup:zusia            # środowisko Pythona dla ZUSi (.venv)
 
 # 2. Konfiguracja
-cp .env.example .env                    # uzupełnij ZUS_API_KEY (Gemini)
+cp .env.example .env                    # uzupełnij OPEN_AI_KEY (OpenAI)
 cp backend/.env.example backend/.env    # ustaw ADMIN_TOKEN, np. openssl rand -hex 24
 
 # 3. Magazyn plików (MinIO) – opcjonalnie; bez S3_ENDPOINT_URL ZUSia działa bez przechowywania plików
@@ -124,7 +124,7 @@ Aplikacja: **http://localhost:5173** · panel administracyjny: **/admin** (token
 frontend/                    aplikacja React (strony, planer urlopów, kalkulatory, panel administracyjny)
 backend/                     NestJS – REST API silnika i parametrów, symulacja PUE/mObywatel, wnioski
 packages/engine/             @zus/engine – silnik obliczeń wspólny dla frontendu i backendu
-python/                      ZUSia – FastAPI: czat (Gemini + RAG), import spraw, magazyn plików
+python/                      ZUSia – FastAPI: czat (OpenAI + RAG), import spraw, magazyn plików
 python/knowledge/            baza wiedzy: artykuły ustaw i opisy formularzy
 docker-compose.yml           MinIO (S3) i automatyczne utworzenie bucketów
 Materiały dodatkowe/         treść zadania i KNOWLEDGE_BASE.txt – źródła bazy wiedzy

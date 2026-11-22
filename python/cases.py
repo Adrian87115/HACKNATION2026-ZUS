@@ -1,4 +1,4 @@
-"""Case import: read the documents of a benefit case with Gemini and return structured data for the calculators.
+"""Case import: read the documents of a benefit case with the OpenAI model and return structured data for the calculators.
 
 When object storage (MinIO / S3) is configured and the user agrees (`keep=true`), the uploaded documents are kept under `cases/<case_id>/`
 in the cases bucket (private; expires after CASE_RETENTION_DAYS via the bucket lifecycle rule), so the user

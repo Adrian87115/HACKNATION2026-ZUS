@@ -290,7 +290,7 @@ export default function ChatSidebar() {
 					</label>
 					{rememberError && <p className="mt-1 text-xs text-red-600 dark:text-red-300">{rememberError}</p>}
 					<p className="mt-1.5 text-[11px] leading-snug text-muted">
-						ZUSia korzysta z AI (Google Gemini) i może się mylić. Nie podawaj numeru PESEL ani danych innych osób.
+						ZUSia korzysta z AI (OpenAI) i może się mylić. Nie podawaj numeru PESEL ani danych innych osób.
 					</p>
 				</form>
 			</aside>

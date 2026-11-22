@@ -66,7 +66,7 @@ export async function checkHealth(): Promise<boolean> {
 		const res = await fetch(`${ZUSIA_API}/health`, { signal: AbortSignal.timeout(4000) });
 		if (!res.ok) return false;
 		const body = (await res.json()) as { status?: string; assistant?: boolean };
-		// `assistant: false` → the service runs but has no Gemini key configured
+		// `assistant: false` → the service runs but has no OpenAI key configured
 		return body.status === 'ok' && body.assistant !== false;
 	} catch {
 		return false;

@@ -566,7 +566,7 @@ function Review({
 				</button>
 			</div>
 			<p className="text-xs text-muted">
-				Dane odczytuje model AI (Google Gemini) – mogą zawierać błędy. Wszystkie pola możesz poprawić w kalkulatorze.
+				Dane odczytuje model AI (OpenAI) – mogą zawierać błędy. Wszystkie pola możesz poprawić w kalkulatorze.
 			</p>
 		</div>
 	);

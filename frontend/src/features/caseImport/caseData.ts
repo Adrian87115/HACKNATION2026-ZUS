@@ -1,5 +1,5 @@
 /**
- * Case import: send the documents of a benefit case to the ZUSia service (Gemini reads them),
+ * Case import: send the documents of a benefit case to the ZUSia service (an OpenAI model reads them),
  * then turn the extracted data into calculator presets.
  * Mirrors python/case_schemas.py.
  */

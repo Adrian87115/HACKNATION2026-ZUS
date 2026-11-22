@@ -1,35 +1,67 @@
+import base64
 import logging
 import mimetypes
-import time
 from pathlib import Path
 
-from google import genai
-from google.genai import errors, types
+from openai import OpenAI
 
 from python.case_schemas import CaseExtraction
 from python.config import setting
 from python.knowledge import KnowledgeBase
+from python.knowledge.vectors import openai_key
 from python.mcp_server import screens
 from python.zusia_tools import McpTools, UserContext
 
 logger = logging.getLogger(__name__)
 
-# Transient Gemini errors worth retrying: rate limit, overload ("high demand"), gateway problems.
-RETRYABLE_STATUS = {429, 500, 503, 504}
-MAX_ATTEMPTS = 3
+DEFAULT_MODEL = 'gpt-5.4-mini'
+# Reasoning models (gpt-5…, o…) think before answering; ignored for other models. In the chat it must be „none”:
+# gpt-5.4 models do not combine function tools (MCP) with reasoning in /v1/chat/completions – and it is the fastest.
+# Reading case documents uses no tools, so it may think a little.
+DEFAULT_REASONING_EFFORT = 'none'
+DEFAULT_CASE_REASONING_EFFORT = 'low'
+# Transient OpenAI errors (rate limit, overload, connection problems) are retried by the SDK with backoff.
+MAX_RETRIES = 3
+TIMEOUT_SECONDS = 120
 # How many rounds of tool calls (MCP) the model may make before it has to answer.
 MAX_TOOL_ROUNDS = 4
 
+
+class Chat:
+    """One conversation: the user's messages (with attachments) and ZUSia's answers in the OpenAI chat format.
+    The system instruction is not stored – it is built anew for every turn (see ZUSia._turn_config)."""
+
+    def __init__(self, messages: list[dict] | None = None):
+        self.messages = list(messages or [])
+
+
+def _data_url(data: bytes, mime: str) -> str:
+    return f'data:{mime};base64,{base64.b64encode(data).decode()}'
+
+
+def user_message(text: str, attachments: list[tuple[bytes, str]] = ()) -> dict:
+    """A user turn: text plus images (image_url) and PDFs (file), both sent inline as base64."""
+    content = [{'type': 'text', 'text': text}] if text.strip() else []
+    for data, mime in attachments:
+        if mime == 'application/pdf':
+            content.append({'type': 'file', 'file': {'filename': 'dokument.pdf', 'file_data': _data_url(data, mime)}})
+        else:
+            content.append({'type': 'image_url', 'image_url': {'url': _data_url(data, mime)}})
+    return {'role': 'user', 'content': content or ''}
+
+
 class ZUSia:
     def __init__(self):
-        api_key = setting('ZUS_API_KEY')
+        api_key = openai_key()
 
         if not api_key:
-            raise RuntimeError('ZUS_API_KEY is not configured')
+            raise RuntimeError('OpenAI API key (OPENAI_API_KEY / OPEN_AI_KEY) is not configured')
 
-        self.client = genai.Client(api_key = api_key)
+        self.client = OpenAI(api_key = api_key, max_retries = MAX_RETRIES, timeout = TIMEOUT_SECONDS)
 
-        self.model = setting('ZUSIA_MODEL', 'gemini-3.1-flash-lite')
+        self.model = setting('ZUSIA_MODEL', DEFAULT_MODEL)
+        self.reasoning_effort = setting('ZUSIA_REASONING_EFFORT', DEFAULT_REASONING_EFFORT)
+        self.case_reasoning_effort = setting('ZUSIA_CASE_REASONING_EFFORT', DEFAULT_CASE_REASONING_EFFORT)
 
         file_path = Path(__file__).resolve().parent / 'zusia_persona.txt'
 
@@ -39,113 +71,106 @@ class ZUSia:
         self.knowledge = KnowledgeBase()
         self.tools = McpTools()
 
-    def create_chat(self, history = None):
-        chat = self.client.chats.create(model = self.model,
-                                        config = types.GenerateContentConfig(system_instruction = self.persona),
-                                        history = history)
-        return chat
+    def create_chat(self, history = None) -> Chat:
+        """A new conversation, or one restored from saved turns (rows with role, content and an optional attachment)."""
+        messages = []
+        for row in history or []:
+            if row['role'] == 'user':
+                attachment = [(row['attachment'], row['attachment_mime'])] if row['attachment'] is not None else []
+                messages.append(user_message(row['content'] or '', attachment))
+            else:
+                messages.append({'role': 'assistant', 'content': row['content'] or ''})
+        return Chat(messages)
 
-    @staticmethod
-    def _retry(call):
-        """Run a Gemini call, retrying transient errors with exponential backoff (1 s, 2 s)."""
-        delay = 1.0
-        for attempt in range(1, MAX_ATTEMPTS + 1):
-            try:
-                return call()
-            except errors.APIError as exc:
-                if getattr(exc, 'code', None) not in RETRYABLE_STATUS or attempt == MAX_ATTEMPTS:
-                    raise
-                logger.warning('Gemini returned %s – retrying in %.0f s (attempt %d/%d)', exc.code, delay, attempt, MAX_ATTEMPTS)
-                time.sleep(delay)
-                delay *= 2
+    def _reasoning(self, effort: str | None) -> dict:
+        return {'reasoning_effort': effort} if effort and self.model.startswith(('gpt-5', 'o')) else {}
 
-    def _turn_config(self, question: str, user: UserContext | None = None) -> types.GenerateContentConfig:
+    def _complete(self, messages: list[dict], tools: list[dict] | None = None, tool_choice: str = 'auto'):
+        kwargs = self._reasoning(self.reasoning_effort)
+        if tools:
+            kwargs.update(tools = tools, tool_choice = tool_choice)
+        return self.client.chat.completions.create(model = self.model, messages = messages, **kwargs)
+
+    def _turn_config(self, question: str, user: UserContext | None = None) -> tuple[str, list[dict]]:
         """System instruction for one turn: the persona, the verified data that matches the question and how to reach
         the user's own data – through the MCP tools (account, applications, current screen…), called on demand."""
         data = self.knowledge.context(question)
-        declarations = self.tools.declarations()
         instruction = f'{self.persona}\n\n<|PROTECTED_INTERNAL_DATA|>\n{data}\n</|PROTECTED_INTERNAL_DATA|>'
+        tools = []
         if user is not None:
             screen = screens.get(user.session_id)
             where = screen.split('\n', 1)[0] if screen else 'nieznany'
             signed_in = 'tak' if user.pue_token else 'nie'
             instruction += f'\n\n<|USER_CONTEXT|>\n{USER_CONTEXT_RULES}\n\nZalogowany: {signed_in}. {where}\n</|USER_CONTEXT|>'
-        config = types.GenerateContentConfig(system_instruction = instruction)
-        if declarations:
-            config.tools = [types.Tool(function_declarations = declarations)]
             # we run the calls ourselves through MCP with the user's token
-            config.automatic_function_calling = types.AutomaticFunctionCallingConfig(disable = True)
-        return config
+            tools = self.tools.declarations()
+        return instruction, tools
 
-    def _send(self, chat, content, config: types.GenerateContentConfig, user: UserContext | None) -> str:
-        """Send one user turn; when the model asks for tools, run them via MCP and give it the results."""
-        response = self._retry(lambda: chat.send_message(content, config = config))
-        for _ in range(MAX_TOOL_ROUNDS):
-            calls = response.function_calls
-            if not calls or user is None:
-                break
-            logger.info('ZUSia calls MCP tools: %s', ', '.join(c.name for c in calls))
-            results = self.tools.call(calls, user)
-            response = self._retry(lambda: chat.send_message(results, config = config))
-        if response.function_calls:
-            # tool budget used up – ask for an answer with what is known
-            final = types.GenerateContentConfig(system_instruction = config.system_instruction)
-            response = self._retry(lambda: chat.send_message('Odpowiedz teraz na podstawie zebranych danych.', config = final))
-        return response.text
+    def _send(self, chat: Chat, message: dict, instruction: str, tools: list[dict], user: UserContext | None) -> str:
+        """Send one user turn; when the model asks for tools, run them via MCP and give it the results.
+        Only the user's message and the final answer are kept in the chat history (not the tool data)."""
+        messages = [{'role': 'system', 'content': instruction}, *chat.messages, message]
+        response = self._complete(messages, tools)
+        rounds = 0
+        while (calls := response.choices[0].message.tool_calls) and user is not None:
+            logger.info('ZUSia calls MCP tools: %s', ', '.join(c.function.name for c in calls))
+            messages.append({'role': 'assistant', 'content': response.choices[0].message.content,
+                             'tool_calls': [{'id': c.id, 'type': 'function',
+                                             'function': {'name': c.function.name, 'arguments': c.function.arguments}}
+                                            for c in calls]})
+            messages += self.tools.call(calls, user)
+            rounds += 1
+            # tool budget used up – the model has to answer with what is known
+            response = self._complete(messages, tools, 'none' if rounds >= MAX_TOOL_ROUNDS else 'auto')
+
+        reply = response.choices[0].message.content or ''
+        if reply:
+            chat.messages += [message, {'role': 'assistant', 'content': reply}]
+        return reply
 
     def text(self, chat, message, user: UserContext | None = None):
-        config = self._turn_config(message, user)
-        return self._send(chat, message, config, user)
+        instruction, tools = self._turn_config(message, user)
+        return self._send(chat, user_message(message), instruction, tools, user)
 
     def img(self, chat, message = '', img_path = None, image_bytes = None, mime_type = None, user: UserContext | None = None):
-        parts = [types.Part.from_text(text = message)]
-
         if img_path:
             mime_type, _ = mimetypes.guess_type(img_path)
 
             with open(img_path, 'rb') as f:
                 image_bytes = f.read()
 
-        if image_bytes is not None:
-            parts.append(types.Part.from_bytes(data = image_bytes, mime_type = mime_type or 'image/jpeg'))
-
-        config = self._turn_config(message, user)
-        return self._send(chat, parts, config, user)
+        attachments = [(image_bytes, mime_type or 'image/jpeg')] if image_bytes is not None else []
+        instruction, tools = self._turn_config(message, user)
+        return self._send(chat, user_message(message, attachments), instruction, tools, user)
 
     def pdf(self, chat, message = '', pdf_bytes = None, user: UserContext | None = None):
-        parts = []
-
-        if message.strip():
-            parts.append(types.Part.from_text(text = message))
-
         if pdf_bytes is None:
             raise ValueError('PDF data is required')
 
-        parts.append(types.Part.from_bytes(data = pdf_bytes, mime_type = 'application/pdf'))
-        config = self._turn_config(message, user)
-        return self._send(chat, parts, config, user)
+        instruction, tools = self._turn_config(message, user)
+        return self._send(chat, user_message(message, [(pdf_bytes, 'application/pdf')]), instruction, tools, user)
 
     def extract_case(self, files: list[tuple[bytes, str]]) -> CaseExtraction:
         """Read the documents of one benefit case (PDFs / scans) and return structured data for the calculators."""
         if not files:
             raise ValueError('At least one document is required')
 
-        parts = [types.Part.from_bytes(data = data, mime_type = mime) for data, mime in files]
-        parts.append(types.Part.from_text(text = 'Odczytaj dane z powyższych dokumentów jednej sprawy.'))
-
-        response = self._retry(lambda: self.client.models.generate_content(
+        message = user_message('Odczytaj dane z powyższych dokumentów jednej sprawy.', files)
+        # documents first, then the instruction – the same order as before
+        message['content'] = message['content'][1:] + message['content'][:1]
+        kwargs = self._reasoning(self.case_reasoning_effort)
+        response = self.client.chat.completions.parse(
             model = self.model,
-            contents = parts,
-            config = types.GenerateContentConfig(system_instruction = CASE_EXTRACTION_PROMPT,
-                                                 response_mime_type = 'application/json',
-                                                 response_schema = CaseExtraction,
-                                                 temperature = 0)))
+            messages = [{'role': 'system', 'content': CASE_EXTRACTION_PROMPT}, message],
+            response_format = CaseExtraction,
+            **kwargs)
 
-        if isinstance(response.parsed, CaseExtraction):
-            return response.parsed
-        if not response.text:
-            raise RuntimeError('The model returned an empty response')
-        return CaseExtraction.model_validate_json(response.text)
+        result = response.choices[0].message
+        if isinstance(result.parsed, CaseExtraction):
+            return result.parsed
+        if not result.content:
+            raise RuntimeError(result.refusal or 'The model returned an empty response')
+        return CaseExtraction.model_validate_json(result.content)
 
 
 USER_CONTEXT_RULES = """Masz narzędzia (MCP) do danych WYŁĄCZNIE zalogowanej osoby i do tego, co widzi na ekranie:

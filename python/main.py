@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from python.cases import router as cases_router
 from python.chat_store import ChatStore
-from python.config import setting
+from python.knowledge.vectors import openai_key
 from python.mcp_server import server as mcp_server
 from python.routers import router
 from python.session_manager import SessionManager
@@ -45,9 +45,9 @@ def create_app(manager: SessionManager | None = None) -> FastAPI:
 
     @app.get('/health', tags = ['health'])
     async def health() -> dict[str, str | bool]:
-        # `assistant` tells the frontend whether chat / case import can work (Gemini key configured).
+        # `assistant` tells the frontend whether chat / case import can work (OpenAI key configured).
         return {'status': 'ok',
-                'assistant': bool(setting('ZUS_API_KEY')),
+                'assistant': bool(openai_key()),
                 'storage': app.state.storage is not None}
 
     return app

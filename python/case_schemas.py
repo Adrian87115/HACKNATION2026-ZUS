@@ -1,6 +1,6 @@
 """Structured data extracted from a benefit case (ZAM, Z-3, Z-3a, ZAS-53, e-ZLA, insurance certificate, ...).
 
-Used as the Gemini response schema, so every field is optional: the model must return null instead of guessing.
+Used as the response schema of the model (OpenAI structured output), so every field is optional: the model must return null instead of guessing.
 Amounts are in PLN, dates are YYYY-MM-DD.
 """
 from typing import Literal
