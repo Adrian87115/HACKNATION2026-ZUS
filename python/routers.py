@@ -1,8 +1,8 @@
 import logging
-from fastapi import APIRouter, File, HTTPException, Request, UploadFile
+from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
 from starlette.concurrency import run_in_threadpool
 
-from python.schemas import ChatResponse, MessageRequest
+from python.schemas import ChatResponse, CreateChatRequest, MessageRequest, PersistenceRequest
 from python.session_manager import KeyNotFoundError
 
 logger  =  logging.getLogger(__name__)
@@ -45,10 +45,11 @@ async def _record_turn(request: Request, session_id: str, user_content: str, ass
         raise HTTPException(status_code = 503, detail = 'Could not save this message. Please try again.') from exc
 
 @router.post('', response_model = dict, status_code = 201, summary = 'Start a chat')
-async def create_chat(request: Request) -> dict[str, str]:
+async def create_chat(request: Request, payload: CreateChatRequest | None = None) -> dict:
+    persist  =  bool(payload and payload.persist)
     try:
-        session_id  =  await run_in_threadpool(request.app.state.sessions.create)
-        return {'session_id': session_id}
+        session_id  =  await run_in_threadpool(request.app.state.sessions.create, persist)
+        return {'session_id': session_id, 'persist': persist}
     except Exception as exc:
         logger.exception('Could not create chat session')
         raise HTTPException(status_code = 503, detail = 'Chat service is unavailable') from exc
@@ -59,13 +60,14 @@ async def send_message(session_id: str, payload: MessageRequest, request: Reques
     session  =  _session(request, session_id)
     async with _async_lock(session['turn_lock']):
         bot  =  await _bot(request)
-        reply  =  await _reply(bot.text, session['chat'], payload.message)
+        reply  =  await _reply(bot.text, session['chat'], payload.message, context = payload.context)
         await _record_turn(request, session_id, payload.message, reply)
     return ChatResponse(session_id = session_id, reply = reply)
 
 
 @router.post('/{session_id}/images', response_model = ChatResponse, summary = 'Send an image')
-async def send_image(session_id: str, request: Request, message: str  =  '', file: UploadFile  =  File(...)) -> ChatResponse:
+async def send_image(session_id: str, request: Request, message: str  =  '', file: UploadFile  =  File(...),
+                     context: str | None  =  Form(None, max_length = 20_000)) -> ChatResponse:
     session  =  _session(request, session_id)
 
     if not file.content_type or not file.content_type.startswith('image/'):
@@ -87,14 +89,15 @@ async def send_image(session_id: str, request: Request, message: str  =  '', fil
     async with _async_lock(session['turn_lock']):
         bot  =  await _bot(request)
         reply  =  await _reply(bot.img, session['chat'], message = message, image_bytes = image_bytes,
-                               mime_type = file.content_type)
+                               mime_type = file.content_type, context = context)
         await _record_turn(request, session_id, message or f"[image: {file.filename or 'upload'}]", reply,
                            file.content_type, image_bytes)
         
     return ChatResponse(session_id = session_id, reply = reply)
 
 @router.post('/{session_id}/pdfs', response_model = ChatResponse, summary = 'Send a PDF document')
-async def send_pdf(session_id: str, request: Request, message: str  =  '', file: UploadFile  =  File(...)) -> ChatResponse:
+async def send_pdf(session_id: str, request: Request, message: str  =  '', file: UploadFile  =  File(...),
+                   context: str | None  =  Form(None, max_length = 20_000)) -> ChatResponse:
     session  =  _session(request, session_id)
 
     if file.content_type !=  'application/pdf':
@@ -118,7 +121,7 @@ async def send_pdf(session_id: str, request: Request, message: str  =  '', file:
     async with _async_lock(session['turn_lock']):
         bot  =  await _bot(request)
         prompt  =  message or 'Please explain the contents of this PDF in clear, accessible language.'
-        reply  =  await _reply(bot.pdf, session['chat'], message = prompt, pdf_bytes = pdf_bytes)
+        reply  =  await _reply(bot.pdf, session['chat'], message = prompt, pdf_bytes = pdf_bytes, context = context)
         await _record_turn(request, session_id, f"{prompt} [PDF: {file.filename or 'upload'}]", reply,
                            'application/pdf', pdf_bytes)
     return ChatResponse(session_id = session_id, reply = reply)
@@ -127,7 +130,22 @@ async def send_pdf(session_id: str, request: Request, message: str  =  '', file:
 async def get_history(session_id: str, request: Request) -> dict:
     session  =  _session(request, session_id)
     return {'session_id': session_id,
+            'persist': session['persist'],
             'messages': session['history']}
+
+
+@router.put('/{session_id}/persistence', summary = 'Keep or forget a chat (user consent)')
+async def set_persistence(session_id: str, payload: PersistenceRequest, request: Request) -> dict:
+    session  =  _session(request, session_id)
+    async with _async_lock(session['turn_lock']):
+        try:
+            await run_in_threadpool(request.app.state.sessions.set_persist, session_id, payload.persist)
+        except KeyNotFoundError as exc:
+            raise HTTPException(status_code = 404, detail = 'Chat session not found') from exc
+        except Exception as exc:
+            logger.exception('Could not change chat persistence')
+            raise HTTPException(status_code = 503, detail = 'Could not save this setting. Please try again.') from exc
+    return {'session_id': session_id, 'persist': payload.persist}
 
 @router.delete('/{session_id}', status_code = 204, summary = 'Delete a chat')
 async def delete_chat(session_id: str, request: Request) -> None:

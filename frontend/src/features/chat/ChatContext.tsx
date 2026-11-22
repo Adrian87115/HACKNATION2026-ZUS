@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { ChatApiError, checkHealth, createChat, deleteChat, getHistory, sendMessage } from './chatApi';
+import { ChatApiError, checkHealth, createChat, deleteChat, getHistory, sendMessage, setPersistence } from './chatApi';
 
 export type ChatMessage = {
 	id: string;
@@ -23,12 +23,16 @@ type ChatContextValue = {
 	send: (text: string, file?: File) => Promise<void>;
 	retry: (messageId: string) => Promise<void>;
 	newChat: () => void;
+	/** The user agreed to keep the conversation (history and files) – off by default. */
+	remember: boolean;
+	setRemember: (remember: boolean) => Promise<void>;
 };
 
 const ChatContext = createContext<ChatContextValue | null>(null);
 
 const SESSION_KEY = 'zusia.chat.session';
 const OPEN_KEY = 'zusia.chat.open';
+const REMEMBER_KEY = 'zusia.chat.remember';
 
 const read = (key: string) => {
 	try {
@@ -53,7 +57,9 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 	const [sending, setSending] = useState(false);
 	const [loadingHistory, setLoadingHistory] = useState(false);
 	const [available, setAvailable] = useState<boolean | null>(null);
-	const sessionRef = useRef<string | null>(read(SESSION_KEY));
+	const [remember, setRememberState] = useState(() => read(REMEMBER_KEY) === '1');
+	// Only a conversation the user agreed to keep is restored after reloading the page.
+	const sessionRef = useRef<string | null>(read(REMEMBER_KEY) === '1' ? read(SESSION_KEY) : null);
 	const historyLoaded = useRef(false);
 	// Files can't be persisted; keep them in memory so a failed upload can be retried.
 	const pendingFiles = useRef(new Map<string, File>());
@@ -67,6 +73,15 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 	const recheck = useCallback(async () => {
 		setAvailable(null);
 		setAvailable(await checkHealth());
+	}, []);
+
+	// A conversation saved before consent was asked for: forget it.
+	useEffect(() => {
+		const stale = read(SESSION_KEY);
+		if (stale && read(REMEMBER_KEY) !== '1') {
+			void deleteChat(stale);
+			write(SESSION_KEY, null);
+		}
 	}, []);
 
 	// Check that the assistant is reachable whenever the panel is opened.
@@ -90,11 +105,27 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
 	const ensureSession = useCallback(async (fresh = false) => {
 		if (sessionRef.current && !fresh) return sessionRef.current;
-		const id = await createChat();
+		const id = await createChat(remember);
 		sessionRef.current = id;
 		historyLoaded.current = true;
-		write(SESSION_KEY, id);
+		if (remember) write(SESSION_KEY, id);
 		return id;
+	}, [remember]);
+
+	const setRemember = useCallback(async (value: boolean) => {
+		const id = sessionRef.current;
+		if (id) {
+			try {
+				await setPersistence(id, value);
+			} catch (err) {
+				// the session is gone on the server – the next message starts a new one with the chosen setting
+				if (!(err instanceof ChatApiError && err.status === 404)) throw err;
+				sessionRef.current = null;
+			}
+		}
+		setRememberState(value);
+		write(REMEMBER_KEY, value ? '1' : null);
+		write(SESSION_KEY, value && sessionRef.current ? sessionRef.current : null);
 	}, []);
 
 	const deliver = useCallback(
@@ -161,8 +192,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 	}, []);
 
 	const value = useMemo(
-		() => ({ open, setOpen, toggle, messages, sending, loadingHistory, available, recheck, send, retry, newChat }),
-		[open, setOpen, toggle, messages, sending, loadingHistory, available, recheck, send, retry, newChat]
+		() => ({ open, setOpen, toggle, messages, sending, loadingHistory, available, recheck, send, retry, newChat, remember, setRemember }),
+		[open, setOpen, toggle, messages, sending, loadingHistory, available, recheck, send, retry, newChat, remember, setRemember]
 	);
 
 	return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

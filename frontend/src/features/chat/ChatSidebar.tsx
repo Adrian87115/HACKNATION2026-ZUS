@@ -17,7 +17,9 @@ const SUGGESTIONS = [
 export const CHAT_PANEL_WIDTH_CLASS = 'sm:w-[26rem]';
 
 export default function ChatSidebar() {
-	const { open, setOpen, messages, sending, loadingHistory, available, recheck, send, retry, newChat } = useChat();
+	const { open, setOpen, messages, sending, loadingHistory, available, recheck, send, retry, newChat, remember, setRemember } =
+		useChat();
+	const [rememberError, setRememberError] = useState<string | null>(null);
 	const offline = available === false;
 	const titleId = useId();
 	const [text, setText] = useState('');
@@ -266,7 +268,22 @@ export default function ChatSidebar() {
 							{sending ? <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden /> : <Send className="h-4 w-4" aria-hidden />}
 						</button>
 					</div>
-					<p className="mt-2 text-[11px] leading-snug text-muted">
+					<label className="mt-2 flex cursor-pointer items-start gap-2 text-xs text-muted">
+						<input
+							type="checkbox"
+							checked={remember}
+							onChange={(e) => {
+								setRememberError(null);
+								setRemember(e.target.checked).catch(() => setRememberError('Nie udało się zapisać ustawienia. Spróbuj ponownie.'));
+							}}
+							className="mt-0.5 h-3.5 w-3.5 shrink-0 cursor-pointer accent-brand"
+						/>
+						<span>
+							Zapamiętaj rozmowę i dodane pliki, żebym mogła do nich wrócić. Bez zgody rozmowa znika po zamknięciu strony.
+						</span>
+					</label>
+					{rememberError && <p className="mt-1 text-xs text-red-600 dark:text-red-300">{rememberError}</p>}
+					<p className="mt-1.5 text-[11px] leading-snug text-muted">
 						ZUSia korzysta z AI (Google Gemini) i może się mylić. Nie podawaj numeru PESEL ani danych innych osób.
 					</p>
 				</form>

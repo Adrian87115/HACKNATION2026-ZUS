@@ -54,18 +54,23 @@ class ZUSia:
                 time.sleep(delay)
                 delay *= 2
 
-    def _turn_config(self, question: str) -> types.GenerateContentConfig:
-        """System instruction for one turn: the persona plus the verified data that matches the question."""
+    def _turn_config(self, question: str, context: str | None = None) -> types.GenerateContentConfig:
+        """System instruction for one turn: the persona, the verified data that matches the question and –
+        when sent by the app – the signed-in user's account data and what they currently see on screen.
+        The user context is used for this turn only and is never saved with the conversation."""
         data = self.knowledge.context(question)
+        user = ''
+        if context and context.strip():
+            user = f'\n\n<|USER_CONTEXT|>\n{USER_CONTEXT_RULES}\n\n{context.strip()}\n</|USER_CONTEXT|>'
         return types.GenerateContentConfig(
-            system_instruction = f'{self.persona}\n\n<|PROTECTED_INTERNAL_DATA|>\n{data}\n</|PROTECTED_INTERNAL_DATA|>')
+            system_instruction = f'{self.persona}\n\n<|PROTECTED_INTERNAL_DATA|>\n{data}\n</|PROTECTED_INTERNAL_DATA|>{user}')
 
-    def text(self, chat, message):
-        config = self._turn_config(message)
+    def text(self, chat, message, context = None):
+        config = self._turn_config(message, context)
         response = self._retry(lambda: chat.send_message(message, config = config))
         return response.text
 
-    def img(self, chat, message = '', img_path = None, image_bytes = None, mime_type = None):
+    def img(self, chat, message = '', img_path = None, image_bytes = None, mime_type = None, context = None):
         parts = [types.Part.from_text(text = message)]
 
         if img_path:
@@ -77,11 +82,11 @@ class ZUSia:
         if image_bytes is not None:
             parts.append(types.Part.from_bytes(data = image_bytes, mime_type = mime_type or 'image/jpeg'))
 
-        config = self._turn_config(message)
+        config = self._turn_config(message, context)
         response = self._retry(lambda: chat.send_message(parts, config = config))
         return response.text
 
-    def pdf(self, chat, message = '', pdf_bytes = None):
+    def pdf(self, chat, message = '', pdf_bytes = None, context = None):
         parts = []
         
         if message.strip():
@@ -91,7 +96,7 @@ class ZUSia:
             raise ValueError('PDF data is required')
 
         parts.append(types.Part.from_bytes(data = pdf_bytes, mime_type = 'application/pdf'))
-        config = self._turn_config(message)
+        config = self._turn_config(message, context)
         response = self._retry(lambda: chat.send_message(parts, config = config))
         return response.text
 
@@ -116,6 +121,17 @@ class ZUSia:
         if not response.text:
             raise RuntimeError('The model returned an empty response')
         return CaseExtraction.model_validate_json(response.text)
+
+
+USER_CONTEXT_RULES = """Poniżej są dane przekazane przez aplikację dla tej jednej wiadomości:
+- „Konto” – dane wyłącznie aktualnie zalogowanej osoby z PUE/eZUS (symulacja). Nie masz dostępu do danych innych osób
+  i nie możesz niczego na koncie zmieniać ani wysyłać – jeśli użytkownik o to prosi, wyjaśnij, gdzie zrobi to sam.
+- „Okoliczności podane przez użytkownika” – informacje wpisane samodzielnie; traktuj je jako deklarację, nie dane z ZUS.
+- „Ekran” – co użytkownik teraz widzi (np. wypełniany formularz wniosku). Gdy pyta o formularz, odnieś się do konkretnych
+  pól i wartości, wskaż brakujące lub budzące wątpliwości dane i sprawdź uprawnienia na podstawie konta i przepisów.
+Gdy pytanie dotyczy jego sytuacji, korzystaj z tych danych (np. status ubezpieczenia chorobowego, zaległości w składkach,
+zwolnienia e-ZLA) i powiedz wprost, na podstawie czego odpowiadasz. Nie podawaj pełnego numeru PESEL ani numeru konta.
+Dokumenty wgrane przez użytkownika są pomocnicze – przy rozbieżności rozstrzygają dane z konta ZUS."""
 
 
 CASE_EXTRACTION_PROMPT = """Jesteś asystentem ZUS, który odczytuje dokumenty jednej sprawy o zasiłek chorobowy lub macierzyński

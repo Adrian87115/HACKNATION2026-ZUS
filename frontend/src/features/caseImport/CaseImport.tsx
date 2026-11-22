@@ -127,6 +127,8 @@ export default function CaseImport({ onApply }: Props) {
 	const [dragging, setDragging] = useState(false);
 	const [state, setState] = useState<State>({ kind: 'idle' });
 	const [recent, setRecent] = useState<StoredCase[]>(loadStoredCases);
+	// consent to keep the documents and the read case – off by default
+	const [keep, setKeep] = useState(false);
 
 	const analysis = useMemo(
 		() => (state.kind === 'done' ? analyzeCase(state.stored.extraction, engine) : null),
@@ -167,16 +169,18 @@ export default function CaseImport({ onApply }: Props) {
 		abortRef.current = controller;
 		setState({ kind: 'loading' });
 		try {
-			const extraction = await extractCase(files, controller.signal);
+			const extraction = await extractCase(files, keep, controller.signal);
 			const stored: StoredCase = {
 				id: crypto.randomUUID(),
 				name: caseName(files),
 				createdAt: new Date().toISOString(),
 				extraction
 			};
-			const nextRecent = [stored, ...recent];
-			setRecent(nextRecent);
-			saveStoredCases(nextRecent);
+			if (keep) {
+				const nextRecent = [stored, ...recent];
+				setRecent(nextRecent);
+				saveStoredCases(nextRecent);
+			}
 			setFiles([]);
 			setState({ kind: 'done', stored });
 		} catch (err) {
@@ -313,9 +317,18 @@ export default function CaseImport({ onApply }: Props) {
 								<Sparkles className="h-4 w-4" aria-hidden />
 								{state.kind === 'error' ? 'Spróbuj ponownie' : 'Odczytaj dokumenty'}
 							</button>
-							<p className="text-xs text-muted">
-								Dokumenty przechowujemy w prywatnym magazynie maksymalnie 30 dni – możesz je usunąć w każdej chwili.
-							</p>
+							<label className="flex cursor-pointer items-start gap-2 text-xs text-muted">
+								<input
+									type="checkbox"
+									checked={keep}
+									onChange={(e) => setKeep(e.target.checked)}
+									className="mt-0.5 h-4 w-4 cursor-pointer accent-brand"
+								/>
+								<span>
+									Zachowaj dokumenty i odczytaną sprawę (prywatny magazyn, maks. 30 dni – usuniesz je w każdej chwili). Bez zgody
+									dokumenty są tylko odczytywane i nie zapisujemy ich.
+								</span>
+							</label>
 						</div>
 
 						{recent.length > 0 && (

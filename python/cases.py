@@ -1,6 +1,6 @@
 """Case import: read the documents of a benefit case with Gemini and return structured data for the calculators.
 
-When object storage (MinIO / S3) is configured, the uploaded documents are kept under `cases/<case_id>/`
+When object storage (MinIO / S3) is configured and the user agrees (`keep=true`), the uploaded documents are kept under `cases/<case_id>/`
 in the cases bucket (private; expires after CASE_RETENTION_DAYS via the bucket lifecycle rule), so the user
 can reopen the source documents and delete the case.
 """
@@ -9,7 +9,7 @@ import re
 import uuid
 from urllib.parse import quote
 
-from fastapi import APIRouter, File, HTTPException, Request, Response, UploadFile
+from fastapi import APIRouter, File, Form, HTTPException, Request, Response, UploadFile
 from pydantic import BaseModel
 from starlette.concurrency import run_in_threadpool
 
@@ -70,7 +70,7 @@ def _store_documents(storage: ObjectStorage, case_id: str, documents: list[tuple
 
 
 @router.post('/extract', response_model = CaseImportResult, summary = 'Read a benefit case from its documents')
-async def extract_case(request: Request, files: list[UploadFile] = File(...)) -> CaseImportResult:
+async def extract_case(request: Request, files: list[UploadFile] = File(...), keep: bool = Form(False)) -> CaseImportResult:
     if not files:
         raise HTTPException(status_code = 400, detail = 'Dodaj co najmniej jeden dokument.')
     if len(files) > MAX_FILES:
@@ -101,7 +101,8 @@ async def extract_case(request: Request, files: list[UploadFile] = File(...)) ->
 
     result = CaseImportResult(**extraction.model_dump())
     storage = getattr(request.app.state, 'storage', None)
-    if storage is not None:
+    # without the user's consent the documents are only read and then discarded
+    if storage is not None and keep:
         case_id = uuid.uuid4().hex
         try:
             result.files = await run_in_threadpool(_store_documents, storage, case_id, documents)

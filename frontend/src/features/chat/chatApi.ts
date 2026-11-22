@@ -73,7 +73,20 @@ export async function checkHealth(): Promise<boolean> {
 	}
 }
 
-export const createChat = () => request<{ session_id: string }>('/chats', { method: 'POST' }).then((r) => r.session_id);
+/** `persist` – the user agreed to keep the conversation; otherwise it lives only in the assistant's memory. */
+export const createChat = (persist: boolean) =>
+	request<{ session_id: string }>('/chats', {
+		method: 'POST',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ persist })
+	}).then((r) => r.session_id);
+
+export const setPersistence = (sessionId: string, persist: boolean) =>
+	request<{ persist: boolean }>(`/chats/${encodeURIComponent(sessionId)}/persistence`, {
+		method: 'PUT',
+		headers: { 'Content-Type': 'application/json' },
+		body: JSON.stringify({ persist })
+	});
 
 export const getHistory = (sessionId: string) =>
 	request<{ messages: { role: 'user' | 'assistant'; content: string }[] }>(`/chats/${encodeURIComponent(sessionId)}/history`).then(

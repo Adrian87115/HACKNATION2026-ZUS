@@ -78,9 +78,11 @@ export const ACCEPTED_FILE_TYPES = 'application/pdf,image/png,image/jpeg,image/w
 export const MAX_FILES = 10;
 export const MAX_FILE_BYTES = 10 * 1024 * 1024;
 
-export async function extractCase(files: File[], signal?: AbortSignal): Promise<CaseExtraction> {
+/** `keep` – the user agreed to keep the documents (private storage, max. 30 days). Otherwise they are only read. */
+export async function extractCase(files: File[], keep: boolean, signal?: AbortSignal): Promise<CaseExtraction> {
 	const body = new FormData();
 	files.forEach((f) => body.append('files', f, f.name));
+	body.append('keep', keep ? 'true' : 'false');
 
 	let res: Response;
 	try {
