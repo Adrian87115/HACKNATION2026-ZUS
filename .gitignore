@@ -14,3 +14,4 @@ dist/
 # Backend (NestJS) admin parameter overrides
 /backend/data/
 /python/knowledge/__pycache__
+.env.production

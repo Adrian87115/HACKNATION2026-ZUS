@@ -1,0 +1,27 @@
+# Public entry point: automatic HTTPS (Let's Encrypt) for $DOMAIN, the built frontend and the two APIs.
+# The frontend calls /api/zusia/* (ZUSia, python) and /api/* (backend) on the same origin – no CORS needed.
+{$DOMAIN} {
+	encode zstd gzip
+
+	handle_path /api/zusia/* {
+		reverse_proxy zusia:8001
+	}
+	handle_path /api/* {
+		reverse_proxy backend:3000
+	}
+
+	handle {
+		root * /srv
+		# pre-rendered pages (dist/<route>/index.html), files, then the SPA fallback
+		try_files {path} {path}/index.html /index.html
+		file_server
+		@assets path /assets/*
+		header @assets Cache-Control "public, max-age=31536000, immutable"
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+	}
+}

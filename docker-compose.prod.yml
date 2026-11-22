@@ -1,0 +1,101 @@
+# Production stack of ZUSia on one VM (e.g. Oracle Cloud Always Free) – see deploy/README.md.
+#   docker compose --env-file .env.production -f docker-compose.prod.yml up -d --build
+name: zusia-prod
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: deploy/node.Dockerfile
+      target: web
+      args:
+        VITE_SITE_URL: https://${DOMAIN}
+    environment:
+      DOMAIN: ${DOMAIN}
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on: [backend, zusia]
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: deploy/node.Dockerfile
+      target: backend
+    environment:
+      ADMIN_TOKEN: ${ADMIN_TOKEN}
+    volumes:
+      - backend-data:/app/backend/data
+    restart: unless-stopped
+
+  zusia:
+    build:
+      context: .
+      dockerfile: deploy/zusia.Dockerfile
+    environment:
+      OPEN_AI_KEY: ${OPEN_AI_KEY}
+      ZUSIA_MODEL: ${ZUSIA_MODEL:-gpt-5.4-mini}
+      BACKEND_API_URL: http://backend:3000
+      ZUSIA_MCP_URL: http://127.0.0.1:8001/mcp/
+      CORS_ORIGINS: https://${DOMAIN}
+      S3_ENDPOINT_URL: http://minio:9000
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      S3_REGION: us-east-1
+      S3_BUCKET_ATTACHMENTS: zusia-attachments
+      S3_BUCKET_CASES: zusia-cases
+      CASE_RETENTION_DAYS: ${CASE_RETENTION_DAYS:-30}
+    volumes:
+      - zusia-data:/data
+    depends_on:
+      minio-init:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  # private object storage for chat attachments and case documents – not exposed to the internet
+  minio:
+    image: minio/minio:latest
+    command: server /data
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
+
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      CASE_RETENTION_DAYS: ${CASE_RETENTION_DAYS:-30}
+    entrypoint: >
+      /bin/sh -c "
+      set -e;
+      mc alias set local http://minio:9000 \"$$MINIO_ROOT_USER\" \"$$MINIO_ROOT_PASSWORD\";
+      mc mb --ignore-existing local/zusia-attachments local/zusia-cases;
+      mc anonymous set none local/zusia-attachments;
+      mc anonymous set none local/zusia-cases;
+      echo '{\"Rules\":[{\"ID\":\"expire-case-documents\",\"Status\":\"Enabled\",\"Filter\":{\"Prefix\":\"\"},\"Expiration\":{\"Days\":'$$CASE_RETENTION_DAYS'}}]}' | mc ilm import local/zusia-cases;
+      "
+    restart: "no"
+
+volumes:
+  caddy-data:
+  caddy-config:
+  backend-data:
+  zusia-data:
+  minio-data:
