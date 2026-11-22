@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import { useAuth } from '../account/AuthContext';
 import { useBenefitEngine } from '../../hooks/useBenefitEngine';
 import { accountContext, screenContext } from './userContext';
+import { useFeatures } from '../system/features';
 import { ChatApiError, checkHealth, createChat, deleteChat, getHistory, sendMessage, setPersistence } from './chatApi';
 
 export type ChatMessage = {
@@ -14,6 +15,8 @@ export type ChatMessage = {
 };
 
 type ChatContextValue = {
+	/** The assistant is switched on in the admin panel. */
+	enabled: boolean;
 	open: boolean;
 	setOpen: (open: boolean) => void;
 	toggle: () => void;
@@ -59,6 +62,7 @@ const uid = () => crypto.randomUUID();
 export function ChatProvider({ children }: { children: ReactNode }) {
 	const { account } = useAuth();
 	const engine = useBenefitEngine();
+	const { assistant: enabled } = useFeatures();
 	const [open, setOpenState] = useState(() => read(OPEN_KEY) === '1');
 	const [messages, setMessages] = useState<ChatMessage[]>([]);
 	const [sending, setSending] = useState(false);
@@ -203,10 +207,11 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 
 	const ask = useCallback(
 		(text: string) => {
+			if (!enabled) return;
 			setOpen(true);
 			void send(text);
 		},
-		[setOpen, send]
+		[enabled, setOpen, send]
 	);
 
 	const newChat = useCallback(() => {
@@ -218,8 +223,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 	}, []);
 
 	const value = useMemo(
-		() => ({ open, setOpen, toggle, messages, sending, loadingHistory, available, recheck, send, retry, newChat, ask, remember, setRemember }),
-		[open, setOpen, toggle, messages, sending, loadingHistory, available, recheck, send, retry, newChat, ask, remember, setRemember]
+		() => ({ enabled, open: open && enabled, setOpen, toggle, messages, sending, loadingHistory, available, recheck, send, retry, newChat, ask, remember, setRemember }),
+		[enabled, open, setOpen, toggle, messages, sending, loadingHistory, available, recheck, send, retry, newChat, ask, remember, setRemember]
 	);
 
 	return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

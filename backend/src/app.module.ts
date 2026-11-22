@@ -3,6 +3,7 @@ import { createObserveModule } from '@nestjs/observe';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { EngineModule } from './engine/engine.module.js';
+import { FeaturesModule } from './features/features.module.js';
 import { LibraryModule } from './library/library.module.js';
 import { PueModule } from './pue/pue.module.js';
 
@@ -23,6 +24,8 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     PueModule,
     // Knowledge base: official forms, legal acts and guides with version history
     LibraryModule,
+    // Feature switches and the announcement banner managed in the admin panel
+    FeaturesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

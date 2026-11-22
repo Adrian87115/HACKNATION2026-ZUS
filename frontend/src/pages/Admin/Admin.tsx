@@ -1,6 +1,10 @@
 import { Clock as History, KeyRound, LoaderCircle, LogOut, RotateCcw, Save, Search, ShieldCheck, Undo2 } from 'lucide-react';
-import { useCallback, useEffect, useId, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import BaseLayout from '../../components/Layouts/BaseLayout';
+import { useSearchParams } from 'react-router-dom';
+import DocumentsAdmin from './DocumentsAdmin';
+import FeaturesAdmin from './FeaturesAdmin';
+import Modal from './Modal';
 import { benefitAmount, type BenefitParams } from '@zus/engine';
 import { AdminApiError, adminApi, type HistoryEntry, type ParamChange } from '../../features/admin/adminApi';
 import { PARAM_GROUPS, UNIT, formatValue, fromInput, kindOf, labelOf, toInput, type ParamGroup } from '../../features/admin/paramMeta';
@@ -29,9 +33,19 @@ const writeToken = (token: string | null) => {
 
 type Draft = Record<string, string | Record<string, string>>;
 
+const TABS = [
+	{ id: 'parametry', label: 'Parametry kalkulatorów', title: 'Parametry kalkulatorów', description: 'Zmieniaj stawki, kwoty i wymiary urlopów bez zmian w kodzie – np. po zmianie przepisów. Nowe wartości od razu działają we wszystkich kalkulatorach i w odpowiedziach ZUSi.' },
+	{ id: 'dokumenty', label: 'Dokumenty', title: 'Formularze, przepisy i poradniki', description: 'Dodawaj nowe formularze, publikuj nowe wersje przepisów i poradników oraz wycofuj nieaktualne dokumenty. Poprzednie wersje zostają w historii.' },
+	{ id: 'funkcje', label: 'Funkcje systemu', title: 'Funkcje systemu', description: 'Włączaj i wyłączaj moduły aplikacji oraz publikuj komunikaty dla użytkowników – bez wdrażania nowej wersji.' }
+] as const;
+type TabId = (typeof TABS)[number]['id'];
+
 export default function Admin() {
 	const [token, setToken] = useState<string | null>(readToken);
 	const [notice, setNotice] = useState<string | null>(null);
+	const [search, setSearch] = useSearchParams();
+	const tab = TABS.find((t) => t.id === search.get('zakladka')) ?? TABS[0];
+	const selectTab = (id: TabId) => setSearch(id === 'parametry' ? {} : { zakladka: id }, { replace: true });
 
 	const logout = useCallback((message?: string) => {
 		writeToken(null);
@@ -45,10 +59,9 @@ export default function Admin() {
 				<header className="enter flex flex-wrap items-end justify-between gap-4">
 					<div className="space-y-2">
 						<p className="text-xs font-semibold uppercase tracking-wider text-brand-ink">Panel administracyjny</p>
-						<h1 className="text-3xl font-bold tracking-tight text-ink sm:text-4xl">Parametry kalkulatorów</h1>
+						<h1 className="text-3xl font-bold tracking-tight text-ink sm:text-4xl">{token ? tab.title : 'Zaplecze ZUSi'}</h1>
 						<p className="max-w-2xl text-muted">
-							Zmieniaj stawki, kwoty i wymiary urlopów bez zmian w kodzie – np. po zmianie przepisów. Nowe wartości od razu działają
-							we wszystkich kalkulatorach.
+							{token ? tab.description : 'Parametry kalkulatorów, baza dokumentów i funkcje systemu – zarządzane przez pracowników ZUS bez udziału programistów.'}
 						</p>
 					</div>
 					{token && (
@@ -63,7 +76,33 @@ export default function Admin() {
 				</header>
 
 				{token ? (
-					<Dashboard token={token} onUnauthorized={() => logout('Sesja wygasła albo token jest nieprawidłowy. Zaloguj się ponownie.')} />
+					<>
+						<div role="tablist" aria-label="Sekcje panelu" className="flex gap-1 overflow-x-auto border-b border-line">
+							{TABS.map((t) => (
+								<button
+									key={t.id}
+									type="button"
+									role="tab"
+									aria-selected={t.id === tab.id}
+									onClick={() => selectTab(t.id)}
+									className={cx(
+										'-mb-px shrink-0 border-b-2 px-3 py-2 text-sm font-semibold transition',
+										t.id === tab.id ? 'border-brand text-brand-ink' : 'border-transparent text-muted hover:text-ink'
+									)}>
+									{t.label}
+								</button>
+							))}
+						</div>
+						{tab.id === 'parametry' && (
+							<Dashboard token={token} onUnauthorized={() => logout('Sesja wygasła albo token jest nieprawidłowy. Zaloguj się ponownie.')} />
+						)}
+						{tab.id === 'dokumenty' && (
+							<DocumentsAdmin token={token} onUnauthorized={() => logout('Sesja wygasła albo token jest nieprawidłowy. Zaloguj się ponownie.')} />
+						)}
+						{tab.id === 'funkcje' && (
+							<FeaturesAdmin token={token} onUnauthorized={() => logout('Sesja wygasła albo token jest nieprawidłowy. Zaloguj się ponownie.')} />
+						)}
+					</>
 				) : (
 					<Login
 						notice={notice}
@@ -635,35 +674,5 @@ function Preview({ current, overrides }: { current: BenefitParams; overrides: Pa
 				))}
 			</dl>
 		</section>
-	);
-}
-
-/* ------------------------------------------------------------------ */
-/*  Modal                                                              */
-/* ------------------------------------------------------------------ */
-
-function Modal({ title, children, actions, onClose }: { title: string; children: ReactNode; actions: ReactNode; onClose: () => void }) {
-	const id = useId();
-	useEffect(() => {
-		const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
-		window.addEventListener('keydown', onKey);
-		return () => window.removeEventListener('keydown', onKey);
-	}, [onClose]);
-
-	return (
-		<div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-4" onClick={onClose}>
-			<div
-				role="dialog"
-				aria-modal="true"
-				aria-labelledby={id}
-				onClick={(e) => e.stopPropagation()}
-				className="enter max-h-[85vh] w-full max-w-lg overflow-y-auto rounded-lg border border-line bg-paper p-5 shadow-xl">
-				<h2 id={id} className="text-lg font-semibold text-ink">
-					{title}
-				</h2>
-				<div className="mt-2">{children}</div>
-				<div className="mt-5 flex justify-end gap-2">{actions}</div>
-			</div>
-		</div>
 	);
 }

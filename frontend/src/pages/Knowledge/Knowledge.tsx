@@ -82,6 +82,7 @@ function DocumentCard({ doc, byId, topicLabel }: { doc: LibraryDocument; byId: M
 						Historia zmian ({history.length + doc.amendments.length})
 					</button>
 				)}
+				{chat.enabled && (
 				<button
 					type="button"
 					onClick={() =>
@@ -93,6 +94,7 @@ function DocumentCard({ doc, byId, topicLabel }: { doc: LibraryDocument; byId: M
 					<MessageCircle className="h-4 w-4" aria-hidden />
 					Zapytaj ZUSię
 				</button>
+				)}
 				<span className="ml-auto text-xs text-muted">{doc.topics.map(topicLabel).join(' · ')}</span>
 			</div>
 

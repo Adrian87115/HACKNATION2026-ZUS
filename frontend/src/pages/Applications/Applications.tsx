@@ -2,6 +2,7 @@ import { ArrowUpRight, Building2, Landmark, Scale } from 'lucide-react';
 import { useId, type CSSProperties, type ReactNode } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { AppRoutePaths } from '../../types/shared';
+import { useFeatures } from '../../features/system/features';
 import BaseLayout from '../../components/Layouts/BaseLayout';
 import {
 	BENEFITS,
@@ -104,6 +105,7 @@ const PAYER_STYLE = {
 
 export default function Applications() {
 	const [params, setParams] = useSearchParams();
+	const { onlineApplications } = useFeatures();
 	const benefit = pick<BenefitKey>(params.get('swiadczenie'), BENEFITS, 'macierzynski');
 	const employment = pick<EmploymentKey>(params.get('zatrudnienie'), EMPLOYMENTS, 'umowa-o-prace');
 	const payer = pick<PayerKey>(params.get('platnik'), PAYERS, 'nie-wiem');
@@ -129,12 +131,14 @@ export default function Applications() {
 						Odpowiedz na trzy pytania, a pokażemy, kto wypłaci zasiłek, jakie wnioski przygotować, w jakich terminach i gdzie je
 						złożyć.
 					</p>
-					<Link
-						to={AppRoutePaths.SUBMIT_APPLICATION}
-						className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-ink hover:underline hover:underline-offset-4">
-						Wypełnij i wyślij wniosek online danymi z ZUS
-						<ArrowUpRight className="h-4 w-4" aria-hidden />
-					</Link>
+					{onlineApplications && (
+						<Link
+							to={AppRoutePaths.SUBMIT_APPLICATION}
+							className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-ink hover:underline hover:underline-offset-4">
+							Wypełnij i wyślij wniosek online danymi z ZUS
+							<ArrowUpRight className="h-4 w-4" aria-hidden />
+						</Link>
+					)}
 				</header>
 
 				<section

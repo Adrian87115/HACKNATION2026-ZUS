@@ -15,6 +15,7 @@ import {
 import { currentTitle, dueDate } from '../../features/account/accountToCase';
 import { useAuth } from '../../features/account/AuthContext';
 import { useChat } from '../../features/chat/ChatContext';
+import { useFeatures } from '../../features/system/features';
 import { useBenefitEngine } from '../../hooks/useBenefitEngine';
 import { AppRoutePaths } from '../../types/shared';
 
@@ -111,6 +112,23 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
 export default function SubmitApplication() {
 	const { status, account } = useAuth();
 	const location = useLocation();
+	const { onlineApplications } = useFeatures();
+
+	if (!onlineApplications) {
+		return (
+			<BaseLayout>
+				<div className="mx-auto max-w-xl space-y-3 py-16 text-center">
+					<h1 className="text-2xl font-bold tracking-tight text-ink">Składanie wniosków online jest chwilowo wyłączone</h1>
+					<p className="text-muted">
+						Wniosek możesz złożyć u pracodawcy, przez PUE/eZUS albo w placówce ZUS. Sprawdź, jakie dokumenty przygotować.
+					</p>
+					<Link to={AppRoutePaths.APPLICATIONS} className="inline-flex font-semibold text-brand-ink hover:underline hover:underline-offset-4">
+						Jakie dokumenty złożyć i gdzie? →
+					</Link>
+				</div>
+			</BaseLayout>
+		);
+	}
 
 	if (status === 'loading') {
 		return (
@@ -287,6 +305,8 @@ function SubmitView({ account }: { account: Account }) {
 					Wniosek uzupełniliśmy danymi z Twojego konta. Sprawdź daty, podpisz w mObywatelu i wyślij – potwierdzenie zobaczysz od razu, a
 					wniosek trafi do historii w „Moim koncie”.
 				</p>
+				{chat.enabled && (
+				<>
 				<button
 					type="button"
 					onClick={() =>
@@ -297,6 +317,8 @@ function SubmitView({ account }: { account: Account }) {
 					Sprawdź wniosek z ZUSią
 				</button>
 				<p className="text-xs text-muted">ZUSia widzi wypełniany formularz i dane z Twojego konta, ale niczego za Ciebie nie zmienia ani nie wysyła.</p>
+				</>
+				)}
 			</header>
 
 			<p className="enter rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/60 dark:bg-amber-950/40 dark:text-amber-100">

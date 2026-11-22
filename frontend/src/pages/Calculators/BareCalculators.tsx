@@ -4,6 +4,7 @@
  *  - PregnancyCalculator  -> point a               (engine.calculatePregnancyBenefits)
  */
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useFeatures } from "../../features/system/features";
 import {
   ArrowRight,
   Calculator,
@@ -1984,6 +1985,7 @@ const TABS: { id: Tab; label: string; sub: string }[] = [
 ];
 
 export default function BareCalculators() {
+  const features = useFeatures();
   const [searchParams, setSearchParams] = useSearchParams();
   const tab: Tab =
     searchParams.get("tab") === "pregnancy" ? "pregnancy" : "maternity";
@@ -2042,9 +2044,11 @@ export default function BareCalculators() {
         </p>
       </header>
 
-      <div className="enter" style={{ animationDelay: "60ms" }}>
-        <CaseImport onApply={applyCase} />
-      </div>
+      {features.caseImport && (
+        <div className="enter" style={{ animationDelay: "60ms" }}>
+          <CaseImport onApply={applyCase} />
+        </div>
+      )}
 
       <div
         ref={panelRef}

@@ -91,7 +91,7 @@ export const SEO_ROUTES: SeoMeta[] = [
 	{
 		path: AppRoutePaths.ADMIN,
 		title: 'Panel administracyjny | ZUSia',
-		description: 'Zarządzanie parametrami kalkulatorów ZUSi.',
+		description: 'Zarządzanie parametrami kalkulatorów, bazą dokumentów i funkcjami systemu ZUSi.',
 		noindex: true
 	},
 	{

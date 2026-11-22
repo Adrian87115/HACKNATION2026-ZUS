@@ -7,6 +7,7 @@ import { accountToCase, currentTitle, dueDate, isPregnant } from '../../features
 import { useAuth } from '../../features/account/AuthContext';
 import { analyzeCase, type CalculatorTarget } from '../../features/caseImport/caseData';
 import { useChat } from '../../features/chat/ChatContext';
+import { useFeatures } from '../../features/system/features';
 import { useBenefitEngine } from '../../hooks/useBenefitEngine';
 import { AppRoutePaths } from '../../types/shared';
 import CircumstancesSection from './CircumstancesSection';
@@ -78,6 +79,7 @@ function AccountView({ account }: { account: AccountData }) {
 	const engine = useBenefitEngine();
 	const navigate = useNavigate();
 	const chat = useChat();
+	const { onlineApplications } = useFeatures();
 	const { token } = useAuth();
 	const [certificate, setCertificate] = useState<DebtCertificate | null>(null);
 	const [certError, setCertError] = useState<string | null>(null);
@@ -138,6 +140,7 @@ function AccountView({ account }: { account: AccountData }) {
 						{account.family.childBirthDate && ` · dziecko urodzone ${date(account.family.childBirthDate)}`}
 					</p>
 				</div>
+				{chat.enabled && (
 				<button
 					type="button"
 					onClick={() => chat.ask('Co dane z mojego konta ZUS oznaczają dla moich zasiłków? Czy coś mi grozi albo o czym powinnam/powinienem pamiętać?')}
@@ -145,6 +148,7 @@ function AccountView({ account }: { account: AccountData }) {
 					<MessageCircle className="h-4 w-4" aria-hidden />
 					Zapytaj ZUSię o swoje dane
 				</button>
+				)}
 			</header>
 
 			{/* Summary */}
@@ -233,7 +237,7 @@ function AccountView({ account }: { account: AccountData }) {
 			<Section
 				title="Moje wnioski"
 				action={
-					<Link
+					onlineApplications && <Link
 						to={AppRoutePaths.SUBMIT_APPLICATION}
 						className="inline-flex items-center gap-1.5 rounded-md bg-brand px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-brand-strong">
 						<Send className="h-4 w-4" aria-hidden />

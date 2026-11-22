@@ -1,4 +1,5 @@
 import React from 'react';
+import AnnouncementBanner from '../Global/AnnouncementBanner';
 import EngineSyncNotice from '../Global/EngineSyncNotice';
 import Footer from '../Global/Footer';
 import Header from '../Global/Header';
@@ -19,6 +20,7 @@ export default function BaseLayout({ children }: Props) {
 					open ? 'xl:pr-[26rem]' : ''
 				}`}>
 				<main className="mx-auto w-full max-w-7xl flex-1 px-4 py-8 sm:px-6">
+					<AnnouncementBanner />
 					<EngineSyncNotice />
 					{children}
 				</main>

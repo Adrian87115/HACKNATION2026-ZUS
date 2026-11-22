@@ -20,7 +20,7 @@ const SUGGESTIONS = [
 export const CHAT_PANEL_WIDTH_CLASS = 'sm:w-[26rem]';
 
 export default function ChatSidebar() {
-	const { open, setOpen, messages, sending, loadingHistory, available, recheck, send, retry, newChat, remember, setRemember } =
+	const { enabled, open, setOpen, messages, sending, loadingHistory, available, recheck, send, retry, newChat, remember, setRemember } =
 		useChat();
 	const [rememberError, setRememberError] = useState<string | null>(null);
 	const { account } = useAuth();
@@ -85,6 +85,8 @@ export default function ChatSidebar() {
 		}
 	}
 
+
+	if (!enabled) return null;
 	return (
 		<>
 			{/* Backdrop on screens where the panel overlays the page */}

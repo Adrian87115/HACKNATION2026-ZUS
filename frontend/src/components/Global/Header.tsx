@@ -9,6 +9,7 @@ import zusiaLogo from '../../assets/zusia-logo.png';
 import AccessibilityMenu from './AccessibilityMenu';
 import { useChat } from '../../features/chat/ChatContext';
 import { useAuth } from '../../features/account/AuthContext';
+import { useFeatures } from '../../features/system/features';
 
 export default function Header() {
 	const { t } = useTranslation();
@@ -115,6 +116,7 @@ export default function Header() {
 function MobileMenu({ onClose }: { onClose: () => void }) {
 	const { t } = useTranslation();
 	const auth = useAuth();
+	const { onlineApplications } = useFeatures();
 	const location = useLocation();
 	const panelRef = useRef<HTMLDivElement>(null);
 	const firstPath = useRef(location.pathname);
@@ -167,10 +169,12 @@ function MobileMenu({ onClose }: { onClose: () => void }) {
 								<UserRound className="mr-3 size-4 text-muted" aria-hidden />
 								{t('account.myAccount')}
 							</NavLink>
-							<NavLink to={AppRoutePaths.SUBMIT_APPLICATION} className={itemCls}>
-								<Send className="mr-3 size-4 text-muted" aria-hidden />
-								{t('account.submitApplication')}
-							</NavLink>
+							{onlineApplications && (
+								<NavLink to={AppRoutePaths.SUBMIT_APPLICATION} className={itemCls}>
+									<Send className="mr-3 size-4 text-muted" aria-hidden />
+									{t('account.submitApplication')}
+								</NavLink>
+							)}
 							<button
 								type="button"
 								onClick={() => {
