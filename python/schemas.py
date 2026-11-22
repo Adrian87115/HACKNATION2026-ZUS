@@ -3,8 +3,10 @@ from pydantic import BaseModel, ConfigDict, Field
 class MessageRequest(BaseModel):
     model_config = ConfigDict(str_strip_whitespace = True)
     message: str = Field(min_length = 1, max_length = 20_000, description = 'Message for ZUSia')
-    context: str | None = Field(default = None, max_length = 20_000,
-                                description = 'Data of the signed-in user and the current screen, used for this turn only')
+    screen: str | None = Field(default = None, max_length = 20_000,
+                               description = 'What the user sees right now (page, form values) – kept in memory for the MCP tool get_current_screen')
+    pue_token: str | None = Field(default = None, max_length = 200,
+                                  description = "The signed-in user's PUE session token – passed to the MCP tools, never stored")
 
 class CreateChatRequest(BaseModel):
     persist: bool = Field(default = False, description = 'The user agreed to keep the conversation and its files')

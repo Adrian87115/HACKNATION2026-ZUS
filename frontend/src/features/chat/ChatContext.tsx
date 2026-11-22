@@ -1,7 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useAuth } from '../account/AuthContext';
-import { useBenefitEngine } from '../../hooks/useBenefitEngine';
-import { accountContext, screenContext } from './userContext';
+import { screenContext } from './userContext';
 import { useFeatures } from '../system/features';
 import { ChatApiError, checkHealth, createChat, deleteChat, getHistory, sendMessage, setPersistence } from './chatApi';
 
@@ -60,8 +59,7 @@ const write = (key: string, value: string | null) => {
 const uid = () => crypto.randomUUID();
 
 export function ChatProvider({ children }: { children: ReactNode }) {
-	const { account } = useAuth();
-	const engine = useBenefitEngine();
+	const { token } = useAuth();
 	const { assistant: enabled } = useFeatures();
 	const [open, setOpenState] = useState(() => read(OPEN_KEY) === '1');
 	const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -139,15 +137,8 @@ export function ChatProvider({ children }: { children: ReactNode }) {
 		write(SESSION_KEY, value && sessionRef.current ? sessionRef.current : null);
 	}, []);
 
-	/** Account of the signed-in user (only theirs) and the current screen – sent with each message, not stored. */
-	const buildContext = useCallback(() => {
-		const params = engine.getParams();
-		const threshold = Math.round(params.MIN_WAGE_2026_GROSS * params.DEBT_EXCLUSION_MIN_WAGE_RATIO * 100) / 100;
-		return [
-			account ? accountContext(account, threshold) : 'Użytkownik nie jest zalogowany – nie masz dostępu do danych z jego konta ZUS. Jeśli pyta o swoje dane, zaproponuj logowanie przez mObywatel (symulacja).',
-			screenContext()
-		].join('\n\n');
-	}, [account, engine]);
+	/** The screen and the PUE token for ZUSia's MCP tools – sent with each message, not stored. */
+	const buildContext = useCallback(() => ({ screen: screenContext(), pueToken: token }), [token]);
 
 	const deliver = useCallback(
 		async (userMessage: ChatMessage, text: string, file?: File) => {

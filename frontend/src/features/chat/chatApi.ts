@@ -96,15 +96,21 @@ export const getHistory = (sessionId: string) =>
 export const deleteChat = (sessionId: string) =>
 	request<void>(`/chats/${encodeURIComponent(sessionId)}`, { method: 'DELETE' }).catch(() => undefined);
 
-/** `context` – the signed-in user's account data and the current screen, used for this answer only. */
-export async function sendMessage(sessionId: string, message: string, file?: File, context?: string, signal?: AbortSignal): Promise<string> {
+/**
+ * What ZUSia's MCP tools need for this turn: the screen the user is on (kept in the assistant's memory only)
+ * and the PUE session token, with which the tools read the signed-in user's own data. Neither is saved.
+ */
+export type TurnContext = { screen?: string; pueToken?: string | null };
+
+export async function sendMessage(sessionId: string, message: string, file?: File, ctx: TurnContext = {}, signal?: AbortSignal): Promise<string> {
 	const id = encodeURIComponent(sessionId);
-	const ctx = context ? context.slice(0, 20000) : undefined;
+	const screen = ctx.screen ? ctx.screen.slice(0, 20000) : undefined;
+	const pueToken = ctx.pueToken || undefined;
 	if (!file) {
 		const r = await request<{ reply: string }>(`/chats/${id}/messages`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ message, context: ctx }),
+			body: JSON.stringify({ message, screen, pue_token: pueToken }),
 			signal
 		});
 		return r.reply;
@@ -112,7 +118,8 @@ export async function sendMessage(sessionId: string, message: string, file?: Fil
 	const kind = file.type === 'application/pdf' || /\.pdf$/i.test(file.name) ? 'pdfs' : 'images';
 	const body = new FormData();
 	body.append('file', file, file.name);
-	if (ctx) body.append('context', ctx);
+	if (screen) body.append('screen', screen);
+	if (pueToken) body.append('pue_token', pueToken);
 	const query = message ? `?message=${encodeURIComponent(message)}` : '';
 	const r = await request<{ reply: string }>(`/chats/${id}/${kind}${query}`, { method: 'POST', body, signal });
 	return r.reply;
