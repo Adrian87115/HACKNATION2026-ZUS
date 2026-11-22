@@ -5,6 +5,7 @@
  */
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { useFeatures } from "../../features/system/features";
+import BenefitCalendar from "../../components/BenefitCalendar";
 import {
   ArrowRight,
   Calculator,
@@ -1537,6 +1538,12 @@ function MaternityResults({
               <SegmentList segments={segments} />
             </ResultCard>
           )}
+
+          {segments.length > 0 && (
+            <ResultCard title="Kalendarz wypłat">
+              <BenefitCalendar segments={segments} />
+            </ResultCard>
+          )}
         </>
       )}
       <TechDetails input={input} result={result} />
@@ -1958,6 +1965,12 @@ function PregnancyResults({
             <ResultCard title="Harmonogram">
               <Timeline segments={segments} />
               <SegmentList segments={segments} />
+            </ResultCard>
+          )}
+
+          {segments.length > 0 && (
+            <ResultCard title="Kalendarz wypłat">
+              <BenefitCalendar segments={segments} />
             </ResultCard>
           )}
         </>
