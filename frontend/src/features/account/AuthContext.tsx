@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { AccountApiError, accountApi, type Account } from './accountApi';
+import { AccountApiError, accountApi, type Account, type Circumstances } from './accountApi';
 
 type Status = 'anonymous' | 'loading' | 'authenticated';
 
@@ -10,6 +10,8 @@ type AuthContextValue = {
 	error: string | null;
 	login: (personaId: string) => Promise<void>;
 	logout: () => Promise<void>;
+	/** Replace the circumstances after the user saved them. */
+	setCircumstances: (circumstances: Circumstances) => void;
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -80,7 +82,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 		setToken(null);
 	}, [token]);
 
-	const value = useMemo(() => ({ status, account, token, error, login, logout }), [status, account, token, error, login, logout]);
+	const setCircumstances = useCallback((circumstances: Circumstances) => {
+		setAccount((prev) => (prev ? { ...prev, circumstances } : prev));
+	}, []);
+
+	const value = useMemo(
+		() => ({ status, account, token, error, login, logout, setCircumstances }),
+		[status, account, token, error, login, logout, setCircumstances]
+	);
 	return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

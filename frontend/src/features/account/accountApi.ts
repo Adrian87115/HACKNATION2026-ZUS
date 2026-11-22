@@ -27,7 +27,28 @@ export type Account = {
 		paidBy: 'zus' | 'platnik';
 	}[];
 	family: { expectedBirthDate: string | null; childBirthDate: string | null };
+	/** Entered by the user (a statement, not registry data), with hints computed by the backend. */
+	circumstances: Circumstances;
 };
+
+export type EmploymentChange =
+	| 'brak'
+	| 'nowa_umowa_o_prace'
+	| 'umowa_zlecenia'
+	| 'dzialalnosc'
+	| 'koniec_umowy_na_czas_okreslony'
+	| 'likwidacja_pracodawcy'
+	| 'wypowiedzenie';
+
+export type CircumstancesInput = {
+	expectedBirthDate: string | null;
+	expectedChildren: number;
+	employmentChange: EmploymentChange;
+	employmentChangeDate: string | null;
+	notes: string;
+};
+
+export type Circumstances = CircumstancesInput & { updatedAt: string | null; hints: string[] };
 
 export type Persona = { id: string; label: string; description: string };
 
@@ -112,6 +133,8 @@ export const accountApi = {
 	logout: (token: string) => request<void>('/pue/logout', { method: 'POST' }, token).catch(() => undefined),
 	me: (token: string) => request<Account>('/pue/me', {}, token),
 	debtCertificate: (token: string) => request<DebtCertificate>('/pue/me/debt-certificate', { method: 'POST' }, token),
+	updateCircumstances: (token: string, input: CircumstancesInput) =>
+		request<Circumstances>('/pue/me/circumstances', { method: 'PUT', body: JSON.stringify(input) }, token),
 	applications: (token: string) => request<SubmittedApplication[]>('/pue/me/applications', {}, token),
 	submitApplication: (token: string, input: ApplicationInput) =>
 		request<SubmittedApplication>('/pue/me/applications', { method: 'POST', body: JSON.stringify(input) }, token)

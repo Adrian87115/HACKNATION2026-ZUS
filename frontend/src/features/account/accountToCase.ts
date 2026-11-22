@@ -17,10 +17,17 @@ export function currentTitle(account: Account, today = new Date().toISOString().
 	return active[0] ?? [...account.insurance].sort((a, b) => b.from.localeCompare(a.from))[0] ?? null;
 }
 
+/** Due date to use: the one the user entered wins over the one from the medical certificate in the account. */
+export const dueDate = (account: Account) => account.circumstances?.expectedBirthDate ?? account.family.expectedBirthDate;
+
+/** Expecting a child: a due date is known and no child is registered yet (or a new due date was entered). */
+export const isPregnant = (account: Account) =>
+	Boolean(account.circumstances?.expectedBirthDate || (account.family.expectedBirthDate && !account.family.childBirthDate));
+
 export function accountToCase(account: Account): CaseExtraction {
 	const title = currentTitle(account);
 	const business = title?.type === 'dzialalnosc';
-	const pregnant = Boolean(account.family.expectedBirthDate && !account.family.childBirthDate);
+	const pregnant = isPregnant(account);
 
 	return {
 		summary: `Dane z konta PUE/eZUS (symulacja): ${account.person.firstName} ${account.person.lastName}.`,
@@ -45,8 +52,8 @@ export function accountToCase(account: Account): CaseExtraction {
 		contribution_debt: account.debt.amount,
 		event: pregnant ? 'pregnancy' : account.family.childBirthDate ? 'birth' : 'unknown',
 		event_date: account.family.childBirthDate,
-		expected_birth_date: account.family.expectedBirthDate,
-		children_count: 1,
+		expected_birth_date: dueDate(account),
+		children_count: account.circumstances?.expectedChildren ?? 1,
 		child_birth_date: null,
 		za_zyciem: null,
 		combined_application_within_21_days: null,
@@ -55,6 +62,6 @@ export function accountToCase(account: Account): CaseExtraction {
 		employment_end_date: null,
 		job_loss_reason: null,
 		zus_decision: null,
-		warnings: []
+		warnings: account.circumstances?.hints ?? []
 	};
 }

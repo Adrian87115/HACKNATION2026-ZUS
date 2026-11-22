@@ -3,12 +3,13 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import BaseLayout from '../../components/Layouts/BaseLayout';
 import { accountApi, type Account as AccountData, type DebtCertificate, type SubmittedApplication } from '../../features/account/accountApi';
-import { accountToCase, currentTitle } from '../../features/account/accountToCase';
+import { accountToCase, currentTitle, dueDate, isPregnant } from '../../features/account/accountToCase';
 import { useAuth } from '../../features/account/AuthContext';
 import { analyzeCase, type CalculatorTarget } from '../../features/caseImport/caseData';
 import { useChat } from '../../features/chat/ChatContext';
 import { useBenefitEngine } from '../../hooks/useBenefitEngine';
 import { AppRoutePaths } from '../../types/shared';
+import CircumstancesSection from './CircumstancesSection';
 
 const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(' ');
 const money = (n: number) => n.toLocaleString('pl-PL', { style: 'currency', currency: 'PLN' });
@@ -98,7 +99,7 @@ function AccountView({ account }: { account: AccountData }) {
 	const extraction = useMemo(() => accountToCase(account), [account]);
 	const analysis = useMemo(() => analyzeCase(extraction, engine), [extraction, engine]);
 	const title = currentTitle(account);
-	const pregnant = Boolean(account.family.expectedBirthDate && !account.family.childBirthDate);
+	const pregnant = isPregnant(account);
 	const threshold = Math.round(engine.getParams().MIN_WAGE_2026_GROSS * engine.getParams().DEBT_EXCLUSION_MIN_WAGE_RATIO * 100) / 100;
 	const debtBlocks = account.debt.amount > threshold;
 	const name = `${account.person.firstName} ${account.person.lastName}`;
@@ -133,7 +134,7 @@ function AccountView({ account }: { account: AccountData }) {
 					<h1 className="text-3xl font-bold tracking-tight text-ink sm:text-4xl">Dzień dobry, {account.person.firstName}</h1>
 					<p className="text-sm text-muted">
 						PESEL {account.person.peselMasked} · {account.person.city}
-						{pregnant && ` · przewidywana data porodu: ${date(account.family.expectedBirthDate)}`}
+						{pregnant && ` · przewidywana data porodu: ${date(dueDate(account))}`}
 						{account.family.childBirthDate && ` · dziecko urodzone ${date(account.family.childBirthDate)}`}
 					</p>
 				</div>
@@ -226,6 +227,8 @@ function AccountView({ account }: { account: AccountData }) {
 					</ul>
 				)}
 			</Section>
+
+			<CircumstancesSection account={account} />
 
 			<Section
 				title="Moje wnioski"

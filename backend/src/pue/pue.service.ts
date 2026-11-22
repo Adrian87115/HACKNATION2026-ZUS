@@ -2,6 +2,13 @@ import { randomBytes, randomInt } from 'node:crypto';
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { EngineService } from '../engine/engine.service.js';
 import { buildApplication, type Application, type ApplicationInput } from './pue.applications.js';
+import {
+  EMPTY_CIRCUMSTANCES,
+  circumstanceHints,
+  normalizeCircumstances,
+  type Circumstances,
+  type CircumstancesView,
+} from './pue.circumstances.js';
 import { ACCOUNTS, PERSONAS, type Account } from './pue.data.js';
 
 const SESSION_TTL_MS = 2 * 60 * 60 * 1000;
@@ -28,6 +35,8 @@ export class PueService {
   private readonly sessions = new Map<string, Session>();
   /** Submitted applications per account – kept across sign-ins until the server restarts (demo only). */
   private readonly applications = new Map<string, Application[]>();
+  /** Circumstances entered by the user per account (demo only – in memory). */
+  private readonly circumstancesByAccount = new Map<string, Circumstances>();
 
   constructor(private readonly engine: EngineService) {}
 
@@ -83,13 +92,31 @@ export class PueService {
     };
   }
 
+  /** Account data from the registers plus the user's own circumstances (kept separate, marked as a statement). */
+  profile(account: Account) {
+    return { ...account, circumstances: this.circumstances(account) };
+  }
+
+  circumstances(account: Account): CircumstancesView {
+    const c = this.circumstancesByAccount.get(account.id) ?? EMPTY_CIRCUMSTANCES;
+    return { ...c, hints: circumstanceHints(account, c, this.engine.getParams()) };
+  }
+
+  updateCircumstances(account: Account, input: Record<string, unknown>): CircumstancesView {
+    this.circumstancesByAccount.set(account.id, normalizeCircumstances(input));
+    return this.circumstances(account);
+  }
+
   listApplications(account: Account): Application[] {
     return this.applications.get(account.id) ?? [];
   }
 
   /** Simulated e-submission: validates the request, "delivers" it and returns the confirmation (UPO for ZUS). */
   submitApplication(account: Account, input: ApplicationInput): Application {
-    const application = buildApplication(account, input ?? {}, this.engine.getParams());
+    // the due date the user entered themselves is used when the account has none or it changed
+    const c = this.circumstancesByAccount.get(account.id);
+    const effective = c?.expectedBirthDate ? { ...account, family: { ...account.family, expectedBirthDate: c.expectedBirthDate } } : account;
+    const application = buildApplication(effective, input ?? {}, this.engine.getParams());
     this.applications.set(account.id, [application, ...this.listApplications(account)].slice(0, 50));
     return application;
   }

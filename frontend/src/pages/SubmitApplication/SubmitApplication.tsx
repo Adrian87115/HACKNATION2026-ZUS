@@ -12,7 +12,7 @@ import {
 	type SubmittedApplication,
 	type ZamPeriod
 } from '../../features/account/accountApi';
-import { currentTitle } from '../../features/account/accountToCase';
+import { currentTitle, dueDate } from '../../features/account/accountToCase';
 import { useAuth } from '../../features/account/AuthContext';
 import { useBenefitEngine } from '../../hooks/useBenefitEngine';
 import { AppRoutePaths } from '../../types/shared';
@@ -75,7 +75,7 @@ type Draft = {
 
 function defaults(kind: ApplicationKind, account: Account, today: string): Draft {
 	const birth = account.family.childBirthDate;
-	const expected = account.family.expectedBirthDate;
+	const expected = dueDate(account);
 	const base = { combined: false, bankAccount: '', copyType: 'skrocony' as const, delivery: 'elektronicznie' as const, confirmed: false };
 	const period: ZamPeriod = account.role === 'father' ? (birth ? 'ojcowski' : 'rodzicielski') : 'macierzynski';
 	switch (kind) {

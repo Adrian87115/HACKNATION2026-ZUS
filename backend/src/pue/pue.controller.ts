@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, Put, Req, UseGuards } from '@nestjs/common';
 import type { ApplicationInput } from './pue.applications.js';
 import { PueSessionGuard, type PueRequest } from './pue-session.guard.js';
 import { PueService } from './pue.service.js';
@@ -31,7 +31,14 @@ export class PueController {
   @Get('me')
   @UseGuards(PueSessionGuard)
   me(@Req() req: PueRequest) {
-    return req.pueAccount;
+    return this.pue.profile(req.pueAccount!);
+  }
+
+  /** Circumstances the user enters themselves (planned due date, change of job…) with what they mean for benefits. */
+  @Put('me/circumstances')
+  @UseGuards(PueSessionGuard)
+  updateCircumstances(@Req() req: PueRequest, @Body() body: Record<string, unknown>) {
+    return this.pue.updateCircumstances(req.pueAccount!, body);
   }
 
   /** Simulated certificate on contribution arrears (important for sole traders – Art. 2a). */
