@@ -14,6 +14,7 @@ import requests
 from python.config import setting
 from python.knowledge.retriever import LegalIndex
 from python.knowledge.sources import DATA_DIR
+from python.knowledge.vectors import VectorIndex
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +26,8 @@ class KnowledgeBase:
     def __init__(self, data_dir: Path = DATA_DIR):
         self.core = CORE_FILE.read_text(encoding='utf-8')
         self.index = LegalIndex(data_dir / 'acts.json')
+        # OpenAI embeddings of the same fragments; empty (BM25 only) without vectors.npy or an OpenAI key.
+        self.vectors = VectorIndex(self.index.chunks, data_dir)
         forms_file = data_dir / 'forms.json'
         self.forms = json.loads(forms_file.read_text(encoding='utf-8')) if forms_file.exists() else []
         self.params_url = setting('ENGINE_PARAMS_URL', f"{setting('BACKEND_API_URL', 'http://127.0.0.1:3000')}/engine/params")
@@ -99,7 +102,7 @@ class KnowledgeBase:
             lines = [f"- {f['code']} – {f['name']}: {f['page']}" for f in self.forms]
             sections.append('## Formularze ZUS (oficjalne wzory na zus.pl)\n' + '\n'.join(lines))
 
-        hits = self.index.search(question)
+        hits = self.index.search(question, semantic = self.vectors.ranking(question))
         if hits:
             articles = [f"### {h['act']} – art. {h['article']}\nŹródło: {h['source']}\n{h['text']}"
                         if not h['article'].startswith(('§', 'wstęp')) else

@@ -2,6 +2,7 @@
 
 Downloads the official texts of the acts (API Sejmu – ELI), extracts the text, splits it into articles
 and writes python/knowledge/data/acts.json. The forms from the same file are written to forms.json.
+With an OpenAI key (OPENAI_API_KEY / OPEN_AI_KEY) it also embeds the fragments into vectors.npy (see vectors.py).
 
 Run:  .venv/bin/python -m python.knowledge.build
 """
@@ -14,6 +15,7 @@ import requests
 from pypdf import PdfReader
 
 from python.knowledge.sources import DATA_DIR, parse_sources
+from python.knowledge.vectors import VECTORS_FILE, build_vectors
 
 # Only the parts of the Labour Code that concern parents (Dział VIII) and sick pay (Art. 92) –
 # the rest of the code is unrelated and would only add noise to the search.
@@ -122,6 +124,10 @@ def build() -> None:
     (DATA_DIR / 'acts.json').write_text(json.dumps(chunks, ensure_ascii=False, indent=0), encoding='utf-8')
     (DATA_DIR / 'forms.json').write_text(json.dumps(forms, ensure_ascii=False, indent=2), encoding='utf-8')
     print(f'Zapisano {len(chunks)} fragmentów przepisów i {len(forms)} formularzy w {DATA_DIR}', file=sys.stderr)
+
+    # OpenAI embeddings of the same fragments (semantic search next to BM25); skipped without an OpenAI key.
+    if build_vectors(chunks, DATA_DIR):
+        print(f'Zapisano embeddingi fragmentów w {DATA_DIR / VECTORS_FILE}', file=sys.stderr)
 
 
 if __name__ == '__main__':

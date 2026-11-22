@@ -8,3 +8,5 @@ requests
 pypdf
 mcp>=2.3
 httpx
+openai
+numpy
