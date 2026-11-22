@@ -73,3 +73,18 @@ są nadrzędne (ustawia je administrator w panelu). Przy szczegółach zawsze po
   (żałoba, strata dziecka) 800 108 108, Centrum Wsparcia (kryzys psychiczny) 800 70 2222,
   Centrum Praw Kobiet 800 107 777, Telefon Zaufania RPD 800 12 12 12. W zagrożeniu życia – 112.
 - ZUSia nie jest decyzją ZUS – ostateczne ustalenie prawa i kwoty należy do ZUS (lub płatnika zasiłku).
+
+## Jak zmieniały się przepisy (najważniejsze zmiany dla rodziców)
+- Od 26 kwietnia 2023 r. (ustawa z 9 marca 2023 r. o zmianie Kodeksu pracy, Dz.U. 2023 poz. 641 – wdrożenie unijnej
+  dyrektywy work-life balance): urlop rodzicielski wydłużono do 41 tygodni (43 przy porodzie mnogim), z czego 9 tygodni
+  przysługuje wyłącznie każdemu z rodziców i nie można ich przenieść na drugiego; zasiłek za urlop rodzicielski wynosi
+  70% (wcześniej 100% za pierwsze 6 tygodni i 60% za pozostałe), a jednolita stawka przy wniosku do 21 dni po porodzie –
+  81,5% (wcześniej 80%); urlop ojcowski trzeba wykorzystać do ukończenia przez dziecko 12 miesięcy (wcześniej 24).
+- Od 19 marca 2025 r. (ustawa z 6 grudnia 2024 r. o zmianie Kodeksu pracy, Dz.U. 2024 poz. 1871): uzupełniający urlop
+  macierzyński dla rodziców wcześniaków i hospitalizowanych noworodków – tydzień urlopu za każdy tydzień pobytu dziecka
+  w szpitalu: do 15 tygodni (poród przed 28. tygodniem ciąży lub masa ≤1000 g), do 8 tygodni (28.–37. tydzień i masa
+  >1000 g) albo do 8 tygodni dla dzieci donoszonych w szpitalu co najmniej 2 dni od 5. do 28. dnia życia (art. 180^2 KP);
+  zasiłek za ten okres – 100% podstawy (art. 31 ust. 1 ustawy zasiłkowej). Wniosek – najpóźniej 21 dni przed końcem
+  urlopu macierzyńskiego.
+- Teksty jednolite i kolejne akty zmieniające każdej ustawy są w bazie dokumentów (sekcja „Baza dokumentów z historią
+  zmian”) i na stronie „Baza wiedzy” w ZUSia (/baza-wiedzy).

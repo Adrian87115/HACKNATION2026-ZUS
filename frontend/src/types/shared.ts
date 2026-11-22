@@ -8,5 +8,6 @@ export const AppRoutePaths = {
 	LOGIN: '/logowanie',
 	ACCOUNT: '/moje-konto',
 	SUBMIT_APPLICATION: '/moje-konto/wnioski',
-	SUPPORT: '/pomoc-i-wsparcie'
+	SUPPORT: '/pomoc-i-wsparcie',
+	KNOWLEDGE: '/baza-wiedzy'
 } as const;

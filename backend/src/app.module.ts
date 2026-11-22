@@ -3,6 +3,7 @@ import { createObserveModule } from '@nestjs/observe';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { EngineModule } from './engine/engine.module.js';
+import { LibraryModule } from './library/library.module.js';
 import { PueModule } from './pue/pue.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
@@ -20,6 +21,8 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     EngineModule,
     // Simulated mObywatel sign-in and PUE/eZUS account data
     PueModule,
+    // Knowledge base: official forms, legal acts and guides with version history
+    LibraryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

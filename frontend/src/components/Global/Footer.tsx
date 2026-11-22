@@ -12,6 +12,7 @@ const TOOLS: { label: TranslationKey; to: string }[] = [
 	{ label: 'footer.pregnancyCalculator', to: `${AppRoutePaths.CALCULATORS}?tab=pregnancy` },
 	{ label: 'footer.applications', to: AppRoutePaths.APPLICATIONS },
 	{ label: 'footer.risks', to: AppRoutePaths.RISKS },
+	{ label: 'footer.knowledge', to: AppRoutePaths.KNOWLEDGE },
 	{ label: 'footer.support', to: AppRoutePaths.SUPPORT }
 ];
 

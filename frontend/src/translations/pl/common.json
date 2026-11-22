@@ -8,6 +8,7 @@
     "applications": "Wnioski",
     "risks": "Ryzyka",
     "support": "Pomoc",
+    "knowledge": "Baza wiedzy",
     "menu": "Menu",
     "closeMenu": "Zamknij menu"
   },
@@ -28,6 +29,7 @@
     "applications": "Dokumenty i wnioski",
     "risks": "Ryzyka i ochrona",
     "support": "Gdzie szukać pomocy",
+    "knowledge": "Formularze i przepisy",
     "admin": "Panel administracyjny"
   },
   "home": {

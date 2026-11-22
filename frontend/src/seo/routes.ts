@@ -81,6 +81,14 @@ export const SEO_ROUTES: SeoMeta[] = [
 		sitemap: { changefreq: 'monthly', priority: 0.7 }
 	},
 	{
+		path: AppRoutePaths.KNOWLEDGE,
+		title: 'Formularze ZUS, przepisy i poradniki dla rodziców | ZUSia',
+		description:
+			'Oficjalne wzory wniosków ZUS (ZAM, Z-3, ZAS-53), aktualne teksty Kodeksu pracy i ustawy zasiłkowej z historią zmian oraz poradniki ZUS, gov.pl i PIP.',
+		name: 'Baza wiedzy',
+		sitemap: { changefreq: 'weekly', priority: 0.7 }
+	},
+	{
 		path: AppRoutePaths.ADMIN,
 		title: 'Panel administracyjny | ZUSia',
 		description: 'Zarządzanie parametrami kalkulatorów ZUSi.',
