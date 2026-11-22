@@ -92,6 +92,8 @@ export type SubmittedApplication = {
 	fields: { label: string; value: string }[];
 	warnings: string[];
 	upo: { number: string; digest: string } | null;
+	/** Leave periods covered by the application (older applications may not have them). */
+	leaves?: { type: ZamPeriod; from: string; to: string; weeks: number }[];
 };
 
 export class AccountApiError extends Error {

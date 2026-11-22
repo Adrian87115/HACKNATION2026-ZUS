@@ -11,6 +11,7 @@ import { useFeatures } from '../../features/system/features';
 import { useBenefitEngine } from '../../hooks/useBenefitEngine';
 import { AppRoutePaths } from '../../types/shared';
 import CircumstancesSection from './CircumstancesSection';
+import DeadlinesSection from './DeadlinesSection';
 
 const cx = (...c: (string | false | null | undefined)[]) => c.filter(Boolean).join(' ');
 const money = (n: number) => n.toLocaleString('pl-PL', { style: 'currency', currency: 'PLN' });
@@ -231,6 +232,8 @@ function AccountView({ account }: { account: AccountData }) {
 					</ul>
 				)}
 			</Section>
+
+			<DeadlinesSection account={account} applications={applications ?? []} params={engine.getParams()} />
 
 			<CircumstancesSection account={account} />
 

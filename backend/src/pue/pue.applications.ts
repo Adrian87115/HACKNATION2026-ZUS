@@ -39,6 +39,8 @@ export type Application = {
   channel: string;
   submittedAt: string;
   status: 'doreczony' | 'przyjety';
+  /** Leave periods the application covers – used to track how much leave is planned and used. */
+  leaves: { type: ZamPeriod; from: string; to: string; weeks: number }[];
   fields: { label: string; value: string }[];
   warnings: string[];
   upo: { number: string; digest: string } | null;
@@ -138,6 +140,7 @@ function buildCertificateRequest(
     channel: 'gov.pl – rejestr stanu cywilnego',
     submittedAt,
     status: 'przyjety',
+    leaves: [],
     fields,
     warnings,
     upo: { number: `UPP/${now.getUTCFullYear()}/${seq}`, digest: digest.slice(0, 32) },
@@ -165,6 +168,11 @@ export function buildApplication(account: Account, input: ApplicationInput, para
   const fields: Application['fields'] = [
     { label: 'Wnioskodawca', value: `${name}, PESEL ${account.person.peselMasked}` },
   ];
+
+  const leaves: Application['leaves'] = [];
+  const addLeave = (type: ZamPeriod, from: Date, weeks: number) => {
+    leaves.push({ type, from: iso(from), to: iso(addWeeks(from, weeks)), weeks });
+  };
 
   const weeksInt = (max: number, min = 1) => {
     const w = Number(input.weeks);
@@ -196,6 +204,7 @@ export function buildApplication(account: Account, input: ApplicationInput, para
     }
     fields.push({ label: 'Okres urlopu', value: `${plDate(start)} – ${plDate(end)} (${weeks} tyg.)` });
     fields.push({ label: 'Data urodzenia dziecka', value: plDate(birth) });
+    addLeave('ojcowski', start, weeks);
   }
 
   if (kind === 'urlop_rodzicielski') {
@@ -207,6 +216,7 @@ export function buildApplication(account: Account, input: ApplicationInput, para
     }
     fields.push({ label: 'Okres urlopu', value: `${plDate(start)} – ${plDate(end)} (${weeks} tyg.)` });
     fields.push({ label: 'Zasiłek za ten okres', value: `${Math.round(params.RATE_PARENTAL_70 * 100)}% podstawy wymiaru` });
+    addLeave('rodzicielski', start, weeks);
   }
 
   if (kind === 'urlop_macierzynski') {
@@ -218,8 +228,10 @@ export function buildApplication(account: Account, input: ApplicationInput, para
       throw new BadRequestException(`Przed porodem można wykorzystać najwyżej ${params.MATERNITY_MAX_PRENATAL_WEEKS} tygodni urlopu macierzyńskiego.`);
     }
     fields.push({ label: 'Okres urlopu macierzyńskiego', value: `od ${plDate(start)}, ${weeks} tyg.` });
+    addLeave('macierzynski', start, weeks);
     if (combined) {
       const parental = parentalMaxPerParent(params);
+      addLeave('rodzicielski', new Date(addWeeks(start, weeks).getTime() + DAY), parental);
       const deadline = birth ? new Date(birth.getTime() + params.COMBINED_APPLICATION_DEADLINE_DAYS * DAY) : null;
       fields.push({
         label: 'Bezpośrednio po nim urlop rodzicielski',
@@ -240,6 +252,7 @@ export function buildApplication(account: Account, input: ApplicationInput, para
       period === 'ojcowski' ? params.PATERNITY_TOTAL_WEEKS : period === 'rodzicielski' ? parentalMaxPerParent(params) : params.MATERNITY_WEEKS_BY_CHILDREN[1];
     const weeks = weeksInt(maxWeeks);
     fields.push({ label: 'Zasiłek macierzyński za okres', value: `${PERIOD_LABEL[period]}: od ${plDate(start)}, ${weeks} tyg.` });
+    addLeave(period, start, weeks);
     fields.push({ label: 'Rachunek do wypłaty', value: bank });
     if (title) fields.push({ label: 'Tytuł ubezpieczenia', value: `${title.payer.name}` });
 
@@ -273,6 +286,7 @@ export function buildApplication(account: Account, input: ApplicationInput, para
     channel: employerPays ? 'elektronicznie do pracodawcy' : 'PUE/eZUS',
     submittedAt,
     status: employerPays ? 'doreczony' : 'przyjety',
+    leaves,
     fields,
     warnings,
     upo: employerPays ? null : { number: `UPO/${now.getUTCFullYear()}/${seq}`, digest: digest.slice(0, 32) },
