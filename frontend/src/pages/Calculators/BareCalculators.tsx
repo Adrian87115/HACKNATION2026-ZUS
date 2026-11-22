@@ -26,6 +26,7 @@ import type {
   CaseAnalysis,
 } from "../../features/caseImport/caseData";
 import {
+  maternityLeaveWeeks,
   type MaternityPlanInput,
   type MaternityPlanResult,
   type ParentalPartInput,
@@ -819,9 +820,16 @@ export type MaternityPreset = {
   p2: ParentForm;
   prenatal: string;
   hasTransfer: boolean;
-  transfer: { weeks: string; circumstance: "standard" | "special" };
+  transfer: TransferForm;
   paternity: PaternityRow[];
   parental: ParentalRow[];
+};
+
+/** Przejęcie urlopu macierzyńskiego przez rodzica 2; przy zgonie matki okres wynika z daty zgonu. */
+type TransferForm = {
+  weeks: string;
+  circumstance: "standard" | "special" | "death";
+  deathDate?: string;
 };
 
 export type PregnancyPreset = {
@@ -924,10 +932,9 @@ export function MaternityCalculator({
     parent: "",
   });
   const [hasTransfer, setHasTransfer] = useState(preset?.hasTransfer ?? false);
-  const [transfer, setTransfer] = useState<{
-    weeks: string;
-    circumstance: "standard" | "special";
-  }>(preset?.transfer ?? { weeks: "6", circumstance: "standard" });
+  const [transfer, setTransfer] = useState<TransferForm>(
+    preset?.transfer ?? { weeks: "6", circumstance: "standard" },
+  );
 
   const [paternity, setPaternity] = useState<PaternityRow[]>(
     preset?.paternity ?? [],
@@ -943,6 +950,25 @@ export function MaternityCalculator({
   const [runId, setRunId] = useState(0);
 
   const isBirth = event === "birth";
+  // Zgon matki dotyczy urodzenia dziecka; przy adopcji i rodzinie zastępczej zostają dotychczasowe okoliczności.
+  const circumstance =
+    !isBirth && transfer.circumstance === "death" ? "standard" : transfer.circumstance;
+  const deathMode = circumstance === "death";
+  /** Tygodnie (także ułamkowe) przejęte po zgonie matki albo undefined, gdy brak daty zgonu. */
+  const deathTransferWeeks = (): number | undefined => {
+    if (!transfer.deathDate || !eventDate) return undefined;
+    const DAY = 86_400_000;
+    const totalDays = maternityLeaveWeeks(engine.getParams(), Number(children) || 1) * 7;
+    const motherStart = Date.parse(`${eventDate}T00:00:00Z`) - (num(prenatal) ?? 0) * 7 * DAY;
+    const motherDays = Math.round((Date.parse(`${transfer.deathDate}T00:00:00Z`) - motherStart) / DAY) + 1;
+    return Math.max(0, totalDays - motherDays) / 7;
+  };
+  const fmtWeeksDays = (weeks: number) => {
+    const days = Math.round(weeks * 7);
+    const w = Math.floor(days / 7);
+    const d = days % 7;
+    return d === 0 ? `${w} tyg.` : `${w} tyg. ${d} dn.`;
+  };
 
   useAutoRun(autoRun, () => {
     setOut(compute());
@@ -989,10 +1015,18 @@ export function MaternityCalculator({
       };
     }
     if (hasTransfer && hasP2) {
-      input.maternityTransfer = {
-        weeks: Number(transfer.weeks),
-        circumstance: transfer.circumstance,
-      };
+      if (deathMode) {
+        const weeks = deathTransferWeeks();
+        if (weeks === undefined) {
+          return { input, error: "Podaj datę zgonu matki, aby wyliczyć urlop przejęty przez rodzica 2." };
+        }
+        input.maternityTransfer = { weeks, circumstance: "death" };
+      } else {
+        input.maternityTransfer = {
+          weeks: Number(transfer.weeks),
+          circumstance: circumstance as "standard" | "special",
+        };
+      }
     }
     if (paternity.length)
       input.paternity = paternity.map((r) => ({
@@ -1225,19 +1259,70 @@ export function MaternityCalculator({
             <div className="space-y-4">
               <Segmented
                 label="Okoliczności"
-                value={transfer.circumstance}
-                onChange={(v) => setTransfer({ ...transfer, circumstance: v })}
+                value={circumstance}
+                onChange={(v) =>
+                  setTransfer({
+                    ...transfer,
+                    circumstance: v,
+                    // przykładowa data zgonu: 4 tygodnie po porodzie (można zmienić)
+                    deathDate:
+                      v === "death" && !transfer.deathDate && eventDate
+                        ? new Date(Date.parse(`${eventDate}T00:00:00Z`) + 27 * 86_400_000).toISOString().slice(0, 10)
+                        : transfer.deathDate,
+                  })
+                }
                 options={[
                   { value: "standard", label: `Standardowe (po ${engine.getParams().MOTHER_MIN_POSTPARTUM_WEEKS_STANDARD} tyg.)` },
                   { value: "special", label: `Szczególne (po ${engine.getParams().MOTHER_MIN_POSTPARTUM_WEEKS_SPECIAL} tyg.)` },
+                  ...(isBirth ? [{ value: "death" as const, label: "Zgon matki" }] : []),
                 ]}
               />
-              <NumberField
-                label="Liczba przejmowanych tygodni"
-                value={transfer.weeks}
-                onChange={(v) => setTransfer({ ...transfer, weeks: v })}
-                suffix="tyg."
-              />
+              {deathMode ? (
+                <>
+                  <DateField
+                    label="Data zgonu matki"
+                    hint={(() => {
+                      const w = deathTransferWeeks();
+                      return w === undefined
+                        ? "Rodzic 2 przejmuje pozostałą część urlopu od dnia następującego po dniu zgonu."
+                        : `Rodzic 2 przejmuje ${fmtWeeksDays(w)} urlopu macierzyńskiego – od dnia następującego po dniu zgonu.`;
+                    })()}
+                    value={transfer.deathDate ?? ""}
+                    onChange={(v) => setTransfer({ ...transfer, deathDate: v })}
+                  />
+                  <Alert
+                    tone="info"
+                    items={[
+                      "Zasiłek za dni do zgonu włącznie przysługuje jeszcze matce – ZUS wypłaca go jako zasiłek niezrealizowany uprawnionym członkom rodziny.",
+                      "Po zgonie matki z urlopu rodzicielskiego korzysta tylko rodzic 2 – przysługuje mu cała niewykorzystana pula, także część matki (art. 182^1g KP).",
+                      `Jeśli matka nie zdążyła złożyć wniosku o stawkę łączną, rodzic 2 może go złożyć w ciągu ${engine.getParams().COMBINED_APPLICATION_DEADLINE_DAYS} dni od dnia zgonu.`,
+                    ]}
+                  />
+                  {parental.some((r) => r.parent === "primary") && (
+                    <AddButton
+                      onClick={() =>
+                        setParental([
+                          {
+                            parent: "secondary",
+                            weeks: String(parental.reduce((sum, r) => sum + (Number(r.weeks) || 0), 0)),
+                            fte: "0",
+                            start: "",
+                          },
+                        ])
+                      }
+                    >
+                      Przypisz cały urlop rodzicielski rodzicowi 2
+                    </AddButton>
+                  )}
+                </>
+              ) : (
+                <NumberField
+                  label="Liczba przejmowanych tygodni"
+                  value={transfer.weeks}
+                  onChange={(v) => setTransfer({ ...transfer, weeks: v })}
+                  suffix="tyg."
+                />
+              )}
             </div>
           </Card>
         )}
