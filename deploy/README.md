@@ -1,4 +1,78 @@
-# Wdrożenie ZUSi na Oracle Cloud (Always Free)
+# Wdrożenie ZUSi
+
+Dwie drogi:
+- **[Własny komputer + tunel Cloudflare](#własny-komputer--tunel-cloudflare)** – za darmo, bez zakładania serwera; komputer musi być włączony.
+- **[Serwer w chmurze](#oracle-cloud-always-free)** (Oracle Cloud lub dowolny inny VPS z Ubuntu) – działa niezależnie od Twojego komputera.
+
+## Własny komputer + tunel Cloudflare
+
+Aplikacja działa w Dockerze na Twoim komputerze, a Cloudflare daje publiczny link `https://…`. Na komputerze nic nie trzeba otwierać w routerze ani zapory.
+
+1. Zainstaluj **Docker Desktop** i **cloudflared**:
+
+   ```bash
+   brew install cloudflared            # macOS; Windows: winget install Cloudflare.cloudflared
+   ```
+
+2. Przygotuj konfigurację:
+
+   ```bash
+   cp .env.production.example .env.production
+   ```
+
+   W `.env.production` ustaw:
+   - `DOMAIN=:80` – lokalnie zwykłe HTTP, HTTPS zapewnia tunel,
+   - `SITE_URL` – publiczny link (na start może zostać przykładowy; zmienia tylko linki kanoniczne i podgląd w social media),
+   - `OPEN_AI_KEY`, `ADMIN_TOKEN` (`openssl rand -hex 32`), `MINIO_ROOT_PASSWORD` (`openssl rand -hex 24`).
+
+3. Uruchom aplikację (pierwsze budowanie trwa kilka minut):
+
+   ```bash
+   docker compose --env-file .env.production -f docker-compose.prod.yml up -d --build
+   ```
+
+   Sprawdź: <http://localhost> powinno pokazać ZUSię.
+
+4. Wystaw ją do internetu:
+
+   ```bash
+   cloudflared tunnel --url http://localhost:80
+   ```
+
+   W wyjściu pojawi się adres `https://<losowe-słowa>.trycloudflare.com` – to link dla jury. Zostaw to okno otwarte.
+
+5. Komputer musi przez cały czas oceniania być **włączony, podłączony do prądu i do internetu**. Na macOS wyłącz usypianie:
+
+   ```bash
+   caffeinate -dims    # działa, dopóki okno terminala jest otwarte
+   ```
+
+### Stały adres zamiast losowego
+
+Szybki tunel dostaje nowy adres przy każdym uruchomieniu `cloudflared` i nie ma gwarancji dostępności. Jeśli link ma się nie zmieniać:
+
+- **Masz domenę** (może być tania, np. `.pl`/`.xyz`) dodaną do darmowego konta Cloudflare:
+
+  ```bash
+  cloudflared tunnel login
+  cloudflared tunnel create zusia
+  cloudflared tunnel route dns zusia zusia.twojadomena.pl
+  cloudflared tunnel run --url http://localhost:80 zusia
+  ```
+
+  Wtedy ustaw `SITE_URL=https://zusia.twojadomena.pl` i przebuduj (`up -d --build`).
+- **Bez domeny**: darmowe konto **ngrok** daje jeden stały adres `*.ngrok-free.app` (`ngrok http --url=<twoj-adres>.ngrok-free.app 80`), ale odwiedzający zobaczą najpierw ekran ostrzeżenia ngrok z przyciskiem „Visit Site”.
+
+### Zatrzymanie i aktualizacja
+
+```bash
+docker compose --env-file .env.production -f docker-compose.prod.yml down      # stop (dane zostają)
+git pull && docker compose --env-file .env.production -f docker-compose.prod.yml up -d --build
+```
+
+---
+
+## Oracle Cloud (Always Free)
 
 Cała aplikacja działa na jednej darmowej maszynie wirtualnej w Dockerze:
 
@@ -64,7 +138,7 @@ nano .env.production
 
 Uzupełnij w `.env.production`:
 
-- `DOMAIN` – domena z kroku 3,
+- `DOMAIN` i `SITE_URL` – domena z kroku 3 (np. `zusia.twojadomena.pl` i `https://zusia.twojadomena.pl`),
 - `OPEN_AI_KEY` – klucz OpenAI,
 - `ADMIN_TOKEN` – `openssl rand -hex 32` (logowanie do `/admin`),
 - `MINIO_ROOT_PASSWORD` – `openssl rand -hex 24`.
